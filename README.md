@@ -6,10 +6,25 @@ There are two versions of the rule applicator.
 + The ***CPU*** version is designed for the excecution on one or multiple CPU threads. 
 + The ***CUDA*** version was designed for the excecution on CUDA-capable GPU's, but does currently ***NOT*** work
 
-## Build
+## Download binaries
 
-There are currently no third-party libraries in use.
+[Windows](https://github.com/OpenBioLink/IRIFAB/blob/master/binaries/windows/IRIFAB.exe)
 
-### gcc
+[Linux](https://github.com/OpenBioLink/IRIFAB/blob/master/binaries/linux/IRIFAB)
+
+## Build from source
+
+1. Have cmake installed
+2. Create folder **build** in {PATH_TO_PROJECT}/CPU/
+3. Switch to {PATH_TO_PROJECT}/CPU/build
+4. Run `cmake ../`
+
+If building using Visual Studio
+1. Open IRIFAB.sln
+2. Select **Release** as build type
+4. Click on **Build** → **Build Solution**
+
+Else
+1. Run `make` from **build** folder
 
 ## Performance
