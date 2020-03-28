@@ -8,11 +8,11 @@ There are two versions of the rule applicator.
 
 ## Download binaries
 
-[Windows x64](https://github.com/OpenBioLink/IRIFAB/blob/master/binaries/windows/IRIFAB_x64.exe)
+[Windows x64](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/windows/IRIFAB_x64.exe)
 
-[Windows x86](https://github.com/OpenBioLink/IRIFAB/blob/master/binaries/windows/IRIFAB_WIN32.exe)
+[Windows x86](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/windows/IRIFAB_WIN32.exe)
 
-[Linux](https://github.com/OpenBioLink/IRIFAB/blob/master/binaries/linux/IRIFAB)
+[Linux](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/linux/IRIFAB)
 
 ## Build from source
 
