@@ -29,4 +29,26 @@ If building using Visual Studio
 Else
 1. Run `make` from **build** folder
 
+## Manual
+
+To run IRIFAB a properties file called apply-config.properties is required as an startup argument.
+
+### Properties
+
+| Parameter                     | Value type     | Description                        |
+| ----------------------------- | -------------- | ---------------------------------- |
+| PATH_TRAINING                 | Valid path     |                                    |
+| PATH_TEST                     | Valid path     |                                    |
+| PATH_VALID                    | Valid path     |                                    |
+| PATH_RULES                    | Valid path     |                                    |
+| PATH_OUTPUT                   | Valid path     |                                    |
+| UNSEEN_NEGATIVE_EXAMPLES      | Integer        |                                    |
+| TOP_K_OUTPUT                  | Integer        |                                    |
+| WORKER_THREADS                | Integer        | Amount of threads that are started |
+| THRESHOLD_CORRECT_PREDICTIONS | Integer        |                                    |
+| THRESHOLD_CONFIDENCE          | Floating point |                                    |
+| FAST                          | [0\|1]         |                                    |
+| DISCRIMINATION_UNIQUE         | [0\|1]         |                                    |
+| INTERMEDIATE_DISCRIMINATION   | [0\|1]         |                                    |
+
 ## Performance

@@ -48,7 +48,10 @@ class RuleReader
 				}
 				myfile.close();
 			}
-			else std::cout << "Unable to open file";
+			else {
+				std::cout << "Unable to open rule file " << filepath << std::endl;
+				exit(-1);
+			}
 			csr = new CSR<int, Rule>(index->getRelSize(), rules);
 		}
 

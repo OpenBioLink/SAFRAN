@@ -72,11 +72,13 @@ class TesttripleReader
 					std::istringstream iss(line);
 					std::vector<std::string> results = util::split(line, '\t');
 					if (results.size() != 3) {
-						throw "Unsupported Filetype";
+						std::cout << "Unsupported Filetype, please make sure you have the following triple format {subject}{TAB}{predicate}{TAB}{object}" << std::endl;
+						exit(-1);
 					}
 					int * headId = index->getIdOfNodestring(results[0]);
 					int * relId = index->getIdOfRelationstring(results[1]);
 					int * tailId = index->getIdOfNodestring(results[2]);
+
 
 					std::vector<int*> testtriple;
 					testtriple.push_back(headId);
@@ -109,7 +111,10 @@ class TesttripleReader
 				}
 
 			}
-			else std::cout << "Unable to open file";
+			else {
+				std::cout << "Unable to open test file " << filepath << std::endl;
+				exit(-1);
+			}
 		}
 };
 

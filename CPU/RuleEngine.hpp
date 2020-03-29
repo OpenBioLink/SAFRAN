@@ -322,11 +322,26 @@ protected:
 		fprintf(pFile, "\nTails: ");
 		int maxTail = tailresults.size() < K ? tailresults.size() : K;
 		for (int i = 0; i < maxTail; i++) {
-			fprintf(pFile, "%s\t%.16f\t", index->getStringOfNodeId(tailresults[i].first), tailresults[i].second);
+			fprintf(pFile, "%s\t%.16f\t", index->getStringOfNodeId(tailresults[i].first)->c_str(), tailresults[i].second);
 		}
 		fprintf(pFile, "\n");
 		writeLock->unlock();
 	}
+
+	struct testComp {
+		int other;
+		bool operator()(int a, int b) const
+		{
+			return (a < b) && (a != other);
+		}
+	};
+
+	struct {
+		bool operator()(std::pair<int, double> const& a, std::pair<int, double> const& b) const
+		{
+			return a.second > b.second;
+		}
+	} finalResultComperator;
 };
 
 #endif // RULEENGINE_H

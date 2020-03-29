@@ -25,9 +25,14 @@ private:
 	B * adj_list;
 
 	void generateTripleCSR(int relationSize, int nodeSize, RelNodeToNodes& relHeadToTails, RelNodeToNodes& relTailToHeads) {
+		int nRelsNNZ = 0;
 		int nnz = 0;
 		int * indlen = new int[relationSize * 2];
 		for (int i = 0; i < relationSize; i++) {
+			// If rel present in headToTails it should be also present in tailToHeads
+			if (relHeadToTails.find(i) != relHeadToTails.end()) {
+				nRelsNNZ++;
+			}
 			int indlenHTT = 0;
 			int indlenTTH = 0;
 			for (int j = 0; j < nodeSize; j++) {
@@ -47,30 +52,30 @@ private:
 			nnz += indlenHTT;
 			nnz += indlenTTH;
 		}
-		
-		adj_list = new int[relationSize * 2 * (3 + nodeSize + 1) + nnz];
-		adj_begin = new int[relationSize * 2];
+		int adj_list_size = nRelsNNZ * 2 * (3 + nodeSize + 1) + nnz;
+		adj_list = new int[adj_list_size];
+		int adj_begin_size = relationSize * 2;
+		adj_begin = new int[adj_begin_size];
 
 		int start = 0;
 		for (int rel = 0; rel < relationSize; rel++) {
+			//if rel not in relHeadToTails it is also not in relTailToHeads
+			if (relHeadToTails.find(rel) != relHeadToTails.end()) {
+				adj_begin[rel * 2] = start;
+				int currentIndptrlen = nodeSize + 1;
+				int currentIndlen = indlen[rel * 2];
+				int currentLen = 3 + currentIndptrlen + currentIndlen;
 
-			adj_begin[rel * 2] = start;
-			int currentIndptrlen = nodeSize + 1;
-			int currentIndlen = indlen[rel * 2];
-			int currentLen = 3 + currentIndptrlen + currentIndlen;
+				int stop = start + currentLen;
+				adj_list[start] = currentLen;
+				adj_list[start + 1] = currentIndptrlen;
+				adj_list[start + 2] = currentIndlen;
 
-			int stop = start + currentLen;
+				int* indptr = &adj_list[start + 3];
+				int* ind = &adj_list[start + 3 + currentIndptrlen];
 
-			adj_list[start] = currentLen;
-			adj_list[start + 1] = currentIndptrlen;
-			adj_list[start + 2] = currentIndlen;
-
-			int * indptr = &adj_list[start + 3];
-			int * ind = &adj_list[start + 3 + currentIndptrlen];
-
-			*indptr = 0;
-			for (int node = 0; node < nodeSize; node++) {
-				if (relHeadToTails.find(rel) != relHeadToTails.end()) {
+				*indptr = 0;
+				for (int node = 0; node < nodeSize; node++) {
 					if (relHeadToTails[rel].find(node) != relHeadToTails[rel].end()) {
 						*(indptr + 1) = *indptr + relHeadToTails[rel][node].size();
 						indptr++;
@@ -87,27 +92,25 @@ private:
 						indptr++;
 					}
 				}
-			}
-			start = stop;
+				start = stop;
 
 
-			adj_begin[rel * 2 + 1] = start;
-			currentIndptrlen = nodeSize + 1;
-			currentIndlen = indlen[rel * 2 + 1];
-			currentLen = 3 + currentIndptrlen + currentIndlen;
+				adj_begin[rel * 2 + 1] = start;
+				currentIndptrlen = nodeSize + 1;
+				currentIndlen = indlen[rel * 2 + 1];
+				currentLen = 3 + currentIndptrlen + currentIndlen;
 
-			stop = start + currentLen;
+				stop = start + currentLen;
 
-			adj_list[start] = currentLen;
-			adj_list[start + 1] = currentIndptrlen;
-			adj_list[start + 2] = currentIndlen;
+				adj_list[start] = currentLen;
+				adj_list[start + 1] = currentIndptrlen;
+				adj_list[start + 2] = currentIndlen;
 
-			indptr = &adj_list[start + 3];
-			ind = &adj_list[start + 3 + currentIndptrlen];
+				indptr = &adj_list[start + 3];
+				ind = &adj_list[start + 3 + currentIndptrlen];
 
-			*indptr = 0;
-			for (int node = 0; node < nodeSize; node++) {
-				if (relTailToHeads.find(rel) != relTailToHeads.end()) {
+				*indptr = 0;
+				for (int node = 0; node < nodeSize; node++) {
 					if (relTailToHeads[rel].find(node) != relTailToHeads[rel].end()) {
 						*(indptr + 1) = *indptr + relTailToHeads[rel][node].size();
 						indptr++;
@@ -124,8 +127,12 @@ private:
 						indptr++;
 					}
 				}
+				start = stop;
 			}
-			start = stop;
+			else {
+				adj_begin[rel * 2] = -1;
+				adj_begin[rel * 2 + 1] = -1;
+			}
 		}
 	}
 

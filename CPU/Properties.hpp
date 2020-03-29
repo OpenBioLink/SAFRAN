@@ -94,7 +94,8 @@ public:
 				INTERMEDIATE_DISCRIMINATION = std::stoi(strVal);
 			}
 			else {
-				throw "Properties key not recognized";
+				std::cout << "Properties key "  << strKey <<" not recognized";
+				exit(-1);
 			}
 		}
 

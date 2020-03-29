@@ -122,7 +122,8 @@ public:
 										int * t_indptr = &t_adj_list[3 + head];
 										int t_len = *(t_indptr + 1) - *t_indptr;
 										int * t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-										int * tailresults_testsetfiltered = new int[DISCRIMINATION_BOUND];
+										int * tailresults_testsetfiltered = new int[DISCRIMINATION_BOUND];;
+
 										int * end_diff_test = std::set_difference(tailresults, end_diff_val, t_ind, t_ind + t_len, tailresults_testsetfiltered, testComp{ *tail });
 
 										int nValues = std::distance(tailresults_testsetfiltered, end_diff_test);
@@ -151,7 +152,7 @@ public:
 							// Get Tailresults and final sorting
 							std::vector<std::pair<int, double>> tailresults_vec;
 							tailScoreTrees[tailIndex].getResults(tailresults_vec);
-							std::sort(tailresults_vec.begin(), tailresults_vec.end(), cmp);
+							std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
 							headTailResults[head][*tail] = tailresults_vec;
 							tailScoreTrees[tailIndex].Free();
 						}
@@ -249,15 +250,10 @@ public:
 						}
 						for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
 							int * head = &t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
-							auto cmp = [](std::pair<int, double> const & a, std::pair<int, double> const & b)
-							{
-								return a.second > b.second;
-							};
-
 							// Get Headresults and final sorting
 							std::vector<std::pair<int, double>> headresults_vec;
 							headScoreTrees[headIndex].getResults(headresults_vec);
-							std::sort(headresults_vec.begin(), headresults_vec.end(), cmp);
+							std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
 							tailHeadResults[tail][*head] = headresults_vec;
 							headScoreTrees[headIndex].Free();
 						}
@@ -267,7 +263,7 @@ public:
 					tails++;
 				}
 				delete[] headresults;
-				delete[] headresultlength;
+				delete headresultlength;
 			}
 
 			auto it_head = headTailResults.begin();
@@ -301,15 +297,6 @@ public:
 			lock->unlock();
 			return rel;
 		}
-
-
-		struct testComp {
-			int other;
-			bool operator()(int a, int b) const
-			{
-				return a < b || a == other;
-			}
-		};
 };
 
 #endif

@@ -49,13 +49,17 @@ class Graph
 					std::istringstream iss(line);
 					std::vector<std::string> results = util::split(line, '\t');
 					if (results.size() != 3) {
-						throw "Unsupported Filetype";
+						std::cout << "Unsupported Filetype, please make sure you have the following triple format {subject}{TAB}{predicate}{TAB}{object}" << std::endl;
+						exit(-1);
 					}
 					add(results[0], results[1], results[2], relHeadToTails, relTailToHeads);
 				}
 				myfile.close();
 			}
-			else throw "Unable to open file";
+			else {
+				std::cout << "Unable to open train file " << filepath << std::endl;
+				exit(-1);
+			}
 		}
 
 		void add(std::string head, std::string relation, std::string tail, RelNodeToNodes& relHeadToTails, RelNodeToNodes& relTailToHeads) {

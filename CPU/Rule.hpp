@@ -20,7 +20,7 @@ class Rule
 		}
 
 		void print() {
-			printf("\n%d %d %d %d\n", type, *headrelation, rulelength);
+			printf("\n%d %d %d\n", type, *headrelation, rulelength);
 			for (int i = 0; i < rulelength; i++) {
 				printf("%d %d\n", relationsFwd[i], relationsBwd[i]);
 			}

@@ -14,7 +14,10 @@
 int main(int argc, char** argv)
 {
 
-	if (argc != 2) throw "Wrong number of arguments";
+	if (argc != 2) {
+		std::cout << "Wrong number of elements" << std::endl;
+		exit(-1);
+	}
 	Properties::get().read(argv[1]);
 
 	unsigned int intermediate = clock();
@@ -41,7 +44,6 @@ int main(int argc, char** argv)
 	intermediate = clock();
 
 	if (Properties::get().FAST == 0) {
-		std::cout << "ORIGINAL";
 		OriginalRuleEngine re = OriginalRuleEngine(index, graph, ttr, vtr, rr);
 		re.start();
 

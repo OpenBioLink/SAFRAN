@@ -99,14 +99,6 @@ private:
 					int * v_ind = &v_adj_list[3 + v_adj_list[1] + *v_indptr];
 					endDiff = std::set_difference(tailresults, endDiff, v_ind, v_ind + v_len, tailresults);
 
-					//Filter results from testset
-					struct testComp {
-						int other;
-						bool operator()(int a, int b) const
-						{
-							return a < b || a == other;
-						}
-					};
 					int * t_adj_list = &(tt_adj_list[tt_adj_begin[testtriple[1] * 2]]);
 					int * t_indptr = &t_adj_list[3 + testtriple[0]];
 					int t_len = *(t_indptr + 1) - *t_indptr;
@@ -165,13 +157,6 @@ private:
 					endDiff = std::set_difference(headresults, endDiff, v_ind, v_ind + v_len, headresults);
 
 					//Filter results from testset
-					struct testComp {
-						int other;
-						bool operator()(int a, int b) const
-						{
-							return a < b || a == other;
-						}
-					};
 					int * t_adj_list = &(tt_adj_list[tt_adj_begin[testtriple[1] * 2 + 1]]);
 					int * t_indptr = &t_adj_list[3 + testtriple[2]];
 					int t_len = *(t_indptr + 1) - *t_indptr;
@@ -185,26 +170,21 @@ private:
 				}
 			}
 
-			auto cmp = [](std::pair<int, double> const & a, std::pair<int, double> const & b)
-			{
-				return a.second > b.second;
-			};
-
 			// Get Tailresults and final sorting
 			std::vector<std::pair<int, double>> tailresults_vec;
 			tailScoreTree.getResults(tailresults_vec);
-			std::sort(tailresults_vec.begin(), tailresults_vec.end(), cmp);
+			std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
 
 			// Get Headresults and final sorting
 			std::vector<std::pair<int, double>> headresults_vec;
 			headScoreTree.getResults(headresults_vec);
-			std::sort(headresults_vec.begin(), headresults_vec.end(), cmp);
+			std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
 
 			// Write Results to stringstream
 			writeTopKCandidates(testtriple[0], testtriple[1], testtriple[2], headresults_vec, tailresults_vec, pFile, Properties::get().TOP_K_OUTPUT);
 
 			delete[] headresults;
-			delete[] headresultlength;
+			delete headresultlength;
 			delete[] tailresults;
 			delete tailresultlength;
 			headScoreTree.Free();

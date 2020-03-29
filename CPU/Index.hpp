@@ -22,11 +22,11 @@ public:
 		}
 	}
 
-	int&& getNodeSize() {
+	int getNodeSize() {
 		return nodeToId.size();
 	}
 
-	int&& getRelSize() {
+	int getRelSize() {
 		return relToId.size();
 	}
 

@@ -121,7 +121,6 @@ private:
 	int nStoredValues;
 	std::vector<ScoreTree> children;
 	int nChildren;
-	int capacityChildren;
 
 	void addValues(double score, int * values, int& nValues, int counter) {
 		for (int i = 0; i < nChildren; i++) {
