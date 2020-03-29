@@ -2,6 +2,7 @@
 #define FASTRULEENGINE_H
 
 #include "RuleEngine.hpp"
+#include "Util.hpp"
 
 class FastRuleEngine : public RuleEngine
 {
@@ -124,7 +125,7 @@ public:
 										int * t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
 										int * tailresults_testsetfiltered = new int[DISCRIMINATION_BOUND];;
 
-										int * end_diff_test = std::set_difference(tailresults, end_diff_val, t_ind, t_ind + t_len, tailresults_testsetfiltered, testComp{ *tail });
+										int * end_diff_test = util::test_set_difference(tailresults, end_diff_val, t_ind, t_ind + t_len, tailresults_testsetfiltered, *tail );
 
 										int nValues = std::distance(tailresults_testsetfiltered, end_diff_test);
 										tailScoreTrees[tailIndex].addValues(currRule.getAppliedConfidence(), tailresults_testsetfiltered, nValues);
@@ -231,7 +232,7 @@ public:
 										int t_len = *(t_indptr + 1) - *t_indptr;
 										int * t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
 										int * headresults_testsetfiltered = new int[DISCRIMINATION_BOUND];
-										int * end_diff_test = std::set_difference(headresults, end_diff_val, t_ind, t_ind + t_len, headresults_testsetfiltered, testComp{ *head });
+										int * end_diff_test = util::test_set_difference(headresults, end_diff_val, t_ind, t_ind + t_len, headresults_testsetfiltered, *head);
 
 										int nValues = std::distance(headresults_testsetfiltered, end_diff_test);
 										headScoreTrees[headIndex].addValues(currRule.getAppliedConfidence(), headresults_testsetfiltered, nValues);

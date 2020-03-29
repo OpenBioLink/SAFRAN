@@ -4,6 +4,7 @@
 #include "RuleEngine.hpp"
 
 #include <thread>
+#include "Util.hpp"
 
 class OriginalRuleEngine : public RuleEngine
 {
@@ -103,7 +104,7 @@ private:
 					int * t_indptr = &t_adj_list[3 + testtriple[0]];
 					int t_len = *(t_indptr + 1) - *t_indptr;
 					int * t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-					endDiff = std::set_difference(tailresults, endDiff, t_ind, t_ind + t_len, tailresults, testComp{ testtriple[2] });
+					endDiff = util::test_set_difference(tailresults, endDiff, t_ind, t_ind + t_len, tailresults, testtriple[2]);
 
 					//Add tailresults to ScoreTree
 					int nValues = std::distance(tailresults, endDiff);
@@ -161,7 +162,7 @@ private:
 					int * t_indptr = &t_adj_list[3 + testtriple[2]];
 					int t_len = *(t_indptr + 1) - *t_indptr;
 					int * t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-					endDiff = std::set_difference(headresults, endDiff, t_ind, t_ind + t_len, headresults, testComp{ testtriple[0] });
+					endDiff = util::test_set_difference(headresults, endDiff, t_ind, t_ind + t_len, headresults, testtriple[0]);
 
 					//Add headreults to ScoreTree
 					int nValues = std::distance(headresults, endDiff);

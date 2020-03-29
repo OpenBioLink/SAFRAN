@@ -26,6 +26,27 @@ namespace util{
 		snprintf(buf.get(), size, format.c_str(), args ...);
 		return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
 	}
+
+	template<class InputIt1, class InputIt2, class OutputIt>
+	inline OutputIt test_set_difference(InputIt1 first1, InputIt1 last1,
+		InputIt2 first2, InputIt2 last2,
+		OutputIt d_first, int other)
+	{
+		while (first1 != last1) {
+			if (first2 == last2) return std::copy(first1, last1, d_first);
+
+			if ((*first1 < *first2) || (*first1 == other)) {
+				*d_first++ = *first1++;
+			}
+			else {
+				if (!(*first2 < *first1)) {
+					++first1;
+				}
+				++first2;
+			}
+		}
+		return d_first;
+	}
 }
 
 #endif // UTIL_H

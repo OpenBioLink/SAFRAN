@@ -328,14 +328,6 @@ protected:
 		writeLock->unlock();
 	}
 
-	struct testComp {
-		int other;
-		bool operator()(int a, int b) const
-		{
-			return (a < b) && (a != other);
-		}
-	};
-
 	struct {
 		bool operator()(std::pair<int, double> const& a, std::pair<int, double> const& b) const
 		{
