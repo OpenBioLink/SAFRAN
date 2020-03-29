@@ -317,7 +317,7 @@ protected:
 
 		int maxHead = headresults.size() < K ? headresults.size() : K;
 		for (int i = 0; i < maxHead; i++) {
-			fprintf(pFile,"%s\t%.16f\t", index->getStringOfNodeId(headresults[i].first), headresults[i].second);
+			fprintf(pFile,"%s\t%.16f\t", index->getStringOfNodeId(headresults[i].first)->c_str(), headresults[i].second);
 		}
 		fprintf(pFile, "\nTails: ");
 		int maxTail = tailresults.size() < K ? tailresults.size() : K;

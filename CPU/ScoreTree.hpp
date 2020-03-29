@@ -15,9 +15,9 @@ class ScoreTree
 public:
 
 	ScoreTree() {
-		this->nChildren = 0;
-		this->nStoredValues = 0;
+		this->score = 0.0;
 		this->storedValues = nullptr;
+		this->nStoredValues = 0;
 		this->closed = false;
 		this->numOfValues = 0;
 		this->index = 0;
@@ -25,16 +25,15 @@ public:
 	};
 
 	void Free() {
-		for (int i = 0; i < nChildren; i++) {
+		for (int i = 0; i < children.size(); i++) {
 			children[i].Free();
 		}
 		delete[] storedValues;
 	}
 
-	ScoreTree(double score, int * values, int valuelength) {
+	ScoreTree(double score, int * values, int valuelength, int index) {
 		this->score = score;
 		nStoredValues = valuelength;
-		if (storedValues != nullptr) { delete[] storedValues; }
 		storedValues = new int[nStoredValues];
 		for (int i = 0; i < nStoredValues; i++) {
 			storedValues[i] = values[i];
@@ -43,11 +42,12 @@ public:
 		else this->closed = false;
 		this->numOfValues = valuelength;
 		this->root = false;
+		this->index = index;
 	}
 
 	bool fine() {
-		if (root && nChildren > 0) {
-			int i = children[nChildren - 1].index;
+		if (root && children.size() > 0) {
+			int i = children[children.size() - 1].index;
 			if (i >= LOWER_BOUND && i <= UPPER_BOUND) {
 				return isFirstUnique();
 			}
@@ -57,7 +57,7 @@ public:
 
 	bool isFirstUnique() {
 		ScoreTree * tree = this;
-		while (tree->nChildren > 0) {
+		while (tree->children.size() > 0) {
 			tree = &(tree->children[0]);
 		}
 		return tree->closed;
@@ -80,14 +80,14 @@ public:
 		}
 		printf("}\n");
 
-		for (int i = 0; i < nChildren; i++) {
+		for (int i = 0; i < children.size(); i++) {
 			children[i].print(intent);
 		}
 	}
 
 	void getResults(std::vector<std::pair<int, double>>& results, double ps, int level) {
-		if (nChildren > 0) {
-			for (int i = 0; i < nChildren; i++) {
+		if (children.size() > 0) {
+			for (int i = 0; i < children.size(); i++) {
 				if (root) {
 					children[i].getResults(results, ps, level + 1);
 				}
@@ -120,10 +120,9 @@ private:
 	int * storedValues;
 	int nStoredValues;
 	std::vector<ScoreTree> children;
-	int nChildren;
 
 	void addValues(double score, int * values, int& nValues, int counter) {
-		for (int i = 0; i < nChildren; i++) {
+		for (int i = 0; i < children.size(); i++) {
 			children[i].addValues(score, values, nValues, 0);
 		}
 
@@ -175,7 +174,7 @@ private:
 
 		if (storedValues == nullptr || nStoredValues <= 1) {
 			bool c = true;
-			for (int i = 0; i < nChildren; i++) {
+			for (int i = 0; i < children.size(); i++) {
 				if (children[i].closed == false) {
 					c = false;
 					break;
@@ -189,10 +188,8 @@ private:
 	}
 
 	ScoreTree addChild(double score, int * values, int valuelength, int childIndex) {
-		ScoreTree child = ScoreTree(score, values, valuelength);
-		child.index = childIndex;
+		ScoreTree child = ScoreTree(score, values, valuelength, childIndex);
 		children.push_back(child);
-		nChildren++;
 		return child;
 	}
 
