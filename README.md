@@ -8,9 +8,7 @@ There are two versions of the rule applicator.
 
 ## Download binaries
 
-[Windows x64](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/windows/IRIFAB_x64.exe)
-
-[Windows x86](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/windows/IRIFAB_WIN32.exe)
+[Windows x64](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/windows/IRIFAB.exe)
 
 [Linux](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/linux/IRIFAB)
 
@@ -33,22 +31,39 @@ Else
 
 To run IRIFAB a properties file called apply-config.properties is required as an startup argument.
 
-### Properties
+#### Windows
 
-| Parameter                     | Value type     | Description                        |
-| ----------------------------- | -------------- | ---------------------------------- |
-| PATH_TRAINING                 | Valid path     |                                    |
-| PATH_TEST                     | Valid path     |                                    |
-| PATH_VALID                    | Valid path     |                                    |
-| PATH_RULES                    | Valid path     |                                    |
-| PATH_OUTPUT                   | Valid path     |                                    |
-| UNSEEN_NEGATIVE_EXAMPLES      | Integer        |                                    |
-| TOP_K_OUTPUT                  | Integer        |                                    |
-| WORKER_THREADS                | Integer        | Amount of threads that are started |
-| THRESHOLD_CORRECT_PREDICTIONS | Integer        |                                    |
-| THRESHOLD_CONFIDENCE          | Floating point |                                    |
-| FAST                          | [0\|1]         |                                    |
-| DISCRIMINATION_UNIQUE         | [0\|1]         |                                    |
-| INTERMEDIATE_DISCRIMINATION   | [0\|1]         |                                    |
+`IRIFAB.exe apply-config.properties`
+
+#### Linux
+
+`./IRIFAB apply-config.properties`
+
+#### Properties file
+
+The properties file should have the following format 
+```
+{KEY} = {VALUE}
+{KEY} = {VALUE}
+...
+```
+
+
+| Key                           | Value type     | Description                                                  | Default |
+| ----------------------------- | -------------- | ------------------------------------------------------------ | ------- |
+| PATH_TRAINING                 | Valid path     | Path to the training triples                                 |         |
+| PATH_TEST                     | Valid path     | Path to the test triples                                     |         |
+| PATH_VALID                    | Valid path     | Path to the validation triples                               |         |
+| PATH_RULES                    | Valid path     | Path to the rule set                                         |         |
+| PATH_OUTPUT                   | Valid path     | Path to the output file                                      |         |
+| DISCRIMINATION_BOUND          | Integer        | Returns only results for head or tail computation if the results set has less elements than this bound. The idea is that any results set which has more elements is anyhow not useful for a top-k ranking.  Should be set to a value thats higher than the k of the requested top-k (however, the higher the value the more runtime is required) | 1000    |
+| UNSEEN_NEGATIVE_EXAMPLES      | Integer        | The number of negative examples for which we assume that they exist, however, we have not seen them. Rules with high coverage are favored the higher the chosen number. | 5       |
+| TOP_K_OUTPUT                  | Integer        | The top-k results that are after filtering kept in the results. | 10      |
+| WORKER_THREADS                | Integer        | Amount of threads that are started to compute the ranked results. | 3       |
+| THRESHOLD_CORRECT_PREDICTIONS | Integer        | The threshold for the number of correct prediction created with the refined rule. | 2       |
+| THRESHOLD_CONFIDENCE          | Floating point | The threshold for the confidence of the refined rule         | 0.001   |
+| FAST                          | [0\|1]         | If 0 the original rule engine is used (for each testtriple -> for each rule)<br />If 1 a faster version is used which caches intermediate results and requires more memory | 0       |
+| DISCRIMINATION_UNIQUE         | [0\|1]         | If 1 the unique results are calculated before discrimination.  (Original 1, More performant: 0) | 1       |
+| INTERMEDIATE_DISCRIMINATION   | [0\|1]         | If 1 not only the final results are discriminated, but also intermediate results, see DISCRIMINATION_BOUND | 0       |
 
 ## Performance
