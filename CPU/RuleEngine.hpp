@@ -1,6 +1,10 @@
 #ifndef RULEENGINE_H
 #define RULEENGINE_H
 
+#ifdef __unix
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+#endif
+
 #include "Graph.hpp"
 #include "RuleReader.hpp"
 #include "TesttripleReader.hpp"

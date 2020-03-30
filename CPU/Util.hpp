@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <memory>
 
 namespace util{
 	inline std::vector<std::string> split(const std::string& str, char delim = ' ') {

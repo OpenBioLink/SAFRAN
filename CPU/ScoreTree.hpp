@@ -92,13 +92,13 @@ public:
 					children[i].getResults(results, ps, level + 1);
 				}
 				else {
-					double psUpdated = ps + std::powf(EPSILON, level - 1) * score;
+					double psUpdated = ps + std::pow(EPSILON, level - 1) * score;
 					children[i].getResults(results, psUpdated, level + 1);
 				}
 			}
 		}
 		if (!root) {
-			double psUpdated = ps + std::powf(EPSILON, level - 1) * score;
+			double psUpdated = ps + std::pow(EPSILON, level - 1) * score;
 			for(int i = 0; i < nStoredValues; i++){
 				results.push_back(std::pair<int, double>(storedValues[i], psUpdated));
 			}
