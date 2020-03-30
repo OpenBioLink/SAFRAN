@@ -10,7 +10,9 @@ There are two versions of the rule applicator.
 
 [Windows x64](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/windows/IRIFAB.exe)
 
-[Linux](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/linux/IRIFAB)
+[Linux](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/linux/IRIFAB.out)
+
+[Example config-apply.properties](https://github.com/OpenBioLink/IRIFAB/raw/master/binaries/config-apply.properties)
 
 ## Build from source
 
