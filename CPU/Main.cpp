@@ -7,7 +7,7 @@
 #include "FastRuleEngine.hpp"
 #include "Properties.hpp"
 
-#include <ctime>
+#include <chrono>
 #include <stdio.h>
 
 
@@ -20,28 +20,36 @@ int main(int argc, char** argv)
 	}
 	Properties::get().read(argv[1]);
 
-	unsigned int intermediate = clock();
+	auto start = std::chrono::high_resolution_clock::now();
 	Index * index = new Index();
 
 	//"C:\\Users\\Simon\\Desktop\\data\\train.txt"
 	Graph * graph = new Graph(Properties::get().PATH_TRAINING, index);
-	printf("Graph created in millisecs: %ld\n", clock() - intermediate);
-	intermediate = clock();
+	auto finish = std::chrono::high_resolution_clock::now();
+	auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start);
+	std::cout << "Graph created in "<< milliseconds.count() << " ms\n";
+	start = finish;
 
 
 	//"C:\\Users\\Simon\\Desktop\\data\\alpha-50"
 	RuleReader * rr = new RuleReader(Properties::get().PATH_RULES, index, graph);
-	printf("Rules created in millisecs: %ld\n", clock() - intermediate);
-	intermediate = clock();
+	finish = std::chrono::high_resolution_clock::now();
+	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start);
+	std::cout << "Rules created in "<< milliseconds.count() << " ms\n";
+	start = finish;
 
 	//"C:\\Users\\Simon\\Desktop\\data\\test.txt"
 	TesttripleReader * ttr = new TesttripleReader(Properties::get().PATH_TEST, index, graph);
-	printf("Testtriples created in millisecs: %ld\n", clock() - intermediate);
-	intermediate = clock();
+	finish = std::chrono::high_resolution_clock::now();
+	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start);
+	std::cout << "Testtriples created in "<< milliseconds.count() << " ms\n";
+	start = finish;
 
 	ValidationtripleReader * vtr = new ValidationtripleReader(Properties::get().PATH_VALID, index, graph);
-	printf("Validationtriples created in millisecs: %ld\n", clock() - intermediate);
-	intermediate = clock();
+	finish = std::chrono::high_resolution_clock::now();
+	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start);
+	std::cout << "Validationtriples created in "<< milliseconds.count() << " ms\n";
+	start = finish;
 
 	if (Properties::get().FAST == 0) {
 		OriginalRuleEngine re = OriginalRuleEngine(index, graph, ttr, vtr, rr);
@@ -52,7 +60,9 @@ int main(int argc, char** argv)
 		FastRuleEngine re = FastRuleEngine(index, graph, ttr, vtr, rr);
 		re.start();
 	}
-	std::cout << "Rules applied in millisecs: " << clock() - intermediate << std::endl;
+	finish = std::chrono::high_resolution_clock::now();
+	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start);
+	std::cout << "Rules applied in "<< milliseconds.count() << " ms\n";
 	
 	return 0;
 }

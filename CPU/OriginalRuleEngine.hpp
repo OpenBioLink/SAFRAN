@@ -30,7 +30,7 @@ public:
 	}
 
 private:
-	int testtripleIndex = 0;
+	int testtripleIndex = -1;
 
 	void run(int threadId) {
 		int * adj_lists = graph->getCSR()->getAdjList();

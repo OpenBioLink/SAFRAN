@@ -67,7 +67,7 @@ public:
 		addValues(score, values, nValues, 0);
 	}
 
-	void print(int intent) {
+	void print(int intent, Index * index_obj) {
 		for (int i = 0; i < intent * 4; i++) {
 			printf(" ");
 		}
@@ -75,13 +75,13 @@ public:
 		printf("%d %f [%d](%d) -> { ", closed, score, index, numOfValues);
 		if (storedValues != nullptr) {
 			for (int i = 0; i < nStoredValues; i++) {
-				printf("%d ", storedValues[i]);
+				printf("%s ", (*(index_obj->getStringOfNodeId(storedValues[i]))).c_str());
 			}
 		}
 		printf("}\n");
 
 		for (int i = 0; i < children.size(); i++) {
-			children[i].print(intent);
+			children[i].print(intent, index_obj);
 		}
 	}
 
@@ -129,8 +129,8 @@ private:
 		int * touched_end;
 		int * untouched_end;
 		int * values_end;
-		int * touched = new int[1000];
-		int * untouched = new int[1000];
+		int * touched = new int[Properties::get().DISCRIMINATION_BOUND];
+		int * untouched = new int[Properties::get().DISCRIMINATION_BOUND];
 		int nTouched = 0;
 		int nUntouched = 0;
 

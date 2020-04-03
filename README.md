@@ -69,3 +69,45 @@ The properties file should have the following format
 | INTERMEDIATE_DISCRIMINATION   | [0\|1]         | If 1 not only the final results are discriminated, but also intermediate results, see DISCRIMINATION_BOUND | 0       |
 
 ## Performance
+
+Performance test performed on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. (Averaged over 10 runs)
+
+Each test was run with the following properties:
+
+```
+UNSEEN_NEGATIVE_EXAMPLES = 5
+TOP_K_OUTPUT = 10
+WORKER_THREADS = 3
+```
+
+The column "Configuration" shows the different configurations of the following properties:
+
+```
+FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND
+```
+
+While 0 1 0 is closest to the original implementation and 1 0 1 is the fastest.
+
+### IRIFAB
+
+| Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
+| ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
+| 0 0 0 1000    | 11,751                                    | 18,956                        | 0.7933 | 0.8292 | 0.8640  |
+| 0 0 1 1000    | 11,852                                    | 18,536                        | 0.7934 | 0.8292 | 0.8639  |
+| 0 1 0 1000    | 11,780                                    | 25,282                        | 0.7933 | 0.8292 | 0.8643  |
+| 0 1 1 1000    | 11,778                                    | 24,700                        | 0.7933 | 0.8292 | 0.8641  |
+| 1 0 0 1000    | 11,834                                    | 9,844                         | 0.7933 | 0.8292 | 0.8640  |
+| 1 0 1 1000    | 11,796                                    | 9,714                         | 0.7934 | 0.8292 | 0.8639  |
+| 1 1 0 1000    | 11,654                                    | 10,450                        | 0.7933 | 0.9292 | 0.8643  |
+| 1 1 1 1000    | 11,714                                    | 10,370                        | 0.7933 | 0.8292 | 0.8641  |
+| 0 1 0 4000    | 11,868                                    | 27,280                        | 0.8090 | 0.8445 | 0.8783  |
+| 1 0 1 4000    | 11,763                                    | 10,444                        | 0.8090 | 0.8445 | 0.8782  |
+
+### Original AnyBURL Rule Application
+
+| Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
+| ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
+| 0 1 0* 1000   | 7,170                                     | 148,877                       | 0.8094 | 0.8443 | 0.8785  |
+| 0 1 0* 4000   | 7,053                                     | 203,534                       | 0.8094 | 0.8443 | 0.8785  |
+
+*) You cannot actually set these parameters in the AnyBURL implementation. Here 0 1 0 just represents a run with the original implementation (without intermediate discrimination and discrimination of unique results).
