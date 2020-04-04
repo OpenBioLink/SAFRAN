@@ -10,6 +10,7 @@
 #include "Graph.hpp"
 #include "Types.h"
 #include "CSR.hpp"
+#include "Trial.hpp"
 
 
 class TesttripleReader
@@ -75,9 +76,9 @@ class TesttripleReader
 						std::cout << "Unsupported Filetype, please make sure you have the following triple format {subject}{TAB}{predicate}{TAB}{object}" << std::endl;
 						exit(-1);
 					}
-					int * headId = index->getIdOfNodestring(results[0]);
-					int * relId = index->getIdOfRelationstring(results[1]);
-					int * tailId = index->getIdOfNodestring(results[2]);
+					int* headId = index->getIdOfNodestring(results[0]);
+					int* relId = index->getIdOfRelationstring(results[1]);
+					int* tailId = index->getIdOfNodestring(results[2]);
 
 
 					std::vector<int*> testtriple;
@@ -85,6 +86,7 @@ class TesttripleReader
 					testtriple.push_back(relId);
 					testtriple.push_back(tailId);
 					testtriplesVector.push_back(testtriple);
+
 					relHeadToTails[*relId][*headId].insert(*tailId);
 					relTailToHeads[*relId][*tailId].insert(*headId);
 				}
@@ -93,8 +95,26 @@ class TesttripleReader
 				csr = new CSR<int, int>(index->getRelSize(), index->getNodeSize(), relHeadToTails, relTailToHeads);
 
 				std::vector<int> keys(relHeadToTails.size());
-				std::transform(relHeadToTails.begin(), relHeadToTails.end(), keys.begin(), [](auto pair) {return pair.first;});
+				std::transform(relHeadToTails.begin(), relHeadToTails.end(), keys.begin(), [](auto pair) {return pair.first; });
 				uniqueRelations = keys;
+
+				if (Properties::get().TRIAL == 1) {
+					if (Properties::get().FAST == 1) {
+						std::cout << "Sorry, currently only the original rule engine is supported wir trials, please set FAST to 0." << std::endl;
+					}
+					Trial t = Trial(Properties::get().CONFIDENCE_LEVEL, Properties::get().MARGIN_OF_ERROR, testtriplesVector.size());
+					testtriplesVector = t.getTesttriplesSample(testtriplesVector);
+
+					FILE* test_sample_file;
+					fopen_s(&test_sample_file, Properties::get().PATH_TEST_SAMPLE.c_str(), "w");
+
+					for (auto triple : testtriplesVector) {
+						fprintf(test_sample_file, "%s\t%s\t%s\n", index->getStringOfNodeId(*triple[0])->c_str(), index->getStringOfRelId(*triple[1])->c_str(), index->getStringOfNodeId(*triple[2])->c_str());
+					}
+
+					fclose(test_sample_file);
+					std::cout << "Written test sample to " << Properties::get().PATH_TEST_SAMPLE << std::endl;
+				}
 
 				testtripleSize = new int;
 				*testtripleSize = testtriplesVector.size();
@@ -109,7 +129,6 @@ class TesttripleReader
 					testtriplesstore[i * 3 + 2] = *(testtriplesVector[i][2]);
 					testtriples[i] = &testtriplesstore[i * 3];
 				}
-
 			}
 			else {
 				std::cout << "Unable to open test file " << filepath << std::endl;

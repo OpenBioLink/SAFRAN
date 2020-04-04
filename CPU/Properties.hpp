@@ -11,11 +11,11 @@
 class Properties{
 
 public:
-	std::string PATH_TRAINING;
-	std::string PATH_TEST;
-	std::string PATH_VALID;
-	std::string PATH_RULES;
-	std::string PATH_OUTPUT;
+	std::string PATH_TRAINING = "train.txt";
+	std::string PATH_TEST = "test.txt";
+	std::string PATH_VALID = "valid.txt";
+	std::string PATH_RULES = "rules";
+	std::string PATH_OUTPUT = "predictions";
 
 	int TRIAL_SIZE = 100000;
 	int DISCRIMINATION_BOUND = 1000;
@@ -27,10 +27,16 @@ public:
 	double THRESHOLD_CONFIDENCE = 0.0001;
 
 	//performance
-
 	int DISCRIMINATION_UNIQUE = 1;
 	int FAST = 0;
 	int INTERMEDIATE_DISCRIMINATION = 0;
+
+	//trial
+	int TRIAL = 0;
+	int CONFIDENCE_LEVEL = 95;
+	int MARGIN_OF_ERROR = 5;
+	std::string PATH_TEST_SAMPLE = "test_sample.txt";
+
 
 	static Properties& get()
 	{
@@ -92,6 +98,18 @@ public:
 			}
 			else if (strKey.compare("INTERMEDIATE_DISCRIMINATION") == 0) {
 				INTERMEDIATE_DISCRIMINATION = std::stoi(strVal);
+			}
+			else if (strKey.compare("TRIAL") == 0) {
+				TRIAL = std::stoi(strVal);
+			}
+			else if (strKey.compare("CONFIDENCE_LEVEL") == 0) {
+				CONFIDENCE_LEVEL = std::stoi(strVal);
+			}
+			else if (strKey.compare("MARGIN_OF_ERROR") == 0) {
+				MARGIN_OF_ERROR = std::stoi(strVal);
+			}
+			else if (strKey.compare("PATH_TEST_SAMPLE") == 0) {
+				PATH_TEST_SAMPLE = strVal;
 			}
 			else {
 				std::cout << "Properties key "  << strKey <<" not recognized";

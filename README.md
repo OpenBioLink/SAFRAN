@@ -115,3 +115,12 @@ Ruleset (alpha-50) size: 4,845
 |              |                                           |                          |        |        |         |
 |              |                                           |                          |        |        |         |
 
+#### Trial
+
+| Configuration | R      | R      | Confidence level | Margin of error | Sample size | hits@1  | hits@3  | hits@10 |
+| ------------- | ------ | ------ | ---------------- | --------------- | ----------- | ------- | ------- | ------- |
+| 0 1 0 1000    | 43,380 | 35,239 | 95%              | 5%              | 384         | 0.11758 | 0.20925 | 0.35235 |
+|               |        |        |                  |                 |             |         |         |         |
+|               |        |        |                  |                 |             |         |         |         |
+
+![boxplot_obl](https://github.com/OpenBioLink/IRIFAB/blob/master/resources/img/boxplotobl.png)

@@ -2,6 +2,7 @@
 #define INDEX_H
 
 #include <unordered_map>
+#include <iostream>
 
 class Index {
 
@@ -36,7 +37,8 @@ public:
 			return &(it->second);
 		}
 		else {
-			throw "Not found";
+			std::cout << "Error: Node " << node << " not found in Trainingset";
+			exit(-1);
 		}
 	}
 
@@ -46,7 +48,8 @@ public:
 			return &(it->second);
 		}
 		else {
-			throw "Not found";
+			std::cout << "Error: Id " << id << " not found in idToNode set";
+			exit(-1);
 		}
 	}
 
@@ -56,7 +59,8 @@ public:
 			return &(it->second);
 		}
 		else {
-			throw "Not found";
+			std::cout << "Error: Relation " << relation << " not found in Trainingset";
+			exit(-1);
 		}
 	}
 
@@ -66,7 +70,8 @@ public:
 			return &(it->second);
 		}
 		else {
-			throw "Not found";
+			std::cout << "Error: Id " << id << " not found in idToRel set";
+			exit(-1);
 		}
 	}
 

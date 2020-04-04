@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17.0)
 project("IRIFAB" CXX)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -19,6 +19,7 @@ add_executable("${PROJECT_NAME}"
  "RuleReader.hpp"
  "ScoreTree.hpp"
  "TesttripleReader.hpp"
+ "Trial.hpp"
  "Types.h"
  "Util.hpp"
  "ValidationtripleReader.hpp"
