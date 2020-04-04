@@ -45,6 +45,12 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 An overview of the format and possible parameters can be found [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file).
 
+#### Trials
+
+To be able to quickly estimate evaluation results, the prediction can be performed only on a sample of the test set. The sample size is dependent on the confidence level and the margin of error, both can be set in the properties file.
+
+If f.e. the confidence level is set to 95% and the margin of error is set to 5%, then the evaluation results of  95% of trials lie between ±5% of the evaluation results of the whole test set. An example on the accuracy and runtimes can be seen [here](https://github.com/OpenBioLink/IRIFAB#trial), where the runtime was improved from 4.6 hours to 40 seconds with estimated similar results.
+
 ## Performance
 
 Performance test performed on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. (Averaged over 10 runs)
