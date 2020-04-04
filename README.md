@@ -88,7 +88,17 @@ FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND
 
 While 0 1 0 is closest to the original implementation and 1 0 1 is the fastest.
 
-### IRIFAB
+### FB15k
+
+Dataset consisting of:
+
++ Train samples: 483,142
++ Test samples: 59,071
++ Validation samples: 50,000
+
+Ruleset (alpha-50) size: 106,480
+
+#### IRIFAB
 
 | Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
 | ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
@@ -103,11 +113,28 @@ While 0 1 0 is closest to the original implementation and 1 0 1 is the fastest.
 | 0 1 0 4000    | 11,868                                    | 27,280                        | 0.8090 | 0.8445 | 0.8783  |
 | 1 0 1 4000    | 11,763                                    | 10,444                        | 0.8090 | 0.8445 | 0.8782  |
 
-### Original AnyBURL Rule Application
+#### Original AnyBURL Rule Application
 
 | Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
 | ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
 | 0 1 0* 1000   | 7,170                                     | 148,877                       | 0.8094 | 0.8443 | 0.8785  |
 | 0 1 0* 4000   | 7,053                                     | 203,534                       | 0.8094 | 0.8443 | 0.8785  |
 
-*) You cannot actually set these parameters in the AnyBURL implementation. Here 0 1 0 just represents a run with the original implementation (without intermediate discrimination and discrimination of unique results).
+*) You cannot actually set these  parameters (FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND) in the AnyBURL implementation. Here 0 1 0 just represents a run with the original AnyBURL implementation and the specified DISCRIMINATION_BOUND set.
+
+### OpenBioLink (Positive edges only)
+
+Dataset consisting of:
+
++ Train samples: 4,193,905
++ Test samples: 180,310
++ Validation samples: 183,652
+
+Ruleset (alpha-50) size: 4,845
+
+| Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
+| ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
+| 0 1 0 1000   | 43,585                                    | 276 mins (4.4 h)         | 0.1160 | 0.2107 | 0.3514  |
+|              |                                           |                          |        |        |         |
+|              |                                           |                          |        |        |         |
+
