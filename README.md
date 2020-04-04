@@ -43,7 +43,7 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 #### Properties file
 
-The properties file should have the following format as specified [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file).
+An overview of the format and possible parameters can be found [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file).
 
 ## Performance
 
