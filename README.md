@@ -111,7 +111,7 @@ Ruleset (alpha-50) size: 4,845
 
 | Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
 | ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
-| 0 1 0 1000   | 43,585                                    | 276 mins (4.4 h)         | 0.1160 | 0.2107 | 0.3514  |
+| 0 1 0 1000   | 43,585                                    | 276 mins (4.6 h)         | 0.1160 | 0.2107 | 0.3514  |
 
 #### Trial
 
@@ -119,4 +119,5 @@ Ruleset (alpha-50) size: 4,845
 | ------------- | ------ | ------ | ---------------- | --------------- | ----------- | ------- | ------- | ------- |
 | 0 1 0 1000    | 43,380 | 35,239 | 95%              | 5%              | 384         | 0.11758 | 0.20925 | 0.35235 |
 
+Boxplot of 10 runs:
 ![boxplot_obl](https://github.com/OpenBioLink/IRIFAB/blob/master/resources/img/boxplotobl.png)
