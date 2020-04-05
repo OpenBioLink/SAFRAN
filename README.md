@@ -120,6 +120,7 @@ Ruleset (alpha-50) size: 4,845
 | 0 1 0 1000   | 43,585                                    | 276 mins (4.6 h)         | 0.1160 | 0.2107 | 0.3514  |
 
 #### Trial
+Means over 10 runs:
 
 | Configuration | Runtime file reading and preperation (ms)      | Runtime rule application (ms)     | Confidence level | Margin of error | Sample size | hits@1  | hits@3  | hits@10 |
 | ------------- | ------ | ------ | ---------------- | --------------- | ----------- | ------- | ------- | ------- |
