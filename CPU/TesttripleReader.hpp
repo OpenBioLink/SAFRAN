@@ -1,6 +1,10 @@
 #ifndef TESTTRIPLEREADER_H
 #define TESTTRIPLEREADER_H
 
+#ifdef __unix
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+#endif
+
 #include <string>
 #include <iostream>
 #include <fstream>
