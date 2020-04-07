@@ -54,7 +54,7 @@ private:
 			if (i >= *testtriplessize) break;
 
 			if (i % 5000 == 0) {
-				std::cout << "Rules applied for " << i << "testtriples..." << std::endl;
+				std::cout << "Rules applied for " << i << "/" <<*testtriplessize << " testtriples..." << std::endl;
 			}
 
 			int * testtriple = testtriples[i];
