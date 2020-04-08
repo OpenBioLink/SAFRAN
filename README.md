@@ -53,6 +53,14 @@ If f.e. the confidence level is set to 95% and the margin of error is set to 5%,
 
 ## Performance
 
+### Used datasets
+
+|                              | Train     | Test    | Valid   | Entites | Relations |
+| ---------------------------- | --------- | ------- | ------- | ------- | --------- |
+| FB15k                        | 483,142   | 59,071  | 50,000  | 14,951  | 1,345     |
+| OpenBioLink (positive edges) | 4,193,905 | 180,509 | 183,653 | 180,926 | 28        |
+|                              |           |         |         |         |           |
+
 Performance test performed on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. (Averaged over 10 runs)
 
 Each test was run with the following properties:
@@ -118,6 +126,8 @@ Ruleset (alpha-50) size: 4,845
 | Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
 | ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
 | 0 1 0 1000   | 43,585                                    | 276 mins (4.6 h)         | 0.1160 | 0.2107 | 0.3514  |
+| 1 1 0 1000   | 42,897                                    | 19 mins                  | 0.1160 | 0.2107 | 0.3514  |
+| 1 0 1 1000   | 42,912                                    | 56,736 ms                | 0.1191 | 0.2135 | 0.3560  |
 
 #### Trial
 Means over 10 runs:
