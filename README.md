@@ -31,7 +31,7 @@ Else
 
 ## Manual
 
-To run IRIFAB a properties file called apply-config.properties is required as an startup argument.
+To run IRIFAB a properties file called apply-config.properties is required as an startup argument. To quickly perform a test run with the FB15k dataset, clone this repository, change to path `resources/binaries` and run:
 
 #### Windows
 
@@ -59,7 +59,8 @@ If f.e. the confidence level is set to 95% and the margin of error is set to 5%,
 | ---------------------------- | --------- | ------- | ------- | ------- | --------- |
 | FB15k                        | 483,142   | 59,071  | 50,000  | 14,951  | 1,345     |
 | OpenBioLink (positive edges) | 4,193,905 | 180,509 | 183,653 | 180,926 | 28        |
-|                              |           |         |         |         |           |
+
+### Test runs
 
 Performance test performed on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. (Averaged over 10 runs)
 
@@ -79,17 +80,13 @@ FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND
 
 While 0 1 0 is closest to the original implementation and 1 0 1 is the fastest.
 
-### FB15k
+-----
 
-Dataset consisting of:
-
-+ Train samples: 483,142
-+ Test samples: 59,071
-+ Validation samples: 50,000
+#### FB15k
 
 Ruleset (alpha-50) size: 106,480
 
-#### IRIFAB
+##### IRIFAB
 
 | Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
 | ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
@@ -104,24 +101,20 @@ Ruleset (alpha-50) size: 106,480
 | 0 1 0 4000    | 11,868                                    | 27,280                        | 0.8090 | 0.8445 | 0.8783  |
 | 1 0 1 4000    | 11,763                                    | 10,444                        | 0.8090 | 0.8445 | 0.8782  |
 
-#### Original AnyBURL Rule Application
+##### Original AnyBURL Rule Application
 
 | Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
 | ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
 | 0 1 0* 1000   | 7,170                                     | 148,877                       | 0.8094 | 0.8443 | 0.8785  |
 | 0 1 0* 4000   | 7,053                                     | 203,534                       | 0.8094 | 0.8443 | 0.8785  |
 
-*) You cannot actually set these  parameters (FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND) in the AnyBURL implementation. Here 0 1 0 just represents a run with the original AnyBURL implementation and the specified DISCRIMINATION_BOUND set.
+------
 
-### OpenBioLink (Positive edges only)
-
-Dataset consisting of:
-
-+ Train samples: 4,193,905
-+ Test samples: 180,310
-+ Validation samples: 183,652
+#### OpenBioLink (Positive edges only)
 
 Ruleset (alpha-50) size: 4,845
+
+##### IRIFAB
 
 | Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
 | ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
@@ -129,12 +122,23 @@ Ruleset (alpha-50) size: 4,845
 | 1 1 0 1000   | 42,897                                    | 19 mins                  | 0.1160 | 0.2107 | 0.3514  |
 | 1 0 1 1000   | 42,912                                    | 56,736 ms                | 0.1191 | 0.2135 | 0.3560  |
 
-#### Trial
+##### Original AnyBURL Implementation
+
+| Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
+| ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
+| 0 1 0* 1000  | 79,191                                    | 789 mins (13.2 h)        | 0.1160 | 0.2107 | 0.3514  |
+
+##### Trial
+
 Means over 10 runs:
 
-| Configuration | Runtime file reading and preperation (ms)      | Runtime rule application (ms)     | Confidence level | Margin of error | Sample size | hits@1  | hits@3  | hits@10 |
-| ------------- | ------ | ------ | ---------------- | --------------- | ----------- | ------- | ------- | ------- |
-| 0 1 0 1000    | 43,380 | 35,239 | 95%              | 5%              | 384         | 0.11758 | 0.20925 | 0.35235 |
+| Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | Confidence level | Margin of error | Sample size | hits@1  | hits@3  | hits@10 |
+| ------------- | ----------------------------------------- | ----------------------------- | ---------------- | --------------- | ----------- | ------- | ------- | ------- |
+| 0 1 0 1000    | 43,380                                    | 35,239                        | 95%              | 5%              | 384         | 0.11758 | 0.20925 | 0.35235 |
 
 Boxplot of 10 runs:
 ![boxplot_obl](https://github.com/OpenBioLink/IRIFAB/blob/master/resources/img/boxplotobl.png)
+
+----
+
+*) You cannot actually set these  parameters (FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND) in the AnyBURL implementation. Here 0 1 0 just represents a run with the original AnyBURL implementation and the specified DISCRIMINATION_BOUND set.
