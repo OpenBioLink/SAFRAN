@@ -62,7 +62,9 @@ If f.e. the confidence level is set to 95% and the margin of error is set to 5%,
 
 ### Test runs
 
-Performance test performed on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. (Averaged over 10 runs)
+Performance test performed on Windows on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. Almost all results were averaged over 10 runs (Except OpenBioLink 0 1 0).
+
+***Due to faster I/O, runs on linux tend to be 20-25% faster.***
 
 Each test was run with the following properties:
 
