@@ -105,10 +105,10 @@ Ruleset (alpha-50) size: 106,480
 
 ##### Original AnyBURL Rule Application
 
-| Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
-| ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
-| 0 1 0* 1000   | 7,170                                     | 148,877                       | 0.8094 | 0.8443 | 0.8785  |
-| 0 1 0* 4000   | 7,053                                     | 203,534                       | 0.8094 | 0.8443 | 0.8785  |
+| Configuration | Runtime file reading and preperation | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
+| ------------- | ------------------------------------ | ----------------------------- | ------ | ------ | ------- |
+| 0 1 0* 1000   | 7,170 ms                             | 148,877                       | 0.8094 | 0.8443 | 0.8785  |
+| 0 1 0* 4000   | 7,053 ms                             | 203,534                       | 0.8094 | 0.8443 | 0.8785  |
 
 ------
 
@@ -118,17 +118,25 @@ Ruleset (alpha-50) size: 4,845
 
 ##### IRIFAB
 
-| Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
-| ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
-| 0 1 0 1000   | 43,585                                    | 276 mins (4.6 h)         | 0.1160 | 0.2107 | 0.3514  |
-| 1 1 0 1000   | 42,897                                    | 19 mins                  | 0.1160 | 0.2107 | 0.3514  |
-| 1 0 1 1000   | 42,912                                    | 56,736 ms                | 0.1191 | 0.2135 | 0.3560  |
+| Configuation | Runtime file reading and preperation | Runtime rule application | hits@1 | hits@3 | hits@10 |
+| ------------ | ------------------------------------ | ------------------------ | ------ | ------ | ------- |
+| 0 1 0 1000   | 43,585 ms                            | 276 mins (4.6 h)         | 0.1160 | 0.2107 | 0.3514  |
+| 1 1 0 1000   | 42,897 ms                            | 19 mins                  | 0.1160 | 0.2107 | 0.3514  |
+| 1 0 1 1000   | 42,912 ms                            | 56,736 ms                | 0.1191 | 0.2135 | 0.3560  |
 
 ##### Original AnyBURL Implementation
 
-| Configuation | Runtime file reading and preperation (ms) | Runtime rule application | hits@1 | hits@3 | hits@10 |
-| ------------ | ----------------------------------------- | ------------------------ | ------ | ------ | ------- |
-| 0 1 0* 1000  | 79,191                                    | 789 mins (13.2 h)        | 0.1160 | 0.2107 | 0.3514  |
+| Configuation | Runtime file reading and preperation | Runtime rule application | hits@1 | hits@3 | hits@10 |
+| ------------ | ------------------------------------ | ------------------------ | ------ | ------ | ------- |
+| 0 1 0* 1000  | 79,191 ms                            | 789 mins (13.2 h)        | 0.1160 | 0.2107 | 0.3514  |
+
+Ruleset (alpha-1000) size: 393,841
+
+##### IRIFAB
+
+| Configuation | Runtime file reading and preperation | Runtime rule application | hits@1 | hits@3 | hits@10 |
+| ------------ | ------------------------------------ | ------------------------ | ------ | ------ | ------- |
+| 1 0 1 1000   | 47,276 ms                            | 52.1 mins                | 0.1646 | 0.2798 | 0.4375  |
 
 ##### Trial
 
@@ -139,6 +147,7 @@ Means over 10 runs:
 | 0 1 0 1000    | 43,380                                    | 35,239                        | 95%              | 5%              | 384         | 0.11758 | 0.20925 | 0.35235 |
 
 Boxplot of 10 runs:
+
 ![boxplot_obl](https://github.com/OpenBioLink/IRIFAB/blob/master/resources/img/boxplotobl.png)
 
 ----
