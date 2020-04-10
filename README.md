@@ -96,6 +96,8 @@ WORKER_THREADS = 3
 
 |                    | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
 | ------------------ | ----------- | ---------------- | ------ | ------ | ------- |
-| ***AnyBURL***      |             |                  |        |        |         |
+| ***AnyBURL***      | 88.19 s     | 142 days*        | -      | -      | -       |
 | ***IRIFAB***       | 47.27 s     | 52.1 min         | 0.1646 | 0.2798 | 0.4375  |
 | ***IRIFAB Trial*** | 46.96 s     | 45.43 s          | 0.1672 | 0.2866 | 0.4372  |
+
+*) Projection - After 4 hours predictions for 212 testtriple were made.
