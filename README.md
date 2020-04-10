@@ -49,9 +49,11 @@ An overview of the format and possible parameters can be found [here](https://gi
 
 To be able to quickly estimate evaluation results, the prediction can be performed only on a sample of the test set. The sample size is dependent on the confidence level and the margin of error, both can be set in the properties file.
 
-If f.e. the confidence level is set to 95% and the margin of error is set to 5%, then the evaluation results of  95% of trials lie between ±5% of the evaluation results of the whole test set. An example on the accuracy and runtimes can be seen [here](https://github.com/OpenBioLink/IRIFAB#trial), where the runtime was improved from 4.6 hours to 40 seconds with estimated similar results.
+If f.e. the confidence level is set to 95% and the margin of error is set to 5%, then the evaluation results of  95% of trials lie between ±5% of the evaluation results of the whole test set. An example on the accuracy and runtimes can be seen [here](https://github.com/OpenBioLink/IRIFAB#trial), where the runtime was improved from 50 minutes to 40 seconds with estimated similar results.
 
 ## Performance
+
+***For more details on the performance see [here](https://github.com/OpenBioLink/IRIFAB/wiki/Performance)***
 
 ### Used datasets
 
@@ -62,9 +64,9 @@ If f.e. the confidence level is set to 95% and the margin of error is set to 5%,
 
 ### Test runs
 
-Performance test performed on Windows on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. Almost all results were averaged over 10 runs (Except OpenBioLink 0 1 0).
+Performance test performed on Windows on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. Almost all results were averaged over 10 runs (Except runs taking longer than 4 hours).
 
-***Due to faster I/O, runs on linux tend to be 20-25% faster.***
+***Due to faster I/O, runs on Linux tend to be 20-25% faster.***
 
 Each test was run with the following properties:
 
@@ -74,82 +76,26 @@ TOP_K_OUTPUT = 10
 WORKER_THREADS = 3
 ```
 
-The column "Configuration" shows the different configurations of the following properties:
+### FB15K
 
-```
-FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND
-```
+|               | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
+| ------------- | ----------- | ---------------- | ------ | ------ | ------- |
+| ***AnyBURL*** | 7.09 s      | 148.87 s         | 0.8094 | 0.8443 | 0.8785  |
+| ***IRIFAB***  | 11.75 s     | 10.44 s          | 0.8090 | 0.8445 | 0.8782  |
 
-While 0 1 0 is closest to the original implementation and 1 0 1 is the fastest.
+### OpenBioLink (Positive edges only)
 
------
+#### alpha-50 (4,845 rules)
 
-#### FB15k
+|               | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
+| ------------- | ----------- | ---------------- | ------ | ------ | ------- |
+| ***AnyBURL*** | 79.19 s     | 789 min (13.2 h) | 0.1160 | 0.2107 | 0.3514  |
+| ***IRIFAB***  | 42.9 s      | 56.73 s          | 0.1191 | 0.2135 | 0.3560  |
 
-Ruleset (alpha-50) size: 106,480
+#### alpha-1000 reinforced (393,841 rules)
 
-##### IRIFAB
-
-| Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
-| ------------- | ----------------------------------------- | ----------------------------- | ------ | ------ | ------- |
-| 0 0 0 1000    | 11,751                                    | 18,956                        | 0.7933 | 0.8292 | 0.8640  |
-| 0 0 1 1000    | 11,852                                    | 18,536                        | 0.7934 | 0.8292 | 0.8639  |
-| 0 1 0 1000    | 11,780                                    | 25,282                        | 0.7933 | 0.8292 | 0.8643  |
-| 0 1 1 1000    | 11,778                                    | 24,700                        | 0.7933 | 0.8292 | 0.8641  |
-| 1 0 0 1000    | 11,834                                    | 9,844                         | 0.7933 | 0.8292 | 0.8640  |
-| 1 0 1 1000    | 11,796                                    | 9,714                         | 0.7934 | 0.8292 | 0.8639  |
-| 1 1 0 1000    | 11,654                                    | 10,450                        | 0.7933 | 0.9292 | 0.8643  |
-| 1 1 1 1000    | 11,714                                    | 10,370                        | 0.7933 | 0.8292 | 0.8641  |
-| 0 1 0 4000    | 11,868                                    | 27,280                        | 0.8090 | 0.8445 | 0.8783  |
-| 1 0 1 4000    | 11,763                                    | 10,444                        | 0.8090 | 0.8445 | 0.8782  |
-
-##### Original AnyBURL Rule Application
-
-| Configuration | Runtime file reading and preperation | Runtime rule application (ms) | hits@1 | hits@3 | hits@10 |
-| ------------- | ------------------------------------ | ----------------------------- | ------ | ------ | ------- |
-| 0 1 0* 1000   | 7,170 ms                             | 148,877                       | 0.8094 | 0.8443 | 0.8785  |
-| 0 1 0* 4000   | 7,053 ms                             | 203,534                       | 0.8094 | 0.8443 | 0.8785  |
-
-------
-
-#### OpenBioLink (Positive edges only)
-
-Ruleset (alpha-50) size: 4,845
-
-##### IRIFAB
-
-| Configuation | Runtime file reading and preperation | Runtime rule application | hits@1 | hits@3 | hits@10 |
-| ------------ | ------------------------------------ | ------------------------ | ------ | ------ | ------- |
-| 0 1 0 1000   | 43,585 ms                            | 276 mins (4.6 h)         | 0.1160 | 0.2107 | 0.3514  |
-| 1 1 0 1000   | 42,897 ms                            | 19 mins                  | 0.1160 | 0.2107 | 0.3514  |
-| 1 0 1 1000   | 42,912 ms                            | 56,736 ms                | 0.1191 | 0.2135 | 0.3560  |
-
-##### Original AnyBURL Implementation
-
-| Configuation | Runtime file reading and preperation | Runtime rule application | hits@1 | hits@3 | hits@10 |
-| ------------ | ------------------------------------ | ------------------------ | ------ | ------ | ------- |
-| 0 1 0* 1000  | 79,191 ms                            | 789 mins (13.2 h)        | 0.1160 | 0.2107 | 0.3514  |
-
-Ruleset (alpha-1000) size: 393,841
-
-##### IRIFAB
-
-| Configuation | Runtime file reading and preperation | Runtime rule application | hits@1 | hits@3 | hits@10 |
-| ------------ | ------------------------------------ | ------------------------ | ------ | ------ | ------- |
-| 1 0 1 1000   | 47,276 ms                            | 52.1 mins                | 0.1646 | 0.2798 | 0.4375  |
-
-##### Trial
-
-Means over 10 runs:
-
-| Configuration | Runtime file reading and preperation (ms) | Runtime rule application (ms) | Confidence level | Margin of error | Sample size | hits@1  | hits@3  | hits@10 |
-| ------------- | ----------------------------------------- | ----------------------------- | ---------------- | --------------- | ----------- | ------- | ------- | ------- |
-| 0 1 0 1000    | 43,380                                    | 35,239                        | 95%              | 5%              | 384         | 0.11758 | 0.20925 | 0.35235 |
-
-Boxplot of 10 runs:
-
-![boxplot_obl](https://github.com/OpenBioLink/IRIFAB/blob/master/resources/img/boxplotobl.png)
-
-----
-
-*) You cannot actually set these  parameters (FAST DISCRIMINATION_UNIQUE INTERMEDIATE_DISCRIMINATION DISCRIMINATION_BOUND) in the AnyBURL implementation. Here 0 1 0 just represents a run with the original AnyBURL implementation and the specified DISCRIMINATION_BOUND set.
+|                    | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
+| ------------------ | ----------- | ---------------- | ------ | ------ | ------- |
+| ***AnyBURL***      |             |                  |        |        |         |
+| ***IRIFAB***       | 47.27 s     | 52.1 min         | 0.1646 | 0.2798 | 0.4375  |
+| ***IRIFAB Trial*** | 46.96 s     | 45.43 s          | 0.1672 | 0.2866 | 0.4372  |
