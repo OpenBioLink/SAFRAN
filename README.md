@@ -31,6 +31,8 @@ Else
 
 ## Manual
 
+If you get unexplainable errors, please check the [troubleshooting](https://github.com/OpenBioLink/IRIFAB/wiki/Troubleshooting) page or create an issue.
+
 To run IRIFAB a properties file called apply-config.properties is required as an startup argument. To quickly perform a test run with the FB15k dataset, clone this repository, change to path `resources/binaries` and run:
 
 #### Windows
