@@ -167,7 +167,7 @@ std::vector<std::pair<int, double>>* Clustering::read_jaccard(std::string path) 
 }
 
 void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>* res, std::vector<std::vector<int>>* res_clusters) {
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic) num_threads(WORKER_THREADS)
 	for(int i = 0; i < portions+1; i++){
 		double thresh = (double)i / portions;
 
@@ -190,8 +190,6 @@ void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>*
 			auto result = noe->max();
 
 			res[i] = result;
-			std::cout << "MAX" << "\n";
-			std::cout << std::get<0>(result) << " " << std::get<1>(result) << " " << std::get<2>(result) << "\n";
 			res_clusters[i] = clusters;
 			delete noe;
 		} else {
@@ -224,8 +222,6 @@ void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>*
 
 			res_clusters[i] = clusters;
 			res[i] = result;
-
-			std::cout << std::get<0>(result) << " " << std::get<1>(result) << " " << std::get<2>(result) << "\n";
 			delete noe;
 		}
 	}

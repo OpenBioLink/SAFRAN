@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "Properties.hpp"
 #include <vector>
+#include <math.h> 
 
 enum Ruletype {XYRule, XRule, YRule, None};
 

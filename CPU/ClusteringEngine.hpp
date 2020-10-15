@@ -42,7 +42,7 @@ public:
 	void _learn(int threadId) {
 
 		int rellen = index->getRelSize();
-		for(int i = 2; i < 3; i++){
+		for(int i = 0; i < rellen; i++){
 			std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << "\n";
 			int ind_ptr = adj_begin[3 + i];
 			int len = adj_begin[3 + i + 1] - ind_ptr;
