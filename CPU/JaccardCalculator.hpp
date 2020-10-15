@@ -1,0 +1,280 @@
+#ifndef JACCARDCALCULATOR_H
+#define JACCARDCALCULATOR_H
+
+#include "ValidationtripleReader.hpp"
+#include "RuleReader.hpp"
+#include "Index.hpp"
+#include "Graph.hpp"
+#include "Clustering.hpp"
+#include <iostream>
+#include "RuleGraph.hpp"
+#include <omp.h>
+
+class JaccardCalculator {
+
+public:
+
+	JaccardCalculator(Index* index, TraintripleReader* graph, ValidationtripleReader* vtr, RuleReader* rr, int k) {
+		this->index = index;
+		this->graph = graph;
+		this->vtr = vtr;
+		this->rr = rr;
+		this->k = k;
+		adj_lists = graph->getCSR()->getAdjList();
+		adj_list_starts = graph->getCSR()->getAdjBegin();
+		vt_adj_lists = vtr->getCSR()->getAdjList();
+		vt_adj_list_starts = vtr->getCSR()->getAdjBegin();
+		rules_adj_list = rr->getCSR()->getAdjList();
+		adj_begin = rr->getCSR()->getAdjBegin();
+		WORKER_THREADS = Properties::get().WORKER_THREADS;
+		this->rulegraph = new RuleGraph(index->getNodeSize(), graph);
+		min = new MinHash(k);
+	}
+
+	FILE* pFile;
+
+	void calculate_jaccard() {
+		int rellen = index->getRelSize();
+		for (int i = 1; i < rellen; i++) {
+
+			int ind_ptr = adj_begin[3 + i];
+			int len = adj_begin[3 + i + 1] - ind_ptr;
+			std::cout << "Cluster calculating " << *(index->getStringOfRelId(i)) << " " << len << std::endl;
+			Rule** rules = new Rule * [len];
+			std::vector<long long>* solutions = new std::vector<long long>[len];
+			std::cout << "Calulating all solutions of all rules ... \n";
+			calc_sols(solutions, rules, ind_ptr, len);
+			std::cout << "Calculating jaccards\n";
+
+			std::vector<std::pair<int, double>>* jacc = new std::vector<std::pair<int, double>>[len];
+			calc_jaccs(solutions, rules, len, jacc);
+
+			std::ostringstream* out = new std::ostringstream();
+
+			fopen_s(&pFile, (Properties::get().PATH_CLUSTER + std::string("/") + std::to_string(i) + std::string("_jacc.csv")).c_str(), "w");
+			
+
+			for (int i = 0; i < len; i++) {
+				auto it = jacc[i].begin();
+				std::ostringstream out;
+				for (int j = 0; j < len; j++) {
+					if (it != jacc[i].end() and j == it->first) {
+						out << it->second << ";";
+						it++;
+					}
+					else {
+						out << 0.0 << ";";
+					}
+				}
+				out << "\n";
+				fprintf(pFile, "%s", (out).str().c_str());
+			}
+
+			fclose(pFile);
+			std::cout << "Cluster calculated for " << i << "/" << rellen << " rule relations" << std::endl;
+			delete[] rules;
+			delete[] solutions;
+			delete[] jacc;
+		}
+
+		std::cout << "DONEZO" << std::endl;
+	}
+
+private:
+	Index* index;
+	TraintripleReader* graph;
+	ValidationtripleReader* vtr;
+	RuleReader* rr;
+	int WORKER_THREADS;
+
+	MinHash* min;
+	int k;
+
+	int* adj_lists;
+	int* adj_list_starts;
+
+	int* vt_adj_lists;
+	int* vt_adj_list_starts;
+
+	Rule* rules_adj_list;
+	int* adj_begin;
+
+	RuleGraph* rulegraph;
+
+
+	void calc_sols(std::vector<long long>* solutions, Rule** rules, int ind_ptr, int len) {
+		std::cout << Properties::get().CLUSTER_SET << "\n";
+		int size = index->getNodeSize();
+
+#pragma omp parallel for schedule(dynamic)
+		for (int j = 0; j < len; j++) {
+			if (j % 100 == 0) {
+				std::cout << j << "\n";
+			}
+
+			std::vector<std::vector<int>> heads;
+			std::vector<std::vector<int>> tails;
+
+			Rule& currRule = rules_adj_list[ind_ptr + j];
+			rules[j] = &currRule;
+			if (currRule.is_ac1()) {
+				continue;
+			}
+
+			int rulelength = currRule.getRulelength();
+			bool** visited = new bool* [rulelength];
+			for (int i = 0; i < rulelength; i++) {
+				visited[i] = new bool[size];
+				std::fill(visited[i], visited[i] + size, false);
+			}
+			int* previous = new int[rulelength];
+
+			if (currRule.getRuletype() == Ruletype::XRule) {
+				if (currRule.getBodyconstantId() != nullptr) {
+					std::vector<int> results;
+					rulegraph->searchDFSSingleStart(*currRule.getBodyconstantId(), currRule, true, results, previous, visited);
+					heads.push_back(results);
+					tails.push_back(std::vector<int> {*currRule.getHeadconstant()});
+				}
+				else {
+					std::vector<int> results;
+					//rulegraph->searchDFSMultiStart(currRule, true, results);
+					heads.push_back(results);
+					tails.push_back(std::vector<int> {*currRule.getHeadconstant()});
+				}
+			}
+			// ALL of Y are [head] | tail1, tail2, ...
+			else if (currRule.getRuletype() == Ruletype::YRule) {
+				if (currRule.getBodyconstantId() != nullptr) {
+					std::vector<int> results;
+					rulegraph->searchDFSSingleStart(*currRule.getBodyconstantId(), currRule, true, results, previous, visited);
+					heads.push_back(std::vector<int> {*currRule.getHeadconstant()});
+					tails.push_back(results);
+				}
+				else {
+					std::vector<int> results;
+					//rulegraph->searchDFSMultiStart(currRule, true, results);
+					heads.push_back(std::vector<int> {*currRule.getHeadconstant()});
+					tails.push_back(results);
+				}
+			}
+			else {
+				int* relations = currRule.getRelationsFwd();
+				int* adj_list;
+				if (Properties::get().CLUSTER_SET.compare("train") == 0) {
+					adj_list = &(adj_lists[adj_list_starts[*relations]]);
+				}
+				else {
+					adj_list = &(vt_adj_lists[vt_adj_list_starts[*relations]]);
+				}
+				int start_indptr = 3;
+				int size_indptr = adj_list[1];
+				int start_ind = start_indptr + size_indptr;
+				for (int val = 0; val < size_indptr - 1; val++) {
+					int ind_ptr = adj_list[start_indptr + val];
+					int len = adj_list[start_indptr + val + 1] - ind_ptr;
+					if (len > 0) {
+						std::vector<int> results;
+						rulegraph->searchDFSSingleStart(val, currRule, false, results, previous, visited);
+						if (results.size() > 0) {
+							heads.push_back(std::vector<int> {val});
+							tails.push_back(results);
+						}
+						for (int i = 0; i < rulelength; i++) {
+							std::fill(visited[i], visited[i] + size, false);
+						}
+					}
+				}
+			}
+			for (int i = 0; i < rulelength; i++) {
+				delete[] visited[i];
+			}
+			delete[] visited;
+			delete[] previous;
+			solutions[j] = min->getMinimum(heads, tails);
+
+
+
+			//std::cout << currRule.getRuletype() << " " << *headresultlength << " " << *tailresultlength << " " << currRule.getRulelength() << std::endl;
+
+
+		}
+	}
+
+	void calc_jaccs(std::vector<long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc) {
+#pragma omp parallel for schedule(dynamic)
+		for (int i = 0; i < len; i++) {
+			for (int j = 0; j < len; j++) {
+				if (i != j) {
+					/*
+					Rule rule_i = rules[i];
+					Rule rule_j = rules[j];
+
+					if (rule_i.is_c() and rule_j.is_c()) {
+						double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					}
+					else if (rule_i.is_ac2() and rule_j.is_ac2()) {
+						double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					}
+					else if ((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) {
+						double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					}
+					*/
+
+					Rule& rule_i = *rules[i];
+					Rule& rule_j = *rules[j];
+
+					if (rule_i.is_c() and rule_j.is_c()) {
+						int c = 0;
+						for (int m = 0; m < k; m++) {
+							if (solutions[i][m] == solutions[j][m]) {
+								c++;
+							}
+						}
+						double jaccard = (double)c / k;
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					}
+					else if (rule_i.is_ac2() and rule_j.is_ac2()) {
+						int c = 0;
+						for (int m = 0; m < k; m++) {
+							if (solutions[i][m] == solutions[j][m]) {
+								c++;
+							}
+						}
+						double jaccard = (double)c / k;
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					}
+					else if ((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) {
+						int c = 0;
+						for (int m = 0; m < k; m++) {
+							if (solutions[i][m] == solutions[j][m]) {
+								c++;
+							}
+						}
+						double jaccard = (double)c / k;
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+};
+
+#endif // JACCARDCALCULATOR_H

@@ -21,7 +21,7 @@ class TesttripleReader
 {
 
     public:
-		TesttripleReader(std::string filepath, Index * index, Graph * graph) {
+		TesttripleReader(std::string filepath, Index * index, TraintripleReader* graph) {
 			this->index = index;
 			this->graph = graph;
 			read(filepath);
@@ -57,7 +57,7 @@ class TesttripleReader
         int ** testtriples;
 		int * testtripleSize;
 		Index * index;
-		Graph * graph;
+		TraintripleReader* graph;
 		std::vector<int> uniqueRelations;
 		CSR<int, int> * csr;
 
@@ -80,19 +80,21 @@ class TesttripleReader
 						std::cout << "Unsupported Filetype, please make sure you have the following triple format {subject}{TAB}{predicate}{TAB}{object}" << std::endl;
 						exit(-1);
 					}
-					int* headId = index->getIdOfNodestring(results[0]);
-					int* relId = index->getIdOfRelationstring(results[1]);
-					int* tailId = index->getIdOfNodestring(results[2]);
 
+					try {
+						int* headId = index->getIdOfNodestring(results[0]);
+						int* relId = index->getIdOfRelationstring(results[1]);
+						int* tailId = index->getIdOfNodestring(results[2]);
+						std::vector<int*> testtriple;
+						testtriple.push_back(headId);
+						testtriple.push_back(relId);
+						testtriple.push_back(tailId);
+						testtriplesVector.push_back(testtriple);
 
-					std::vector<int*> testtriple;
-					testtriple.push_back(headId);
-					testtriple.push_back(relId);
-					testtriple.push_back(tailId);
-					testtriplesVector.push_back(testtriple);
-
-					relHeadToTails[*relId][*headId].insert(*tailId);
-					relTailToHeads[*relId][*tailId].insert(*headId);
+						relHeadToTails[*relId][*headId].insert(*tailId);
+						relTailToHeads[*relId][*tailId].insert(*headId);
+					}
+					catch (std::runtime_error& e) {}
 				}
 				myfile.close();
 

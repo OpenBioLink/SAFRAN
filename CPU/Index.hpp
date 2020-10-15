@@ -37,8 +37,7 @@ public:
 			return &(it->second);
 		}
 		else {
-			std::cout << "Error: Node " << node << " not found in Trainingset";
-			exit(-1);
+			throw std::runtime_error(("Error: Node " + node + " not found in Trainingset").c_str());
 		}
 	}
 

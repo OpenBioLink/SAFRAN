@@ -1,82 +1,89 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <string>
-#include <fstream>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <stack>
+#include "Rule.hpp"
 
-#include "Types.h"
-#include "Index.hpp"
-#include "Util.hpp"
-#include "CSR.hpp"
 
-class Graph
-{
-    public:
-		Graph(std::string filepath, Index * index) {
-			this->index = index;
-			RelNodeToNodes relHeadToTails;
-			RelNodeToNodes relTailToHeads;
-			read(filepath, relHeadToTails, relTailToHeads);
-			
-			index->rehash();
-			for (int i = 0; i < index->getRelSize(); i++) {
-				relHeadToTails[i].rehash(relHeadToTails[i].size());
-				relTailToHeads[i].rehash(relTailToHeads[i].size());
-			}
-			relHeadToTails.rehash(relHeadToTails.size());
-			relTailToHeads.rehash(relTailToHeads.size());
+class Graph {
+public:
+	Graph(int size, std::vector<std::pair<int, double>>* jacc, Rule* rules) {
+		this->size = new int(size);
+		this->jacc = jacc;
+		this->rules = rules;
+	}
 
-			csr = new CSR<int, int>(index->getRelSize(), index->getNodeSize(), relHeadToTails, relTailToHeads);
-		}
+	std::vector<int> searchDFS(int v, double thresh) {
+		std::vector<int> solution;
+		bool* visited = new bool[*size];
+		std::fill(visited, visited + *size, false);
 
-		CSR<int, int>* getCSR() {
-			return csr;
-		}
+		searchDFSUtil(solution, visited, v, thresh);
+		delete[] visited;
+		return solution;
+	}
 
-    protected:
+private:
+	int* size;
+	std::vector<std::pair<int, double>>* jacc;
+	Rule* rules;
 
-    private:
-		Index * index;
-		CSR<int, int> * csr;
 
-		void read(std::string filepath, RelNodeToNodes& relHeadToTails, RelNodeToNodes& relTailToHeads) {
-			std::string line;
-			std::ifstream myfile(filepath);
-			if (myfile.is_open())
+	void searchDFSUtil(std::vector<int>& solution, bool* visited, int v, double thresh) {
+
+
+
+		std::stack<int> stack;
+
+		// Push the current source node. 
+		stack.push(v);
+
+		while (!stack.empty()) {
+			// Pop a vertex from stack and print it 
+			v = stack.top();
+			stack.pop();
+
+			if (visited[v])
+				continue;
+
+			// Stack may contain same vertex twice. So 
+			// we need to print the popped item only 
+			// if it is not visited. 
+			if (!visited[v])
 			{
-				while (getline(myfile, line))
-				{
-					std::istringstream iss(line);
-					std::vector<std::string> results = util::split(line, '\t');
-					if (results.size() != 3) {
-						std::cout << "Unsupported Filetype, please make sure you have the following triple format {subject}{TAB}{predicate}{TAB}{object}" << std::endl;
-						exit(-1);
+				
+				solution.push_back(v);
+				visited[v] = true;
+			}
+
+			// Get all adjacent vertices of the popped vertex s 
+			// If a adjacent has not been visited, then push it 
+			// to the stack. 
+			for (auto tup : jacc[v]) {
+				int u = tup.first;
+				double conf = tup.second;
+				if (!visited[u]) {
+					Rule& rule_i = rules[u];
+					Rule& rule_j = rules[v];
+
+					if (rule_i.is_c() && rule_j.is_c() && conf > thresh) {
+						stack.push(u);
 					}
-					add(results[0], results[1], results[2], relHeadToTails, relTailToHeads);
+					else if (rule_i.is_ac2() and rule_j.is_ac2() && conf > thresh) {
+						stack.push(u);
+					}
+					else if (((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) && conf > thresh) {
+						stack.push(u);
+					}
 				}
-				myfile.close();
-			}
-			else {
-				std::cout << "Unable to open train file " << filepath << std::endl;
-				exit(-1);
+					
 			}
 		}
+	}
 
-		void add(std::string head, std::string relation, std::string tail, RelNodeToNodes& relHeadToTails, RelNodeToNodes& relTailToHeads) {
-			//Get ids
-			index->addNode(head);
-			index->addNode(tail);
-			index->addRelation(relation);
-
-			int headNodeId = *(index->getIdOfNodestring(head));
-			int relId = *(index->getIdOfRelationstring(relation));
-			int tailNodeId = *(index->getIdOfNodestring(tail));
-
-			relHeadToTails[relId][headNodeId].insert(tailNodeId);
-			relTailToHeads[relId][tailNodeId].insert(headNodeId);
-		}
-
-		
 };
 
-#endif // GRAPH_H
+#endif //GRAPH_H

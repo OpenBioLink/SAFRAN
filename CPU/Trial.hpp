@@ -19,8 +19,8 @@ public:
 	std::vector<std::vector<int*>> getTesttriplesSample(std::vector<std::vector<int*>> allTesttriples) {
 		std::cout << "Sampling " << sample_size << " random testtriples" << std::endl;
 		std::vector<std::vector<int*>> out;
-		std::sample(allTesttriples.begin(), allTesttriples.end(), std::back_inserter(out),
-			sample_size, std::mt19937{ std::random_device{}() });
+		//std::sample(allTesttriples.begin(), allTesttriples.end(), std::back_inserter(out),
+		//	sample_size, std::mt19937{ std::random_device{}() });
 		return out;
 	}
 

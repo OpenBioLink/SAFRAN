@@ -126,44 +126,39 @@ private:
 			children[i].addValues(score, values, nValues, 0);
 		}
 
-		int * touched_end;
 		int * untouched_end;
 		int * values_end;
-		int * touched = new int[Properties::get().DISCRIMINATION_BOUND];
-		int * untouched = new int[Properties::get().DISCRIMINATION_BOUND];
-		int nTouched = 0;
-		int nUntouched = 0;
+		std::vector<int> touched;
+		std::vector<int> untouched;
 
 		if (!root) {
-			touched_end = std::set_intersection(storedValues, storedValues + nStoredValues, values, values + nValues, touched);
-			nTouched = std::distance(touched, touched_end);
-			untouched_end = std::set_difference(storedValues, storedValues + nStoredValues, values, values + nValues, untouched);
-			nUntouched = std::distance(untouched, untouched_end);
-			values_end = std::set_difference(values, values + nValues, touched, touched_end, values);
+			std::set_intersection(storedValues, storedValues + nStoredValues, values, values + nValues, std::back_inserter(touched));
+			std::set_difference(storedValues, storedValues + nStoredValues, values, values + nValues, std::back_inserter(untouched));
+			values_end = std::set_difference(values, values + nValues, touched.begin(), touched.end(), values);
 			nValues = std::distance(values, values_end);
 		}
 
 
-		if (nTouched > 0 && nStoredValues > 1 && nTouched < nStoredValues) {
-			int childIndex = index - nUntouched;
+		if (touched.size() > 0 && nStoredValues > 1 && touched.size() < nStoredValues) {
+			int childIndex = index - untouched.size();
 			if (childIndex >= LOWER_BOUND) {
-				nStoredValues = nTouched;
+				nStoredValues = touched.size();
 				if (storedValues != nullptr) { delete[] storedValues; }
 				storedValues = new int[nStoredValues];
 				for (int i = 0; i < nStoredValues; i++) {
 					storedValues[i] = touched[i];
 				}
 				index = childIndex;
-				numOfValues -= nUntouched;
+				numOfValues -= untouched.size();
 			}
 			else {
-				nStoredValues = nUntouched;
+				nStoredValues = untouched.size();
 				if (storedValues != nullptr) { delete[] storedValues; }
 				storedValues = new int[nStoredValues];
 				for (int i = 0; i < nStoredValues; i++) {
 					storedValues[i] = untouched[i];
 				}
-				addChild(score, touched, nTouched, childIndex);
+				addChild(score, &touched[0], touched.size(), childIndex);
 			}
 		}
 
@@ -182,9 +177,6 @@ private:
 			}
 			closed = c;
 		}
-
-		delete[] touched;
-		delete[] untouched;
 	}
 
 	ScoreTree addChild(double score, int * values, int valuelength, int childIndex) {

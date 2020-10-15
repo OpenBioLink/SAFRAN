@@ -5,7 +5,7 @@
 #define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
 #endif
 
-#include "Graph.hpp"
+#include "TraintripleReader.hpp"
 #include "RuleReader.hpp"
 #include "TesttripleReader.hpp"
 #include "ScoreTree.hpp"
@@ -33,7 +33,7 @@ public:
 		this->writeLock = that.writeLock;
 	}
 
-	RuleEngine(Index * index, Graph * graph, TesttripleReader * ttr, ValidationtripleReader * vtr, RuleReader * rr) {
+	RuleEngine(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
 		this->index = index;
 		this->graph = graph;
 		this->ttr = ttr;
@@ -50,26 +50,26 @@ public:
 	virtual void start() = 0;
 	virtual void run(int threadId) = 0;
 
-	
+
 
 
 protected:
-	Index * index;
-	Graph * graph;
-	TesttripleReader * ttr;
-	ValidationtripleReader * vtr;
-	RuleReader * rr;
-	std::stringstream * out;
+	Index* index;
+	TraintripleReader* graph;
+	TesttripleReader* ttr;
+	ValidationtripleReader* vtr;
+	RuleReader* rr;
+	std::stringstream* out;
 
-	FILE * pFile;
+	FILE* pFile;
 
 	int TRIAL_SIZE;
 	int DISCRIMINATION_BOUND;
 	int WORKER_THREADS;
 
-	std::mutex * lock;
+	std::mutex* lock;
 
-	void applyCyclicRule(int* adj_list_starts, int* adj_lists, int * val, int* relations, int rulelength, int N, int * result, int * resultlength, int& counter, int * previous) {
+	void applyCyclicRule(int* adj_list_starts, int* adj_lists, int* val, int* relations, int rulelength, int N, std::vector<int>& results, int& counter, int* previous) {
 		counter++;
 		if (counter == TRIAL_SIZE) {
 			return;
@@ -77,7 +77,7 @@ protected:
 
 		int value = *val;
 		previous[N] = value;
-		int * adj_list = &(adj_lists[adj_list_starts[*relations]]);
+		int* adj_list = &(adj_lists[adj_list_starts[*relations]]);
 		int start_indptr = 3;
 		int size_indptr = adj_list[1];
 		int start_ind = start_indptr + size_indptr;
@@ -89,7 +89,7 @@ protected:
 		int ind_ptr = adj_list[start_indptr + value];
 		int len = adj_list[start_indptr + value + 1] - ind_ptr;
 
-		if (Properties::get().INTERMEDIATE_DISCRIMINATION == 1) {
+		if (Properties::get().INTERMEDIATE_DISCRIMINATION == 1 and DISCRIMINATION_BOUND > 0) {
 			if (len > DISCRIMINATION_BOUND) { return; }
 		}
 
@@ -106,17 +106,16 @@ protected:
 				}
 				if (inPrevious) { continue; }
 
-				result[*resultlength] = nextval;
-				(*resultlength)++;
-				if (*resultlength == DISCRIMINATION_BOUND) {
+				results.push_back(nextval);
+				if (results.size() == DISCRIMINATION_BOUND and DISCRIMINATION_BOUND > 0) {
 					if (Properties::get().DISCRIMINATION_UNIQUE == 1) {
-						std::sort(result, (result + *resultlength));
-						int * end = std::unique(result, (result + *resultlength));
-						*resultlength = std::distance(result, end);
+						std::sort(results.begin(), results.end());
+						auto end = std::unique(results.begin(), results.end());
+						results.erase(end, results.end());
 					}
 					// second if needed if after DISCRIMINATION_UNIQUE still *resultlength == DISCRIMINATION_BOUND
-					if (*resultlength == DISCRIMINATION_BOUND) {
-						*resultlength = 0;
+					if (results.size() == DISCRIMINATION_BOUND) {
+						results.clear();
 						return;
 					}
 				}
@@ -137,14 +136,14 @@ protected:
 					}
 				}
 				if (inPrevious) { continue; }
-				applyCyclicRule(adj_list_starts, adj_lists, &nextval, relations, rulelength, N, result, resultlength, counter, previous);
+				applyCyclicRule(adj_list_starts, adj_lists, &nextval, relations, rulelength, N, results, counter, previous);
 				//if (*resultlength == N_SAMPLES) return;
 			}
 		}
 	}
 
-	void applyAcyclicRule(int* adj_list_starts, int* adj_lists, int* relations, int rulelength, int N, int * result, int * resultlength, int& counter, int * previous) {
-		int * adj_list = &(adj_lists[adj_list_starts[*relations]]);
+	void applyAcyclicRule(int* adj_list_starts, int* adj_lists, int* relations, int rulelength, int N, std::vector<int>& results, int& counter, int* previous) {
+		int* adj_list = &(adj_lists[adj_list_starts[*relations]]);
 		int start_indptr = 3;
 		int size_indptr = adj_list[1];
 		int start_ind = start_indptr + size_indptr;
@@ -159,7 +158,7 @@ protected:
 				int ind_ptr = adj_list[start_indptr + val];
 				int len = adj_list[start_indptr + val + 1] - ind_ptr;
 
-				if (Properties::get().INTERMEDIATE_DISCRIMINATION == 1) {
+				if (Properties::get().INTERMEDIATE_DISCRIMINATION == 1 and DISCRIMINATION_BOUND > 0) {
 					if (len > DISCRIMINATION_BOUND) { continue; }
 				}
 
@@ -174,17 +173,16 @@ protected:
 					}
 					if (inPrevious) { continue; }
 
-					result[*resultlength] = nextval;
-					(*resultlength)++;
-					if (*resultlength == DISCRIMINATION_BOUND) {
+					results.push_back(nextval);
+					if (results.size() == DISCRIMINATION_BOUND and DISCRIMINATION_BOUND > 0) {
 						if (Properties::get().DISCRIMINATION_UNIQUE == 1) {
-							std::sort(result, (result + *resultlength));
-							int * end = std::unique(result, (result + *resultlength));
-							*resultlength = std::distance(result, end);
+							std::sort(results.begin(), results.end());
+							auto end = std::unique(results.begin(), results.end());
+							results.erase(end, results.end());
 						}
 						// second if needed if after DISCRIMINATION_UNIQUE still *resultlength == DISCRIMINATION_BOUND
-						if (*resultlength == DISCRIMINATION_BOUND) {
-							*resultlength = 0;
+						if (results.size() == DISCRIMINATION_BOUND) {
+							results.clear();
 							return;
 						}
 					}
@@ -201,7 +199,7 @@ protected:
 				int ind_ptr = adj_list[start_indptr + val];
 				int len = adj_list[start_indptr + val + 1] - ind_ptr;
 
-				if (Properties::get().INTERMEDIATE_DISCRIMINATION == 1) {
+				if (Properties::get().INTERMEDIATE_DISCRIMINATION == 1 and DISCRIMINATION_BOUND > 0) {
 					if (len > DISCRIMINATION_BOUND) { continue; }
 				}
 
@@ -216,15 +214,15 @@ protected:
 					}
 					if (inPrevious) { continue; }
 
-					applyCyclicRule(adj_list_starts, adj_lists, &nextval, relations, rulelength, N, result, resultlength, counter, previous);
+					applyCyclicRule(adj_list_starts, adj_lists, &nextval, relations, rulelength, N, results, counter, previous);
 					//if (*resultlength == N_SAMPLES) return;
 				}
 			}
 		}
 	}
 
-	bool existsAcyclic(int* adj_list_starts, int* adj_lists, int * valId, int * constant, int* relations, int N) {
-		int * adj_list = &(adj_lists[adj_list_starts[*relations]]);
+	bool existsAcyclic(int* adj_list_starts, int* adj_lists, int* valId, int* constant, int* relations, int N) {
+		int* adj_list = &(adj_lists[adj_list_starts[*relations]]);
 		int start_indptr = 3;
 		int size_indptr = adj_list[1];
 		int start_ind = start_indptr + size_indptr;
@@ -261,35 +259,35 @@ protected:
 		}
 	}
 
-	void computeHeadsCyclic(int* adj_list_starts, int* adj_lists, int * valId, Rule& rule, int * result, int * resultlength) {
+	void computeHeadsCyclic(int* adj_list_starts, int* adj_lists, int* valId, Rule& rule, std::vector<int>& results) {
 		int* previous = new int[rule.getRulelength()];
 		int* relations = rule.getRelationsBwd();
 		int counter = 0;
-		applyCyclicRule(adj_list_starts, adj_lists, valId, relations, rule.getRulelength(), 0, result, resultlength, counter, previous);
+		applyCyclicRule(adj_list_starts, adj_lists, valId, relations, rule.getRulelength(), 0, results, counter, previous);
 		delete[] previous;
 	}
-	void computeTailsCyclic(int* adj_list_starts, int* adj_lists, int * valId, Rule& rule, int * result, int * resultlength) {
+	void computeTailsCyclic(int* adj_list_starts, int* adj_lists, int* valId, Rule& rule, std::vector<int>& results) {
 		int* previous = new int[rule.getRulelength()];
 		int* relations = rule.getRelationsFwd();
 		int counter = 0;
-		applyCyclicRule(adj_list_starts, adj_lists, valId, relations, rule.getRulelength(), 0, result, resultlength, counter, previous);
+		applyCyclicRule(adj_list_starts, adj_lists, valId, relations, rule.getRulelength(), 0, results, counter, previous);
 		delete[] previous;
 	}
-	void computeAcyclic(int* adj_list_starts, int* adj_lists, Rule& rule, int * result, int * resultlength) {
+	void computeAcyclic(int* adj_list_starts, int* adj_lists, Rule& rule, std::vector<int>& results) {
 		int* previous = new int[rule.getRulelength()];
 		int* relations = rule.getRelationsBwd();
 		int counter = 0;
 		if (rule.getBodyconstantId() != nullptr) {
-			applyCyclicRule(adj_list_starts, adj_lists, rule.getBodyconstantId(), relations, rule.getRulelength(), 0, result, resultlength, counter, previous);
+			applyCyclicRule(adj_list_starts, adj_lists, rule.getBodyconstantId(), relations, rule.getRulelength(), 0, results, counter, previous);
 		}
 		else {
-			applyAcyclicRule(adj_list_starts, adj_lists, relations, rule.getRulelength(), 0, result, resultlength, counter, previous);
+			applyAcyclicRule(adj_list_starts, adj_lists, relations, rule.getRulelength(), 0, results, counter, previous);
 		}
 		delete[] previous;
 	}
-	bool existsAcyclic(int* adj_list_starts, int* adj_lists, int * valId, Rule& rule) {
+	bool existsAcyclic(int* adj_list_starts, int* adj_lists, int* valId, Rule& rule) {
 		int* relations = rule.getRelationsFwd();
-		int * constantnode = nullptr;
+		int* constantnode = nullptr;
 		if (rule.getBodyconstantId() != nullptr) {
 			constantnode = rule.getBodyconstantId();
 		}
@@ -314,14 +312,14 @@ protected:
 	}
 	*/
 
-	std::mutex * writeLock;
-	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, double>> headresults, std::vector<std::pair<int, double>> tailresults, FILE * pFile, int& K) {
+	std::mutex* writeLock;
+	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, double>> headresults, std::vector<std::pair<int, double>> tailresults, FILE* pFile, int& K) {
 		writeLock->lock();
 		fprintf(pFile, "%s %s %s\nHeads: ", index->getStringOfNodeId(head)->c_str(), index->getStringOfRelId(rel)->c_str(), index->getStringOfNodeId(tail)->c_str());
 
 		int maxHead = headresults.size() < K ? headresults.size() : K;
 		for (int i = 0; i < maxHead; i++) {
-			fprintf(pFile,"%s\t%.16f\t", index->getStringOfNodeId(headresults[i].first)->c_str(), headresults[i].second);
+			fprintf(pFile, "%s\t%.16f\t", index->getStringOfNodeId(headresults[i].first)->c_str(), headresults[i].second);
 		}
 		fprintf(pFile, "\nTails: ");
 		int maxTail = tailresults.size() < K ? tailresults.size() : K;

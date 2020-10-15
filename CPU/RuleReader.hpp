@@ -5,17 +5,18 @@
 #include <iostream>
 #include <fstream>
 
-#include "Graph.hpp"
+#include "TraintripleReader.hpp"
 #include "CSR.hpp"
 #include "Types.h"
 #include "Util.hpp"
 #include "Rule.hpp"
+#include <omp.h>
 
 
 class RuleReader
 {
     public:
-		RuleReader(std::string filepath, Index* index, Graph* graph) {
+		RuleReader(std::string filepath, Index* index, TraintripleReader* graph) {
 			this->graph = graph;
 			this->index = index;
 			read(filepath);
@@ -28,7 +29,7 @@ class RuleReader
     protected:
 
     private:
-		Graph * graph;
+		TraintripleReader* graph;
 		Index * index;
 		CSR<int, Rule> * csr;
 
@@ -52,6 +53,8 @@ class RuleReader
 				std::cout << "Unable to open rule file " << filepath << std::endl;
 				exit(-1);
 			}
+
+
 			csr = new CSR<int, Rule>(index->getRelSize(), rules);
 		}
 
@@ -59,6 +62,7 @@ class RuleReader
 			Rule * ruleObj = new Rule(std::stoi(rule[0]), std::stoi(rule[1]), std::stod(rule[2]));
 
 			std::string rawrule = rule[3];
+			ruleObj->setRulestring(rawrule);
 			std::stringstream ss(rawrule);
 
 			Ruletype type = Ruletype::None;
@@ -158,6 +162,7 @@ class RuleReader
 			}
 			ruleObj->setRelationsFwd(forwardrelations);
 			ruleObj->setRelationsBwd(backwardrelations);
+			ruleObj->compute_body_hash();
 
 			return ruleObj;
 		}
