@@ -20,6 +20,7 @@ public:
 	std::string PATH_RULES = "rules";
 	std::string PATH_OUTPUT = "predictions";
 	std::string PATH_CLUSTER = "cluster";
+	std::string PATH_JACCARD = "jaccard";
 
 	// rule application
 	int TRIAL_SIZE = 100000;
@@ -125,6 +126,9 @@ public:
 			} 
 			else if (strKey.compare("PATH_CLUSTER") == 0) {
 				PATH_CLUSTER = strVal;
+			}
+			else if (strKey.compare("PATH_JACCARD") == 0) {
+				PATH_JACCARD = strVal;
 			}
 			else if (strKey.compare("ONLY_UNCONNECTED") == 0) {
 				ONLY_UNCONNECTED = std::stoi(strVal);

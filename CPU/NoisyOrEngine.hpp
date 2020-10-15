@@ -48,9 +48,19 @@ public:
 
 		int rel = this->relation;
 		int nodesize = index->getNodeSize();
-
 		int ind_ptr = adj_begin[3 + rel];
 		int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+
+		double* result_head = new double[nodesize];
+		double* result_tail = new double[nodesize];
+		double* cluster_result_head = new double[nodesize];
+		double* cluster_result_tail = new double[nodesize];
+		std::fill(result_head, result_head + nodesize, 0.0);
+		std::fill(result_tail, result_tail + nodesize, 0.0);
+		std::fill(cluster_result_head, cluster_result_head + nodesize, 0.0);
+		std::fill(cluster_result_tail, cluster_result_tail + nodesize, 0.0);
+
+		
 
 		{
 			// adj list of testtriple x r ?
@@ -65,11 +75,9 @@ public:
 
 				if (lenTails > 0) {
 					std::vector<int> touched_tails;
-					std::vector<double> result_tail(nodesize);
 					for (int i = 0; i < clusters.size(); i++) {
 
 						std::vector<int> touched_cluster_tails;
-						std::vector<double> cluster_result_tail(nodesize);
 
 						for (auto ruleIndex : clusters[i]) {
 							Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
@@ -95,10 +103,6 @@ public:
 									if (currRule.getRuletype() == Ruletype::XRule) {
 										std::vector<int> comp;
 										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false);
-										if (comp.size() == 0) {
-											std::cout << currRule.getRulestring() << "\n";
-											exit(-1);
-										}
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(comp);
@@ -197,11 +201,9 @@ public:
 
 				if (lenHeads > 0) {
 					std::vector<int> touched_heads;
-					std::vector<double> result_head(nodesize);
 					for (int i = 0; i < clusters.size(); i++) {
 
 						std::vector<int> touched_cluster_heads;
-						std::vector<double> cluster_result_head(nodesize);
 
 						for (auto ruleIndex : clusters[i]) {
 							Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
@@ -310,7 +312,10 @@ public:
 				tails++;
 			}
 		}
-
+		delete[] cluster_result_head;
+		delete[] cluster_result_tail;
+		delete[] result_head;
+		delete[] result_tail;
 		return std::make_tuple((double)hit1 / (double)predicted, (double)hit3 / (double)predicted, (double)hit10 / (double)predicted);
 	}
 

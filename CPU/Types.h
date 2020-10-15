@@ -10,6 +10,6 @@ typedef std::set<int> Nodes;
 typedef std::unordered_map<int, Nodes> NodeToNodes;
 typedef std::unordered_map<int, NodeToNodes> RelNodeToNodes;
 
-typedef std::unordered_map<int, std::unordered_set<Rule*>> RelToRules;
+typedef std::unordered_map<int, std::vector<Rule*>> RelToRules;
 
 #endif //TYPES_H

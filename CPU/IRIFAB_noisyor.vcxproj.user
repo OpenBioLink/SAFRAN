@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>learnnoisy C:\Users\\sott\Desktop\hybridneuneu\fb15k237\config-apply.properties</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>learnnoisy C:\Users\Simon\Desktop\hybridneuneuneu\fb15k237\config-apply.properties</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release1|x64'">

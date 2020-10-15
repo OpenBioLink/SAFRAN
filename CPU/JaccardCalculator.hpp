@@ -35,7 +35,7 @@ public:
 
 	void calculate_jaccard() {
 		int rellen = index->getRelSize();
-		for (int i = 1; i < rellen; i++) {
+		for (int i = 0; i < rellen; i++) {
 
 			int ind_ptr = adj_begin[3 + i];
 			int len = adj_begin[3 + i + 1] - ind_ptr;
@@ -49,28 +49,22 @@ public:
 			std::vector<std::pair<int, double>>* jacc = new std::vector<std::pair<int, double>>[len];
 			calc_jaccs(solutions, rules, len, jacc);
 
-			std::ostringstream* out = new std::ostringstream();
+			std::string out_path = Properties::get().PATH_JACCARD + std::string("/") + std::to_string(i) + std::string("_jacc.bin");
+			std::ofstream file(out_path, std::ios::binary);
 
-			fopen_s(&pFile, (Properties::get().PATH_CLUSTER + std::string("/") + std::to_string(i) + std::string("_jacc.csv")).c_str(), "w");
-			
 
+			file.write((char*)(&len), sizeof len);
 			for (int i = 0; i < len; i++) {
-				auto it = jacc[i].begin();
-				std::ostringstream out;
-				for (int j = 0; j < len; j++) {
-					if (it != jacc[i].end() and j == it->first) {
-						out << it->second << ";";
-						it++;
-					}
-					else {
-						out << 0.0 << ";";
-					}
+				int n_jacc_gt0 = jacc[i].size();
+				file.write((char*)(&n_jacc_gt0), sizeof n_jacc_gt0);
+				for (int j = 0; j < n_jacc_gt0; j++) {
+					int r = jacc[i][j].first;
+					double jc = jacc[i][j].second;
+					file.write((char*)(&r), sizeof r);
+					file.write((char*)(&jc), sizeof jc);
 				}
-				out << "\n";
-				fprintf(pFile, "%s", (out).str().c_str());
 			}
-
-			fclose(pFile);
+			file.close();
 			std::cout << "Cluster calculated for " << i << "/" << rellen << " rule relations" << std::endl;
 			delete[] rules;
 			delete[] solutions;

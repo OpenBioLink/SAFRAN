@@ -45,7 +45,7 @@ class RuleReader
 					//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
 					//r->toString();
 					int * relationId = r->getHeadrelation();
-					rules[*relationId].insert(r);
+					rules[*relationId].push_back(r);
 				}
 				myfile.close();
 			}

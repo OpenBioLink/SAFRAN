@@ -10,10 +10,11 @@
 
 class Graph {
 public:
-	Graph(int size, std::vector<std::pair<int, double>>* jacc, Rule* rules) {
+	Graph(int size, std::vector<std::pair<int, double>>* jacc, Rule* rules, int ind_ptr) {
 		this->size = new int(size);
 		this->jacc = jacc;
 		this->rules = rules;
+		this->ind_ptr = ind_ptr;
 	}
 
 	std::vector<int> searchDFS(int v, double thresh) {
@@ -30,6 +31,7 @@ private:
 	int* size;
 	std::vector<std::pair<int, double>>* jacc;
 	Rule* rules;
+	int ind_ptr;
 
 
 	void searchDFSUtil(std::vector<int>& solution, bool* visited, int v, double thresh) {
@@ -66,8 +68,8 @@ private:
 				int u = tup.first;
 				double conf = tup.second;
 				if (!visited[u]) {
-					Rule& rule_i = rules[u];
-					Rule& rule_j = rules[v];
+					Rule& rule_i = rules[ind_ptr + u];
+					Rule& rule_j = rules[ind_ptr + v];
 
 					if (rule_i.is_c() && rule_j.is_c() && conf > thresh) {
 						stack.push(u);
