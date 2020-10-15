@@ -167,7 +167,7 @@ std::vector<std::pair<int, double>>* Clustering::read_jaccard(std::string path) 
 }
 
 void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>* res, std::vector<std::vector<int>>* res_clusters) {
-#pragma omp parallel for schedule(dynamic) num_threads(WORKER_THREADS)
+#pragma omp parallel for schedule(dynamic)
 	for(int i = 0; i < portions+1; i++){
 		double thresh = (double)i / portions;
 
