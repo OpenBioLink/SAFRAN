@@ -155,7 +155,6 @@ public:
 									tails.insertKey(std::make_pair(i, result_tail[i]));
 								}
 							}
-							result_tail[i] = 0.0;
 						}
 
 						std::vector<std::pair<int, double>> tailresults_vec;
@@ -182,6 +181,9 @@ public:
 							}
 						}
 						predicted++;
+					}
+					for (auto i : touched_tails) {
+						result_tail[i] = 0.0;
 					}
 				}
 				heads++;
@@ -280,7 +282,6 @@ public:
 									heads.insertKey(std::make_pair(i, result_head[i]));
 								}
 							}
-							result_head[i] = 0.0;
 						}
 
 						std::vector<std::pair<int,double>> headresults_vec;
@@ -307,6 +308,9 @@ public:
 							}
 						}
 						predicted++;
+					}
+					for (auto i : touched_heads) {
+						result_head[i] = 0.0;
 					}
 				}
 				tails++;
