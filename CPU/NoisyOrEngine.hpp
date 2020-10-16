@@ -372,7 +372,7 @@ public:
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else {
+								else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
 									tailresults_vec = currRule.getBuffer();
 								}
 							}
@@ -485,7 +485,7 @@ public:
 						}
 						else {
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule) {
+								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
 									headresults_vec = currRule.getBuffer();
 								}
 								else {
@@ -580,7 +580,7 @@ public:
 	bool in_sorted(std::vector<int>& vector, int ele) {
 		if (vector.size() == 0) return false;
 		int a = 0;
-		int b = vector.size() / 2;
+		int b = (vector.size() - 1) / 2;
 		int c = vector.size() - 1;
 
 
