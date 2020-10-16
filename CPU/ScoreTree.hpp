@@ -122,6 +122,7 @@ private:
 	std::vector<ScoreTree> children;
 
 	void addValues(double score, int * values, int& nValues, int counter) {
+		std::sort(values, values + nValues);
 		for (int i = 0; i < children.size(); i++) {
 			children[i].addValues(score, values, nValues, 0);
 		}
