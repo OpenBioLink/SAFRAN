@@ -23,26 +23,20 @@ public:
 		fopen_s(&pFile, Properties::get().PATH_OUTPUT.c_str(), "w");
 
 
-		//Foreach testtriples
-		for (int i = 0; i < WORKER_THREADS; i++) {
-			threads[i] = std::thread(&ClusteringApplication::run, this, i);
-		}
-
-		for (int i = 0; i < WORKER_THREADS; i++) {
-			threads[i].join();
-		}
+		run(0);
 
 		fclose(pFile);
 	}
 
 	void run(int threadId) {
-		while (true) {
-			int rel = getNextRel();
-			if (rel == -1) {
-				break;
-			}
+#pragma omp parallel for schedule(dynamic)
+		for (int rel = 0; rel < index->getRelSize(); rel++) {
 			std::cout << rel << "\n";
 			std::pair<double, std::vector<std::vector<int>>> cluster = rel2clusters[rel];
+			if (cluster.second.size() == 0) {
+				continue;
+			}
+
 			if (cluster.first == 0) {
 				max(rel, cluster.second);
 			}
@@ -50,6 +44,7 @@ public:
 				noisy(rel, cluster.second);
 			}
 		}
+
 	}
 
 
