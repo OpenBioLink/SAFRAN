@@ -168,11 +168,22 @@ private:
 					int ind_ptr = adj_list[start_indptr + val];
 					int len = adj_list[start_indptr + val + 1] - ind_ptr;
 					if (len > 0) {
+						if (currRule.head_exceptions.find(val) != currRule.head_exceptions.end()) {
+							continue;
+						}
 						std::vector<int> results;
 						rulegraph->searchDFSSingleStart(val, currRule, false, results, previous, visited);
 						if (results.size() > 0) {
+							std::vector<int> filt_results;
+							for (auto res : results) {
+								if (currRule.tail_exceptions.find(res) != currRule.tail_exceptions.end()) {
+									continue;
+								}
+								filt_results.push_back(res);
+							}
+
 							heads.push_back(std::vector<int> {val});
-							tails.push_back(results);
+							tails.push_back(filt_results);
 						}
 						for (int i = 0; i < rulelength; i++) {
 							std::fill(visited[i], visited[i] + size, false);

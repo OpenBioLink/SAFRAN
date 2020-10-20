@@ -192,6 +192,8 @@ class Rule
 			rulestring = other->rulestring;
 			applied_confidence = other->applied_confidence;
 			bodyhash = other->bodyhash;
+			tail_exceptions = other->tail_exceptions;
+			head_exceptions = other->head_exceptions;
 			return *this;
 		}
 
