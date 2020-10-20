@@ -43,18 +43,11 @@ public:
 			}
 			std::cout << rel << "\n";
 			std::pair<double, std::vector<std::vector<int>>> cluster = rel2clusters[rel];
-
-			int * adj_begin = rr->getCSR()->getAdjBegin();
-			Rule* rules_adj_list = rr->getCSR()->getAdjList();
-			int ind_ptr = adj_begin[3 + rel];
-			int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
-			std::vector<std::vector<int>> clus(1);
-			for (int j = 0; j < lenRules; j++) {
-				clus[0].push_back(j);
+			if (cluster.first == 0) {
+				max(rel, cluster.second);
 			}
-
-
-			max(rel, clus);
+			else {
+				noisy(rel, cluster.second);
 		}
 	}
 
