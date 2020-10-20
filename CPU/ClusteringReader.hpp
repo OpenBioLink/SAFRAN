@@ -26,7 +26,7 @@ public:
 		return csr;
 	}
 
-	std::unordered_map<int, std::pair<double, std::vector<std::unordered_set<int>>>>& getRelToClusters() {
+	std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>>& getRelToClusters() {
 		return relToClusters;
 	}
 
@@ -36,7 +36,7 @@ private:
 	TraintripleReader* graph;
 	Index* index;
 	CSR<int, Rule>* csr;
-	std::unordered_map<int, std::pair<double, std::vector<std::unordered_set<int>>>> relToClusters;
+	std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>> relToClusters;
 
 	void read(CSR<int, Rule>* rulecsr, std::string clusteringpath) {
 		std::unordered_map<std::string, int> rulestringToID;
@@ -68,14 +68,14 @@ private:
 				double thresh = std::stod(rel_conf[2]);
 
 
-				std::vector<std::unordered_set<int>> id_clusters;
+				std::vector<std::vector<int>> id_clusters;
 				while (true) {
 					getline(myfile, line);
 					if (line.compare("") == 0) {
 						break;
 					}
 					std::vector<std::string> rules = util::split(line, '\t');
-					std::unordered_set<int> id_cluster;
+					std::vector<int> id_cluster;
 					for (auto rule : rules) {
 						if (rule.compare("") == 0) {
 							continue;
@@ -83,7 +83,7 @@ private:
 
 						auto id = rulestringToID.find(rule);
 						if (id != rulestringToID.end()) {
-							id_cluster.insert(id->second);
+							id_cluster.push_back(id->second);
 						}
 						else {
 							std::cout << "Rule in cluster not found in ruleset";

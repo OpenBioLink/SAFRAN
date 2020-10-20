@@ -85,13 +85,13 @@ public:
 							std::vector<int> tailresults_vec;
 
 							if (currRule.is_c()) {
-								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false);
+								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, true);
 							}
 							else {
 
 								if (currRule.isBuffered()) {
 									if (currRule.getRuletype() == Ruletype::XRule) {
-										if (in_sorted(currRule.getBuffer(), head)) {
+										if (util::in_sorted(currRule.getBuffer(), head)) {
 											tailresults_vec.push_back(*currRule.getHeadconstant());
 										}
 									}
@@ -102,17 +102,17 @@ public:
 								else {
 									if (currRule.getRuletype() == Ruletype::XRule) {
 										std::vector<int> comp;
-										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false);
+										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(comp);
 										}
-										if (in_sorted(comp, head)) {
+										if (util::in_sorted(comp, head)) {
 											tailresults_vec.push_back(*currRule.getHeadconstant());
 										}
 									}
 									else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, false);
+										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, false, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
@@ -213,7 +213,7 @@ public:
 							std::vector<int> headresults_vec;
 
 							if (currRule.is_c()) {
-								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false);
+								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, true);
 							}
 							else {
 								if (currRule.isBuffered()) {
@@ -221,14 +221,14 @@ public:
 										headresults_vec = currRule.getBuffer();
 									}
 									else if(currRule.getRuletype() == Ruletype::YRule){
-										if (in_sorted(currRule.getBuffer(), tail)) {
+										if (util::in_sorted(currRule.getBuffer(), tail)) {
 											headresults_vec.push_back(*currRule.getHeadconstant());
 										}
 									}
 								}
 								else {
 									if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, false);
+										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, false, true);
 #pragma omp critical
 										{
 											if(!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
@@ -236,12 +236,12 @@ public:
 									}
 									else if (currRule.getRuletype() == Ruletype::YRule) {
 										std::vector<int> comp;
-										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false);
+										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
 										}
-										if (in_sorted(comp, tail)) {
+										if (util::in_sorted(comp, tail)) {
 											headresults_vec.push_back(*currRule.getHeadconstant());
 										}
 									}
@@ -367,12 +367,12 @@ public:
 						std::vector<int> tailresults_vec;
 
 						if (currRule.is_c()) {
-							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false);
+							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, false);
 						}
 						else {
 							if (currRule.isBuffered()) {
 								if (currRule.getRuletype() == Ruletype::XRule) {
-									if (in_sorted(currRule.getBuffer(), head)) {
+									if (util::in_sorted(currRule.getBuffer(), head)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
@@ -383,17 +383,17 @@ public:
 							else {
 								if (currRule.getRuletype() == Ruletype::XRule) {
 									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false);
+									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(comp);
 									}
-									if (in_sorted(comp, head)) {
+									if (util::in_sorted(comp, head)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
 								else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, false);
+									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, false, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
@@ -485,7 +485,7 @@ public:
 						std::vector<int> headresults_vec;
 
 						if (currRule.is_c()) {
-							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false);
+							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, false);
 						}
 						else {
 							if (currRule.isBuffered()) {
@@ -493,14 +493,14 @@ public:
 									headresults_vec = currRule.getBuffer();
 								}
 								else {
-									if (in_sorted(currRule.getBuffer(), tail)) {
+									if (util::in_sorted(currRule.getBuffer(), tail)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
 							}
 							else {
 								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, false);
+									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, false, false);
 #pragma omp critical
 									{
 										if(!currRule.isBuffered())currRule.setBuffer(headresults_vec);
@@ -508,12 +508,12 @@ public:
 								}
 								else if (currRule.getRuletype() == Ruletype::YRule) {
 									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false);
+									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
 									}
-									if (in_sorted(comp, tail)) {
+									if (util::in_sorted(comp, tail)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
@@ -579,43 +579,6 @@ public:
 		}
 
 		return std::make_tuple((double)hit1 / (double)predicted, (double)hit3 / (double)predicted, (double)hit10 / (double)predicted);
-	}
-
-	bool in_sorted(std::vector<int>& vector, int ele) {
-		if (vector.size() == 0) return false;
-		int a = 0;
-		int b = (vector.size() - 1) / 2;
-		int c = vector.size() - 1;
-
-
-		if (vector[a] > ele) return false;
-		if (vector[c] == ele) return true;
-		if (vector[c] < ele) return false;
-		int asdf = 0;
-
-		while (true) {
-			asdf++;
-			if (asdf == 100) {
-				std::cout << "INF " << ele << "\n";
-				for (auto i : vector) {
-					std::cout << i << " ";
-				}
-				exit(-1);
-			}
-			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
-				break;
-			}
-			if (vector[a] <= ele and ele < vector[b]) {
-				c = b;
-				b = (a + b) / 2;
-			}
-			else if (vector[b] < ele and ele <= vector[c]) {
-				a = b;
-				b = (b + c) / 2;
-			}
-		}
-		return false;
 	}
 
 	double get_hit1() {

@@ -28,7 +28,7 @@ public:
 		this->relCounter = graph->getRelCounter();
 	}
 
-	void searchDFSSingleStart_filt(bool headNotTail, int filt_v, int v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest) {
+	void searchDFSSingleStart_filt(bool headNotTail, int filt_v, int v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest, bool filtExceptions) {
 	
 		int rulelength = r.getRulelength();
 		int* relations;
@@ -40,7 +40,34 @@ public:
 		}
 		std::vector<int> previous(rulelength);
 		std::vector<std::vector<bool>> visited(rulelength, std::vector<bool>(size));
-		searchDFSUtil_filt(&r, headNotTail, filt_v, v, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, filtValidNotTest);
+		searchDFSUtil_filt(&r, headNotTail, filt_v, v, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, filtValidNotTest, filtExceptions);
+		std::sort(solution.begin(), solution.end());
+	}
+
+	void searchDFSMultiStart_filt(bool headNotTail, int filt_v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest, bool filtExceptions) {
+		int rulelength = r.getRulelength();
+		int* relations;
+		if (bwd) {
+			relations = r.getRelationsBwd();
+		}
+		else {
+			relations = r.getRelationsFwd();
+		}
+		std::vector<int> previous(rulelength);
+		std::vector<std::vector<bool>> visited(rulelength, std::vector<bool>(size));
+
+		int* adj_list = &(adj_lists[adj_list_starts[*relations]]);
+		int start_indptr = 3;
+		int size_indptr = adj_list[1];
+		int start_ind = start_indptr + size_indptr;
+		for (int val = 0; val < size_indptr - 1; val++) {
+			int ind_ptr = adj_list[start_indptr + val];
+			int len = adj_list[start_indptr + val + 1] - ind_ptr;
+			if (len > 0) {
+				searchDFSUtil_filt(&r, headNotTail, filt_v, val, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, filtValidNotTest, filtExceptions);
+			}
+		}
+		std::sort(solution.begin(), solution.end());
 	}
 
 	void searchDFSSingleStart(int v, Rule& r, bool bwd, std::vector<int>& solution, int* previous, bool** visited) {
@@ -53,9 +80,9 @@ public:
 			relations = r.getRelationsFwd();
 		}
 		searchDFSUtil(v, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND);
+		std::sort(solution.begin(), solution.end());
 	}
 
-	/*
 	void searchDFSMultiStart(bool headNotTail, Rule& r, bool bwd, std::vector<int>& solution) {
 		int rulelength = r.getRulelength();
 		int* previous = new int[rulelength];
@@ -80,7 +107,7 @@ public:
 			int ind_ptr = adj_list[start_indptr + val];
 			int len = adj_list[start_indptr + val + 1] - ind_ptr;
 			if (len > 0) {
-				searchDFSUtil(headNotTail, val, val, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND);
+				searchDFSUtil(val, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND);
 			}
 		}
 
@@ -89,8 +116,9 @@ public:
 		}
 		delete[] visited;
 		delete[] previous;
+		std::sort(solution.begin(), solution.end());
 	}
-	*/
+
 private:
 	int size;
 	TraintripleReader* graph;
@@ -101,7 +129,7 @@ private:
 	RelNodeToNodes valid_relHeadToTails;
 	std::unordered_map<int, std::unordered_set<int>>* relCounter;
 
-	void searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, bool filtValidNotTest) {
+	void searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, bool filtValidNotTest, bool filtExceptions) {
 
 		if (solution.size() >= limit and limit > 0) {
 			return;
@@ -149,7 +177,7 @@ private:
 				}
 			}
 			
-			if (r->is_c()) {
+			if (filtExceptions and r->is_c()) {
 				if (!headNotTail and r->head_exceptions.find(head) != r->head_exceptions.end()) {
 					return;
 				}
@@ -199,7 +227,7 @@ private:
 					node_fully_visited = false;
 					continue;
 				}
-				searchDFSUtil_filt(r, headNotTail, filt_value, nextval, solution, relations, visited, previous, level, rulelength, limit, filtValidNotTest);
+				searchDFSUtil_filt(r, headNotTail, filt_value, nextval, solution, relations, visited, previous, level, rulelength, limit, filtValidNotTest, filtExceptions);
 				if (solution.size() >= limit and limit > 0) {
 					return;
 				}

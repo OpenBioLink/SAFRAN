@@ -10,9 +10,10 @@ class ClusteringApplication : public RuleEngine
 {
 public:
 
-	ClusteringApplication(std::unordered_map<int, std::pair<double, std::vector<std::unordered_set<int>>>> rel2clusters, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) : RuleEngine(index, graph, ttr, vtr, rr) {
+	ClusteringApplication(std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>> rel2clusters, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) : RuleEngine(index, graph, ttr, vtr, rr) {
 		this->rel2clusters = rel2clusters;
 		it = ttr->getUniqueRelations().begin();
+		this->rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
 	}
 
 	void start() {
@@ -41,18 +42,24 @@ public:
 				break;
 			}
 			std::cout << rel << "\n";
-			std::pair<double, std::vector<std::unordered_set<int>>> cluster = rel2clusters[rel];
-			if (cluster.first == 0) {
-				max(rel);
+			std::pair<double, std::vector<std::vector<int>>> cluster = rel2clusters[rel];
+
+			int * adj_begin = rr->getCSR()->getAdjBegin();
+			Rule* rules_adj_list = rr->getCSR()->getAdjList();
+			int ind_ptr = adj_begin[3 + rel];
+			int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+			std::vector<std::vector<int>> clus(1);
+			for (int j = 0; j < lenRules; j++) {
+				clus[0].push_back(j);
 			}
-			else {
-				noisy(rel, cluster.second);
-			}
+
+
+			max(rel, clus);
 		}
 	}
 
 
-	void noisy(int rel, std::vector<std::unordered_set<int>> clusters) {
+	void noisy(int rel, std::vector<std::vector<int>> clusters) {
 
 		int* adj_lists = graph->getCSR()->getAdjList();
 		int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -69,301 +76,294 @@ public:
 		int* vt_adj_list = vtr->getCSR()->getAdjList();
 		int* vt_adj_begin = vtr->getCSR()->getAdjBegin();
 
-		std::unordered_map<int, std::unordered_set<int>>* relCounter = graph->getRelCounter();
-
-		std::unordered_map<int, std::unordered_map<int, std::map<int, double>>> headTailResults;
-		std::unordered_map<int, std::unordered_map<int, std::map<int, double>>> tailHeadResults;
-
+		int nodesize = index->getNodeSize();
 		int ind_ptr = adj_begin[3 + rel];
 		int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+
+		double* result_head = new double[nodesize];
+		double* result_tail = new double[nodesize];
+		double* cluster_result_head = new double[nodesize];
+		double* cluster_result_tail = new double[nodesize];
+		std::fill(result_head, result_head + nodesize, 0.0);
+		std::fill(result_tail, result_tail + nodesize, 0.0);
+		std::fill(cluster_result_head, cluster_result_head + nodesize, 0.0);
+		std::fill(cluster_result_tail, cluster_result_tail + nodesize, 0.0);
+
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> headTailResults;
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> tailHeadResults;
 
 		{
 			// adj list of testtriple x r ?
 			int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2]]);
 			int lenHeads = t_adj_list[1]; // size + 1 of testtriple testtriple heads of a specific relation
-
 			auto heads = ttr->getRelHeadToTails()[rel].begin();
 			while (heads != ttr->getRelHeadToTails()[rel].end()) {
-				for (int i = 0; i < clusters.size(); i++) {
-					std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, double>>> headTailResults_cluster;
+				int head = heads->first;
+				int* head_ind_ptr = &t_adj_list[3 + head];
+				int lenTails = heads->second.size();
 
-					int head = heads->first;
-					int* head_ind_ptr = &t_adj_list[3 + head];
 
-					int lenTails = heads->second.size();
+				if (lenTails > 0) {
+					std::vector<int> touched_tails;
+					for (int i = 0; i < clusters.size(); i++) {
 
-					if (lenTails > 0) {
+						std::vector<int> touched_cluster_tails;
 
-						int ruleIndex = 0;
 						for (auto ruleIndex : clusters[i]) {
-							Rule currRule = rules_adj_list[ind_ptr + ruleIndex];
+							Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
+
 							std::vector<int> tailresults_vec;
 
-							if (currRule.getRuletype() == Ruletype::XRule) {
-								if (existsAcyclic(adj_list_starts, adj_lists, &head, currRule)) {
-									tailresults_vec.push_back(*(currRule.getHeadconstant()));
-								}
-							}
-							else if (currRule.getRuletype() == Ruletype::YRule) {
-								if (*currRule.getHeadconstant() == head) {
-									computeAcyclic(adj_list_starts, adj_lists, currRule, tailresults_vec);
-								}
+							if (currRule.is_c()) {
+								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true);
 							}
 							else {
-								computeTailsCyclic(adj_list_starts, adj_lists, &head, currRule, tailresults_vec);
-							}
 
-
-							if (tailresults_vec.size() > 0) {
-								int* tailresults = new int[tailresults_vec.size()];
-								std::copy(tailresults_vec.begin(), tailresults_vec.end(), tailresults);
-								std::sort(tailresults, (tailresults + tailresults_vec.size()));
-								int* end = std::unique(tailresults, (tailresults + tailresults_vec.size()));
-
-								//Filter results from trainingsset
-								int* adj_list = &(adj_lists[adj_list_starts[rel * 2]]);
-								int* indptr = &adj_list[3 + head];
-								int len = *(indptr + 1) - *indptr;
-								int* ind = &adj_list[3 + adj_list[1] + *indptr];
-								int* end_diff_train = std::set_difference(tailresults, end, ind, ind + len, tailresults);
-
-								//Filter results from valset
-								int* v_adj_list = &(vt_adj_list[vt_adj_begin[rel * 2]]);
-								int* v_indptr = &v_adj_list[3 + head];
-								int v_len = *(v_indptr + 1) - *v_indptr;
-								int* v_ind = &v_adj_list[3 + v_adj_list[1] + *v_indptr];
-								int* end_diff_val = std::set_difference(tailresults, end_diff_train, v_ind, v_ind + v_len, tailresults);
-
-
-								for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
-
-									int* tail = &t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
-									//Filter results from testset
-									int* t_indptr = &t_adj_list[3 + head];
-									int t_len = *(t_indptr + 1) - *t_indptr;
-									int* t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-									int* tailresults_testsetfiltered = new int[tailresults_vec.size()];
-									int* end_diff_test = util::test_set_difference(tailresults, end_diff_val, t_ind, t_ind + t_len, tailresults_testsetfiltered, *tail);
-									int nValues = std::distance(tailresults_testsetfiltered, end_diff_test);
-
-
-									std::vector<int> tailresults_vec(tailresults_testsetfiltered, tailresults_testsetfiltered + nValues);
-
-									for (auto tailresult : tailresults_vec) {
-
-										if (currRule.is_c()) {
-											if (currRule.tail_exceptions.find(tailresult) != currRule.tail_exceptions.end()) {
-												continue;
-											}
-										}
-
-										if (Properties::get().ONLY_UNCONNECTED == 1) {
-											if ((*relCounter).find(head) != (*relCounter).end()) {
-												auto& it = (*relCounter).find(head)->second;
-												if (it.find(tailresult) != it.end()) {
-													continue;
-												}
-											}
-										}
-
-										auto it = headTailResults_cluster[head][*tail].find(tailresult);
-										if (it == headTailResults_cluster[head][*tail].end()) {
-											headTailResults_cluster[head][*tail][tailresult] = currRule.getAppliedConfidence();
-										}
-										else {
-											if (headTailResults_cluster[head][*tail][tailresult] < currRule.getAppliedConfidence()) {
-												headTailResults_cluster[head][*tail][tailresult] = currRule.getAppliedConfidence();
-											}
+								if (currRule.isBuffered()) {
+									if (currRule.getRuletype() == Ruletype::XRule) {
+										if (util::in_sorted(currRule.getBuffer(), head)) {
+											tailresults_vec.push_back(*currRule.getHeadconstant());
 										}
 									}
-									delete[] tailresults_testsetfiltered;
+									else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+										tailresults_vec = currRule.getBuffer();
+									}
 								}
-								delete[] tailresults;
+								else {
+									if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
+										std::vector<int> comp;
+										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered())currRule.setBuffer(comp);
+										}
+										if (util::in_sorted(comp, head)) {
+											tailresults_vec.push_back(*currRule.getHeadconstant());
+										}
+									}
+									else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
+										}
+									}else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
+										std::vector<int> comp;
+										rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered())currRule.setBuffer(comp);
+										}
+										if (util::in_sorted(comp, head)) {
+											tailresults_vec.push_back(*currRule.getHeadconstant());
+										}
+									}
+									else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+										rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
+										}
+									}
+								}
 							}
+
+							if (tailresults_vec.size() > 0) {
+								for (auto tailresult : tailresults_vec) {
+									if (cluster_result_tail[tailresult] == 0.0) {
+										cluster_result_tail[tailresult] = currRule.getAppliedConfidence();
+										touched_cluster_tails.push_back(tailresult);
+									}
+									else {
+										if (cluster_result_tail[tailresult] < currRule.getAppliedConfidence()) {
+											cluster_result_tail[tailresult] = currRule.getAppliedConfidence();
+										}
+									}
+								}
+							}
+						}
+						for (auto i : touched_cluster_tails) {
+							if (result_tail[i] == 0.0) {
+								touched_tails.push_back(i);
+							}
+							result_tail[i] = 1.0 - (1.0 - result_tail[i]) * (1.0 - cluster_result_tail[i]);
+							cluster_result_tail[i] = 0.0;
 						}
 					}
-					auto it_head = headTailResults_cluster.begin();
-					while (it_head != headTailResults_cluster.end()) {
-						auto it_tail = it_head->second.begin();
-						while (it_tail != it_head->second.end()) {
-							for (std::pair<int, double> res : it_tail->second) {
-								auto it = headTailResults[it_head->first][it_tail->first].find(res.first);
-								if (it == headTailResults[it_head->first][it_tail->first].end()) {
-									headTailResults[it_head->first][it_tail->first][res.first] = 1.0;
+
+					for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
+						int tail = t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
+
+						MinHeap tails(10);
+						for (auto i : touched_tails) {
+							if (result_tail[i] >= tails.getMin().second) {
+								if (i == tail || heads->second.find(i) == heads->second.end()) {
+									tails.deleteMin();
+									tails.insertKey(std::make_pair(i, result_tail[i]));
 								}
-								headTailResults[it_head->first][it_tail->first][res.first] *= (1.0 - res.second);
 							}
-							it_tail++;
 						}
-						it_head++;
+
+						std::vector<std::pair<int, double>> tailresults_vec;
+						for (int i = 9; i >= 0; i--) {
+							std::pair<int, double> tail_pred = tails.extractMin();
+							if (tail_pred.first != -1) tailresults_vec.push_back(tail_pred);
+						}
+						std::reverse(tailresults_vec.begin(), tailresults_vec.end());
+						headTailResults[head][tail] = tailresults_vec;
+
+					}
+					for (auto i : touched_tails) {
+						result_tail[i] = 0.0;
 					}
 				}
 				heads++;
 			}
 		}
-
 		{
-			// adj list of testtriple ? r y
+			// adj list of testtriple x r ?
 			int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2 + 1]]);
 			int lenTails = t_adj_list[1]; // size + 1 of testtriple testtriple heads of a specific relation
 
 			auto tails = ttr->getRelTailToHeads()[rel].begin();
 			while (tails != ttr->getRelTailToHeads()[rel].end()) {
-				for (int i = 0; i < clusters.size(); i++) {
-					std::unordered_map<int, std::unordered_map<int, std::unordered_map<int, double>>> tailHeadResults_cluster;
+				int tail = tails->first;
+				int* tail_ind_ptr = &t_adj_list[3 + tail];
+				int lenHeads = tails->second.size();
 
-					int tail = tails->first;
-					int* tail_ind_ptr = &t_adj_list[3 + tail];
-					int lenHeads = *(tail_ind_ptr + 1) - *tail_ind_ptr;
 
-					if (lenHeads > 0) {
-						int ruleIndex = 0;
+				if (lenHeads > 0) {
+					std::vector<int> touched_heads;
+					for (int i = 0; i < clusters.size(); i++) {
+
+						std::vector<int> touched_cluster_heads;
+
 						for (auto ruleIndex : clusters[i]) {
-							Rule currRule = rules_adj_list[ind_ptr + ruleIndex];
+							Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
+
 							std::vector<int> headresults_vec;
 
-							if (currRule.getRuletype() == Ruletype::YRule) {
-								if (existsAcyclic(adj_list_starts, adj_lists, &tail, currRule)) {
-									headresults_vec.push_back(*(currRule.getHeadconstant()));
-								}
-							}
-							else if (currRule.getRuletype() == Ruletype::XRule) {
-								if (*currRule.getHeadconstant() == tail) {
-									computeAcyclic(adj_list_starts, adj_lists, currRule, headresults_vec);
-								}
+							if (currRule.is_c()) {
+								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true);
 							}
 							else {
-								computeHeadsCyclic(adj_list_starts, adj_lists, &tail, currRule, headresults_vec);
+								if (currRule.isBuffered()) {
+									if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+										headresults_vec = currRule.getBuffer();
+									}
+									else if (currRule.getRuletype() == Ruletype::YRule) {
+										if (util::in_sorted(currRule.getBuffer(), tail)) {
+											headresults_vec.push_back(*currRule.getHeadconstant());
+										}
+									}
+								}
+								else {
+									if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
+										}
+									}
+									else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
+										std::vector<int> comp;
+										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
+										}
+										if (util::in_sorted(comp, tail)) {
+											headresults_vec.push_back(*currRule.getHeadconstant());
+										}
+									} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+										rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
+										}
+									}
+									else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
+										std::vector<int> comp;
+										rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true);
+#pragma omp critical
+										{
+											if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
+										}
+										if (util::in_sorted(comp, tail)) {
+											headresults_vec.push_back(*currRule.getHeadconstant());
+										}
+									}
+								}
 							}
 
 							if (headresults_vec.size() > 0) {
-								int* headresults = new int[headresults_vec.size()];
-								std::copy(headresults_vec.begin(), headresults_vec.end(), headresults);
-								// Calculate unique results
-								std::sort(headresults, (headresults + headresults_vec.size()));
-								int* end = std::unique(headresults, (headresults + headresults_vec.size()));
-
-								//Filter results from trainingsset
-								int* adj_list = &(adj_lists[adj_list_starts[rel * 2 + 1]]);
-								int* indptr = &adj_list[3 + tail];
-								int len = *(indptr + 1) - *indptr;
-								int* ind = &adj_list[3 + adj_list[1] + *indptr];
-								int* end_diff_train = std::set_difference(headresults, end, ind, ind + len, headresults);
-
-								//Filter results from valset
-								int* v_adj_list = &(vt_adj_list[vt_adj_begin[rel * 2 + 1]]);
-								int* v_indptr = &v_adj_list[3 + tail];
-								int v_len = *(v_indptr + 1) - *v_indptr;
-								int* v_ind = &v_adj_list[3 + v_adj_list[1] + *v_indptr];
-								int* end_diff_val = std::set_difference(headresults, end_diff_train, v_ind, v_ind + v_len, headresults);
-
-								for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
-									int* head = &t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
-									//Filter results from testset
-									int* t_indptr = &t_adj_list[3 + tail];
-									int t_len = *(t_indptr + 1) - *t_indptr;
-									int* t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-									int* headresults_testsetfiltered = new int[headresults_vec.size()];
-									int* end_diff_test = util::test_set_difference(headresults, end_diff_val, t_ind, t_ind + t_len, headresults_testsetfiltered, *head);
-
-									int nValues = std::distance(headresults_testsetfiltered, end_diff_test);
-
-									std::vector<int> headresults_vec(headresults_testsetfiltered, headresults_testsetfiltered + nValues);
-
-									for (auto headresult : headresults_vec) {
-
-										if (currRule.is_c()) {
-											if (currRule.head_exceptions.find(headresult) != currRule.head_exceptions.end()) {
-												continue;
-											}
-										}
-
-										if (Properties::get().ONLY_UNCONNECTED == 1) {
-											if ((*relCounter).find(tail) != (*relCounter).end()) {
-												auto& it = (*relCounter).find(tail)->second;
-												if (it.find(headresult) != it.end()) {
-													continue;
-												}
-											}
-										}
-
-										auto it = tailHeadResults_cluster[tail][*head].find(headresult);
-										if (it == tailHeadResults_cluster[tail][*head].end()) {
-											tailHeadResults_cluster[tail][*head][headresult] = currRule.getAppliedConfidence();
-										}
-										else {
-											if (tailHeadResults_cluster[tail][*head][headresult] < currRule.getAppliedConfidence()) {
-												tailHeadResults_cluster[tail][*head][headresult] = currRule.getAppliedConfidence();
-											}
+								for (auto headresult : headresults_vec) {
+									if (cluster_result_head[headresult] == 0.0) {
+										cluster_result_head[headresult] = currRule.getAppliedConfidence();
+										touched_cluster_heads.push_back(headresult);
+									}
+									else {
+										if (cluster_result_head[headresult] < currRule.getAppliedConfidence()) {
+											cluster_result_head[headresult] = currRule.getAppliedConfidence();
 										}
 									}
-									delete[] headresults_testsetfiltered;
 								}
-								delete[] headresults;
 							}
+						}
+						for (auto i : touched_cluster_heads) {
+							if (result_head[i] == 0.0) {
+								touched_heads.push_back(i);
+							}
+							result_head[i] = 1.0 - (1.0 - result_head[i]) * (1.0 - cluster_result_head[i]);
+							cluster_result_head[i] = 0.0;
 						}
 					}
-					auto it_tail = tailHeadResults_cluster.begin();
-					while (it_tail != tailHeadResults_cluster.end()) {
-						auto it_head = it_tail->second.begin();
-						while (it_head != it_tail->second.end()) {
-							for (std::pair<int, double> res : it_head->second) {
-								auto it = tailHeadResults[it_tail->first][it_head->first].find(res.first);
-								if (it == tailHeadResults[it_tail->first][it_head->first].end()) {
-									tailHeadResults[it_tail->first][it_head->first][res.first] = 1.0;
+
+					for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
+						int head = t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
+
+						MinHeap heads(10);
+						for (auto i : touched_heads) {
+							if (result_head[i] >= heads.getMin().second) {
+								if (i == head || tails->second.find(i) == tails->second.end()) {
+									heads.deleteMin();
+									heads.insertKey(std::make_pair(i, result_head[i]));
 								}
-								tailHeadResults[it_tail->first][it_head->first][res.first] *= (1.0 - res.second);
 							}
-							it_head++;
 						}
-						it_tail++;
+
+						std::vector<std::pair<int, double>> headresults_vec;
+						for (int i = 9; i >= 0; i--) {
+							std::pair<int, double> head_pred = heads.extractMin();
+							if (head_pred.first != 1) headresults_vec.push_back(head_pred);
+						}
+						std::reverse(headresults_vec.begin(), headresults_vec.end());
+						tailHeadResults[tail][head] = headresults_vec;
+					}
+					for (auto i : touched_heads) {
+						result_head[i] = 0.0;
 					}
 				}
 				tails++;
 			}
 		}
-
 		auto it_head = headTailResults.begin();
 		while (it_head != headTailResults.end()) {
 			auto it_tail = it_head->second.begin();
 			while (it_tail != it_head->second.end()) {
-				auto headTailResult = headTailResults[it_head->first][it_tail->first];
-				auto tailHeadResult = tailHeadResults[it_tail->first][it_head->first];
-
-				std::vector<std::pair<int, double>> headresVector;
-				auto it_headstart = tailHeadResult.begin();
-				while (it_headstart != tailHeadResult.end()) {
-					headresVector.push_back(std::make_pair(it_headstart->first, 1.0 - it_headstart->second));
-					it_headstart++;
-				}
-				std::sort(headresVector.begin(), headresVector.end(), compFunctor);
-
-				std::vector<std::pair<int, double>> tailresVector;
-				auto it_tailstart = headTailResult.begin();
-				while (it_tailstart != headTailResult.end()) {
-					tailresVector.push_back(std::make_pair(it_tailstart->first, 1.0 - it_tailstart->second));
-					it_tailstart++;
-				}
-				std::sort(tailresVector.begin(), tailresVector.end(), compFunctor);
-
-
-
-				writeTopKCandidates(
-					it_head->first,
-					rel,
-					it_tail->first,
-					headresVector,
-					tailresVector,
-					pFile,
-					Properties::get().TOP_K_OUTPUT
-				);
+				writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
 				it_tail++;
 			}
 			it_head++;
 		}
+		delete[] cluster_result_head;
+		delete[] cluster_result_tail;
+		delete[] result_head;
+		delete[] result_tail;
 	}
 
-	void max(int relation) {
+	void max(int rel, std::vector<std::vector<int>> clusters) {
+
 		int* adj_lists = graph->getCSR()->getAdjList();
 		int* adj_list_starts = graph->getCSR()->getAdjBegin();
 
@@ -379,108 +379,98 @@ public:
 		int* vt_adj_list = vtr->getCSR()->getAdjList();
 		int* vt_adj_begin = vtr->getCSR()->getAdjBegin();
 
-		std::unordered_map<int, std::unordered_set<int>>* relCounter = graph->getRelCounter();
+		int nodesize = index->getNodeSize();
+
+		int ind_ptr = adj_begin[3 + rel];
+		int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+
 
 		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> headTailResults;
 		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> tailHeadResults;
 
-		int ind_ptr = adj_begin[3 + relation];
-		int lenRules = adj_begin[3 + relation + 1] - ind_ptr;
-
 		{
 			// adj list of testtriple x r ?
-			int* t_adj_list = &(tt_adj_list[tt_adj_begin[relation * 2]]);
+			int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2]]);
 			int lenHeads = t_adj_list[1]; // size + 1 of testtriple testtriple heads of a specific relation
-
-			auto heads = ttr->getRelHeadToTails()[relation].begin();
-			while (heads != ttr->getRelHeadToTails()[relation].end()) {
+			auto heads = ttr->getRelHeadToTails()[rel].begin();
+			while (heads != ttr->getRelHeadToTails()[rel].end()) {
 				int head = heads->first;
 				int* head_ind_ptr = &t_adj_list[3 + head];
-
 				int lenTails = heads->second.size();
+
 
 				if (lenTails > 0) {
 					ScoreTree* tailScoreTrees = new ScoreTree[lenTails];
-					bool* fineScoreTrees = new bool[lenTails];
-					for (int z = 0; z < lenTails; z++) { fineScoreTrees[z] = false; }
-					int ruleIndex = 0;
+					std::vector<bool> fineScoreTrees(lenTails);
 					bool stop = false;
-
-					while (stop == false && ruleIndex < lenRules) {
-						Rule currRule = rules_adj_list[ind_ptr + ruleIndex];
+					for (auto ruleIndex : clusters[0]) {
+						Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
 						std::vector<int> tailresults_vec;
 
-						if (currRule.getRuletype() == Ruletype::XRule) {
-							if (existsAcyclic(adj_list_starts, adj_lists, &head, currRule)) {
-								tailresults_vec.push_back(*(currRule.getHeadconstant()));
-							}
-						}
-						else if (currRule.getRuletype() == Ruletype::YRule) {
-							if (*currRule.getHeadconstant() == head) {
-								computeAcyclic(adj_list_starts, adj_lists, currRule, tailresults_vec);
-							}
+						if (currRule.is_c()) {
+							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true);
 						}
 						else {
-							computeTailsCyclic(adj_list_starts, adj_lists, &head, currRule, tailresults_vec);
-						}
-
-						if (tailresults_vec.size() > 0) {
-
-							std::vector<int> tailresults_vec_filtered;
-							for (auto tailresult : tailresults_vec) {
-								if (currRule.is_c()) {
-									if (currRule.tail_exceptions.find(tailresult) != currRule.tail_exceptions.end()) {
-										continue;
+							if (currRule.isBuffered()) {
+								if (currRule.getRuletype() == Ruletype::XRule) {
+									if (util::in_sorted(currRule.getBuffer(), head)) {
+										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-
-								if (Properties::get().ONLY_UNCONNECTED == 1) {
-									if ((*relCounter).find(head) != (*relCounter).end()) {
-										auto& it = (*relCounter).find(head)->second;
-										if (it.find(tailresult) != it.end()) {
-											continue;
-										}
-									}
+								else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+									tailresults_vec = currRule.getBuffer();
 								}
-								tailresults_vec_filtered.push_back(tailresult);
 							}
-
-							int* tailresults = new int[tailresults_vec_filtered.size()];
-							std::copy(tailresults_vec_filtered.begin(), tailresults_vec_filtered.end(), tailresults);
-							std::sort(tailresults, (tailresults + tailresults_vec_filtered.size()));
-							int* end = std::unique(tailresults, (tailresults + tailresults_vec_filtered.size()));
-
-							//Filter results from trainingsset
-							int* adj_list = &(adj_lists[adj_list_starts[relation * 2]]);
-							int* indptr = &adj_list[3 + head];
-							int len = *(indptr + 1) - *indptr;
-							int* ind = &adj_list[3 + adj_list[1] + *indptr];
-							int* end_diff_train = std::set_difference(tailresults, end, ind, ind + len, tailresults);
-
-							//Filter results from valset
-							int* v_adj_list = &(vt_adj_list[vt_adj_begin[relation * 2]]);
-							int* v_indptr = &v_adj_list[3 + head];
-							int v_len = *(v_indptr + 1) - *v_indptr;
-							int* v_ind = &v_adj_list[3 + v_adj_list[1] + *v_indptr];
-							int* end_diff_val = std::set_difference(tailresults, end_diff_train, v_ind, v_ind + v_len, tailresults);
-
-
+							else {
+								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
+									std::vector<int> comp;
+									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(comp);
+									}
+									if (util::in_sorted(comp, head)) {
+										tailresults_vec.push_back(*currRule.getHeadconstant());
+									}
+								}
+								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
+									}
+								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
+									std::vector<int> comp;
+									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(comp);
+									}
+									if (util::in_sorted(comp, head)) {
+										tailresults_vec.push_back(*currRule.getHeadconstant());
+									}
+								}
+								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
+									}
+								}
+							}
+						}
+						if (tailresults_vec.size() > 0) {
 							stop = true;
 							for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
 								if (fineScoreTrees[tailIndex] == false) {
-									int* tail = &t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
-									//Filter results from testset
-									int* t_indptr = &t_adj_list[3 + head];
-									int t_len = *(t_indptr + 1) - *t_indptr;
-									int* t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-									int* tailresults_testsetfiltered = new int[tailresults_vec_filtered.size()];;
-
-									int* end_diff_test = util::test_set_difference(tailresults, end_diff_val, t_ind, t_ind + t_len, tailresults_testsetfiltered, *tail);
-
-									int nValues = std::distance(tailresults_testsetfiltered, end_diff_test);
-									tailScoreTrees[tailIndex].addValues(currRule.getAppliedConfidence(), tailresults_testsetfiltered, nValues);
-									delete[] tailresults_testsetfiltered;
-
+									int tail = t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
+									std::vector<int> filtered_testresults_vec;
+									for (auto a : tailresults_vec) {
+										if (a == tail || heads->second.find(a) == heads->second.end()) {
+											filtered_testresults_vec.push_back(a);
+										}
+									}
+									tailScoreTrees[tailIndex].addValues(currRule.getAppliedConfidence(), &filtered_testresults_vec[0], filtered_testresults_vec.size());
 									if (tailScoreTrees[tailIndex].fine()) {
 										fineScoreTrees[tailIndex] = true;
 									}
@@ -489,12 +479,14 @@ public:
 									}
 								}
 							}
-							delete[] tailresults;
 						}
-						ruleIndex++;
+						if (stop) {
+							break;
+						}
 					}
+
 					for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
-						int* tail = &t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
+						int tail = t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
 						auto cmp = [](std::pair<int, double> const& a, std::pair<int, double> const& b)
 						{
 							return a.second > b.second;
@@ -504,108 +496,101 @@ public:
 						std::vector<std::pair<int, double>> tailresults_vec;
 						tailScoreTrees[tailIndex].getResults(tailresults_vec);
 						std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
-						headTailResults[head][*tail] = tailresults_vec;
+
+						headTailResults[head][tail] = tailresults_vec;
+
 						tailScoreTrees[tailIndex].Free();
 					}
-					delete[] fineScoreTrees;
 					delete[] tailScoreTrees;
 				}
 				heads++;
 			}
 		}
-
 		{
-			// adj list of testtriple ? r y
-			int* t_adj_list = &(tt_adj_list[tt_adj_begin[relation * 2 + 1]]);
+			// adj list of testtriple x r ?
+			int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2 + 1]]);
 			int lenTails = t_adj_list[1]; // size + 1 of testtriple testtriple heads of a specific relation
 
-			auto tails = ttr->getRelTailToHeads()[relation].begin();
-			while (tails != ttr->getRelTailToHeads()[relation].end()) {
+			auto tails = ttr->getRelTailToHeads()[rel].begin();
+			while (tails != ttr->getRelTailToHeads()[rel].end()) {
 				int tail = tails->first;
 				int* tail_ind_ptr = &t_adj_list[3 + tail];
-
-				int lenHeads = *(tail_ind_ptr + 1) - *tail_ind_ptr;
+				int lenHeads = tails->second.size();
 
 				if (lenHeads > 0) {
 					ScoreTree* headScoreTrees = new ScoreTree[lenHeads];
-					bool* fineScoreTrees = new bool[lenHeads];
-					for (int z = 0; z < lenHeads; z++) { fineScoreTrees[z] = false; }
+					std::vector<bool> fineScoreTrees(lenHeads);
 					bool stop = false;
-					int ruleIndex = 0;
-					while (stop == false && ruleIndex < lenRules) {
-						Rule currRule = rules_adj_list[ind_ptr + ruleIndex];
+					for (auto ruleIndex : clusters[0]) {
+						Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
+
 						std::vector<int> headresults_vec;
 
-						if (currRule.getRuletype() == Ruletype::YRule) {
-							if (existsAcyclic(adj_list_starts, adj_lists, &tail, currRule)) {
-								headresults_vec.push_back(*(currRule.getHeadconstant()));
-							}
-						}
-						else if (currRule.getRuletype() == Ruletype::XRule) {
-							if (*currRule.getHeadconstant() == tail) {
-								computeAcyclic(adj_list_starts, adj_lists, currRule, headresults_vec);
-							}
+						if (currRule.is_c()) {
+							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true);
 						}
 						else {
-							computeHeadsCyclic(adj_list_starts, adj_lists, &tail, currRule, headresults_vec);
+							if (currRule.isBuffered()) {
+								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+									headresults_vec = currRule.getBuffer();
+								}
+								else {
+									if (util::in_sorted(currRule.getBuffer(), tail)) {
+										headresults_vec.push_back(*currRule.getHeadconstant());
+									}
+								}
+							}
+							else {
+								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
+									}
+								}
+								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
+									std::vector<int> comp;
+									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
+									}
+									if (util::in_sorted(comp, tail)) {
+										headresults_vec.push_back(*currRule.getHeadconstant());
+									}
+								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
+									}
+								}
+								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
+									std::vector<int> comp;
+									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true);
+#pragma omp critical
+									{
+										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
+									}
+									if (util::in_sorted(comp, tail)) {
+										headresults_vec.push_back(*currRule.getHeadconstant());
+									}
+								}
+							}
 						}
 
 						if (headresults_vec.size() > 0) {
-
-							std::vector<int> headresults_vec_filtered;
-							for (auto headresult : headresults_vec) {
-								if (currRule.is_c()) {
-									if (currRule.head_exceptions.find(headresult) != currRule.head_exceptions.end()) {
-										continue;
-									}
-								}
-
-								if (Properties::get().ONLY_UNCONNECTED == 1) {
-									if ((*relCounter).find(tail) != (*relCounter).end()) {
-										auto& it = (*relCounter).find(tail)->second;
-										if (it.find(headresult) != it.end()) {
-											continue;
-										}
-									}
-								}
-								headresults_vec_filtered.push_back(headresult);
-							}
-
-							int* headresults = new int[headresults_vec_filtered.size()];
-							std::copy(headresults_vec_filtered.begin(), headresults_vec_filtered.end(), headresults);
-							// Calculate unique results
-							std::sort(headresults, (headresults + headresults_vec_filtered.size()));
-							int* end = std::unique(headresults, (headresults + headresults_vec_filtered.size()));
-
-							//Filter results from trainingsset
-							int* adj_list = &(adj_lists[adj_list_starts[relation * 2 + 1]]);
-							int* indptr = &adj_list[3 + tail];
-							int len = *(indptr + 1) - *indptr;
-							int* ind = &adj_list[3 + adj_list[1] + *indptr];
-							int* end_diff_train = std::set_difference(headresults, end, ind, ind + len, headresults);
-
-							//Filter results from valset
-							int* v_adj_list = &(vt_adj_list[vt_adj_begin[relation * 2 + 1]]);
-							int* v_indptr = &v_adj_list[3 + tail];
-							int v_len = *(v_indptr + 1) - *v_indptr;
-							int* v_ind = &v_adj_list[3 + v_adj_list[1] + *v_indptr];
-							int* end_diff_val = std::set_difference(headresults, end_diff_train, v_ind, v_ind + v_len, headresults);
-
 							stop = true;
 							for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
 								if (fineScoreTrees[headIndex] == false) {
-									int* head = &t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
-									//Filter results from testset
-									int* t_indptr = &t_adj_list[3 + tail];
-									int t_len = *(t_indptr + 1) - *t_indptr;
-									int* t_ind = &t_adj_list[3 + t_adj_list[1] + *t_indptr];
-									int* headresults_testsetfiltered = new int[headresults_vec_filtered.size()];
-									int* end_diff_test = util::test_set_difference(headresults, end_diff_val, t_ind, t_ind + t_len, headresults_testsetfiltered, *head);
-
-									int nValues = std::distance(headresults_testsetfiltered, end_diff_test);
-									headScoreTrees[headIndex].addValues(currRule.getAppliedConfidence(), headresults_testsetfiltered, nValues);
-									delete[] headresults_testsetfiltered;
-
+									int head = t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
+									std::vector<int> filtered_headresults_vec;
+									for (auto a : headresults_vec) {
+										if (a == head || tails->second.find(a) == tails->second.end()) {
+											filtered_headresults_vec.push_back(a);
+										}
+									}
+									headScoreTrees[headIndex].addValues(currRule.getAppliedConfidence(), &filtered_headresults_vec[0], filtered_headresults_vec.size());
 									if (headScoreTrees[headIndex].fine()) {
 										fineScoreTrees[headIndex] = true;
 									}
@@ -614,20 +599,22 @@ public:
 									}
 								}
 							}
-							delete[] headresults;
 						}
-						ruleIndex++;
+						if (stop) {
+							break;
+						}
 					}
 					for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
-						int* head = &t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
+						int head = t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
 						// Get Headresults and final sorting
 						std::vector<std::pair<int, double>> headresults_vec;
 						headScoreTrees[headIndex].getResults(headresults_vec);
 						std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
-						tailHeadResults[tail][*head] = headresults_vec;
+
+						tailHeadResults[tail][head] = headresults_vec;
+
 						headScoreTrees[headIndex].Free();
 					}
-					delete[] fineScoreTrees;
 					delete[] headScoreTrees;
 				}
 				tails++;
@@ -638,7 +625,7 @@ public:
 		while (it_head != headTailResults.end()) {
 			auto it_tail = it_head->second.begin();
 			while (it_tail != it_head->second.end()) {
-				writeTopKCandidates(it_head->first, relation, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
+				writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
 				it_tail++;
 			}
 			it_head++;
@@ -646,8 +633,8 @@ public:
 	}
 
 private:
-
-	std::unordered_map<int, std::pair<double, std::vector<std::unordered_set<int>>>> rel2clusters;
+	RuleGraph* rulegraph;
+	std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>> rel2clusters;
 
 	typedef std::function<bool(std::pair<int, double>, std::pair<int, double>)> Comparator;
 	Comparator compFunctor =
