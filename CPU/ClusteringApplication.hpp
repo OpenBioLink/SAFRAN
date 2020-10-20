@@ -115,7 +115,7 @@ public:
 							std::vector<int> tailresults_vec;
 
 							if (currRule.is_c()) {
-								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true);
+								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true, true);
 							}
 							else {
 
@@ -132,7 +132,7 @@ public:
 								else {
 									if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
 										std::vector<int> comp;
-										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(comp);
@@ -142,14 +142,14 @@ public:
 										}
 									}
 									else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true);
+										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
 										}
 									}else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
 										std::vector<int> comp;
-										rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true);
+										rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(comp);
@@ -159,7 +159,7 @@ public:
 										}
 									}
 									else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true);
+										rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
@@ -244,7 +244,7 @@ public:
 							std::vector<int> headresults_vec;
 
 							if (currRule.is_c()) {
-								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true);
+								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true, true);
 							}
 							else {
 								if (currRule.isBuffered()) {
@@ -259,7 +259,7 @@ public:
 								}
 								else {
 									if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true);
+										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
@@ -267,7 +267,7 @@ public:
 									}
 									else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
 										std::vector<int> comp;
-										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
@@ -276,7 +276,7 @@ public:
 											headresults_vec.push_back(*currRule.getHeadconstant());
 										}
 									} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true);
+										rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
@@ -284,7 +284,7 @@ public:
 									}
 									else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
 										std::vector<int> comp;
-										rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true);
+										rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true, true);
 #pragma omp critical
 										{
 											if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
@@ -408,7 +408,7 @@ public:
 						std::vector<int> tailresults_vec;
 
 						if (currRule.is_c()) {
-							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true);
+							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true, false);
 						}
 						else {
 							if (currRule.isBuffered()) {
@@ -424,7 +424,7 @@ public:
 							else {
 								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
 									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(comp);
@@ -434,14 +434,14 @@ public:
 									}
 								}
 								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true);
+									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
 									}
 								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
 									std::vector<int> comp;
-									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true);
+									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(comp);
@@ -451,7 +451,7 @@ public:
 									}
 								}
 								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true);
+									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
@@ -527,7 +527,7 @@ public:
 						std::vector<int> headresults_vec;
 
 						if (currRule.is_c()) {
-							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true);
+							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true, false);
 						}
 						else {
 							if (currRule.isBuffered()) {
@@ -542,7 +542,7 @@ public:
 							}
 							else {
 								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true);
+									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
@@ -550,7 +550,7 @@ public:
 								}
 								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
 									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true);
+									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
@@ -559,7 +559,7 @@ public:
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true);
+									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
@@ -567,7 +567,7 @@ public:
 								}
 								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
 									std::vector<int> comp;
-									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true);
+									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true, false);
 #pragma omp critical
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
