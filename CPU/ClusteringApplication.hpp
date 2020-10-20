@@ -48,6 +48,7 @@ public:
 			}
 			else {
 				noisy(rel, cluster.second);
+			}
 		}
 	}
 
@@ -328,7 +329,7 @@ public:
 						std::vector<std::pair<int, double>> headresults_vec;
 						for (int i = 9; i >= 0; i--) {
 							std::pair<int, double> head_pred = heads.extractMin();
-							if (head_pred.first != 1) headresults_vec.push_back(head_pred);
+							if (head_pred.first != -1) headresults_vec.push_back(head_pred);
 						}
 						std::reverse(headresults_vec.begin(), headresults_vec.end());
 						tailHeadResults[tail][head] = headresults_vec;
