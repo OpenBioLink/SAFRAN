@@ -71,6 +71,25 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 	Graph* g = new Graph(samples_size, jacc, rules_adj_list, ind_ptr);
 	std::cout << "Calced jaccs\n";
 
+	RuleGraph* rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
+#pragma omp parallel for schedule(dynamic)
+	for (int i = 0; i < lenRules; i++) {
+		if (i % 100 == 0) { std::cout << i << "\n"; }
+		Rule& currRule = rules_adj_list[ind_ptr + i];
+		if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
+			std::vector<int> results_vec;
+			rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
+			currRule.setBuffer(results_vec);
+		}
+		else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
+			std::vector<int> results_vec;
+			rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
+			currRule.setBuffer(results_vec);
+		}
+	}
+	std::cout << "DONE buffering" << "\n";
+	delete rulegraph;
+
 	std::tuple<double, double, double>* res = new std::tuple<double, double, double>[portions + 1];
 	std::vector<std::vector<int>>* res_clusters = new std::vector<std::vector<int>>[portions + 1];
 	learn_parameters(g, res, res_clusters);
