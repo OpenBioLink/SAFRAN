@@ -50,6 +50,8 @@ public:
 	int MARGIN_OF_ERROR = 5;
 	std::string PATH_TEST_SAMPLE = "test_sample.txt";
 
+	unsigned long long BUFFER_SIZE = std::numeric_limits<unsigned long long>().max();
+
 
 	static Properties& get()
 	{
@@ -139,6 +141,9 @@ public:
 			else if (strKey.compare("CLUSTER_SET") == 0) {
 				CLUSTER_SET = strVal;
 			}
+			else if (strKey.compare("BUFFER_SIZE") == 0) {
+				BUFFER_SIZE = std::stoull(strVal);
+			}
 			else {
 				std::cout << "Properties key "  << strKey <<" not recognized";
 				exit(-1);
@@ -174,7 +179,7 @@ public:
 		string_rep << "MARGIN_OF_ERROR = " << MARGIN_OF_ERROR << std::endl;
 		string_rep << "PATH_TEST_SAMPLE = " << PATH_TEST_SAMPLE << std::endl;
 		string_rep << "CLUSTER_LIMIT = " << CLUSTER_LIMIT << std::endl;
-
+		string_rep << "BUFFER_SIZE = " << BUFFER_SIZE << std::endl;
 
 		return string_rep.str().c_str();
 	}

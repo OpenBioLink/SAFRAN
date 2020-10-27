@@ -45,7 +45,7 @@ private:
 	}
 
 	std::vector<std::pair<int, double>>* read_jaccard(std::string path);
-	void learn_parameters(Graph* g, std::tuple<double, double, double>* res, std::vector<std::vector<int>>* res_clusters);
+	void learn_parameters(Graph* g, RuleGraph* rulegraph, double* res, std::vector<std::vector<int>>* res_clusters);
 };
 
 Clustering::Clustering(int portions, int relation, int size, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
@@ -71,8 +71,16 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 	Graph* g = new Graph(samples_size, jacc, rules_adj_list, ind_ptr);
 	std::cout << "Calced jaccs\n";
 
+	const unsigned long long MAX_BUF = Properties::get().BUFFER_SIZE;
+	long long CURR_BUF = 0;
+	bool stop = false;
+	int asdf = 0;
+
+	int* vt_adj_list = vtr->getCSR()->getAdjList();
+	int* vt_adj_begin = vtr->getCSR()->getAdjBegin();
+
 	RuleGraph* rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
-#pragma omp parallel for schedule(dynamic)
+	#pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < lenRules; i++) {
 		if (i % 100 == 0) { std::cout << i << "\n"; }
 		Rule& currRule = rules_adj_list[ind_ptr + i];
@@ -86,18 +94,98 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 			rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
 			currRule.setBuffer(results_vec);
 		}
+		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
+			std::vector<int> results_vec;
+			rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, results_vec, false, false);
+			currRule.setBuffer(results_vec);
+		}
+		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
+			std::vector<int> results_vec;
+			rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, results_vec, false, false);
+			currRule.setBuffer(results_vec);
+		}
+
+		if (currRule.is_c()) {
+			if (stop) { 
+				continue; 
+			} else {
+				#pragma omp atomic
+				asdf++;
+			}
+
+			{
+				int* v_adj_list = &(vt_adj_list[vt_adj_begin[relation * 2]]);
+				for (auto heads = vtr->getRelHeadToTails()[relation].begin(); heads != vtr->getRelHeadToTails()[relation].end(); heads++) {
+					int head = heads->first;
+					int lenTails = heads->second.size();
+					if (lenTails > 0) {
+						std::vector<int> tailresults_vec;
+						rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, true);
+						if (tailresults_vec.size() + CURR_BUF < MAX_BUF) {
+#pragma omp critical
+							{
+								if (tailresults_vec.size() + CURR_BUF < MAX_BUF) {
+									currRule.setHeadBuffer(head, tailresults_vec);
+									CURR_BUF = CURR_BUF + tailresults_vec.size();
+								}
+								else {
+									stop = true;
+								}
+							}
+						}
+						else {
+							stop = true;
+						}
+						if (stop) break;
+					}
+				}
+			}
+
+			{
+
+				int* v_adj_list = &(vt_adj_list[vt_adj_begin[relation * 2 + 1]]);
+				for (auto tails = vtr->getRelTailToHeads()[relation].begin(); tails != vtr->getRelTailToHeads()[relation].end(); tails++) {
+					int tail = tails->first;
+					int lenHeads = tails->second.size();
+					if (lenHeads > 0) {
+						std::vector<int> headresults_vec;
+						rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, true);
+						if (headresults_vec.size() + CURR_BUF < MAX_BUF) {
+#pragma omp critical
+							{
+								if (headresults_vec.size() + CURR_BUF < MAX_BUF) {
+									currRule.setTailBuffer(tail, headresults_vec);
+									CURR_BUF = CURR_BUF + headresults_vec.size();
+								}
+								else {
+									stop = true;
+								}
+							}
+						}
+						else {
+							stop = true;
+						}
+						if (stop) break;
+					}
+				}	
+			}
+		}
 	}
-	std::cout << "DONE buffering" << "\n";
-	delete rulegraph;
+	std::cout << "DONE buffering " << CURR_BUF << "\n";
 
-	std::tuple<double, double, double>* res = new std::tuple<double, double, double>[portions + 1];
+	double* res = new double[portions + 1];
 	std::vector<std::vector<int>>* res_clusters = new std::vector<std::vector<int>>[portions + 1];
-	learn_parameters(g, res, res_clusters);
+	learn_parameters(g, rulegraph, res, res_clusters);
 
+	delete rulegraph;
 	for (int i = 0; i < lenRules; i++) {
 		Rule& currRule = rules_adj_list[ind_ptr + i];
 		if (currRule.isBuffered()) {
 			currRule.removeBuffer();
+		}
+		if (currRule.is_c()) {
+			currRule.clearHeadBuffer();
+			currRule.clearTailBuffer();
 		}
 	}
 
@@ -105,38 +193,20 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 
 	int max_param = 0;
 	double max_thresh = 0.0;
-	double max_h1 = 0.0;
-	double max_h3 = 0.0;
-	double max_h10 = 0.0;
+	double max_mrr = 0.0;
 
 	for (int i = 0; i < portions + 1; i++) {
 
 		double thresh = (double)i / portions;
 
-		double hits1;
-		double hits3;
-		double hits10;
-
-		std::tie(hits1, hits3, hits10) = res[i];
-
-		if (hits1 > max_h1) {
+		if (res[i] > max_mrr) {
 			max_param = i;
-			max_h1 = hits1;
 			max_thresh = thresh;
-		}
-		else if (hits1 == max_h1 && hits3 > max_h3) {
-			max_param = i;
-			max_h3 = hits3;
-			max_thresh = thresh;
-		}
-		else if (hits1 == max_h1 && hits3 == max_h3 && hits10 > max_h10) {
-			max_param = i;
-			max_h10 = hits10;
-			max_thresh = thresh;
+			max_mrr = res[i];
 		}
 	}
 
-	std::cout << "MAX " << max_thresh << " " << max_h1 << " " << max_h3 << " " << max_h10 << "\n";
+	std::cout << "MAX " << max_thresh << " " << max_mrr << "\n";
 	std::ostringstream stringStream;
 	stringStream << "Relation\t" << *index->getStringOfRelId(relation) << "\t" << max_thresh << "\n";
 	for (auto cluster : res_clusters[max_param]) {
@@ -185,9 +255,10 @@ std::vector<std::pair<int, double>>* Clustering::read_jaccard(std::string path) 
 	}
 }
 
-void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>* res, std::vector<std::vector<int>>* res_clusters) {
+void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph, double* res, std::vector<std::vector<int>>* res_clusters) {
 #pragma omp parallel for schedule(dynamic)
 	for(int i = 0; i < portions+1; i++){
+		NoisyOrEngine* noe = new NoisyOrEngine(relation, rulegraph, index, graph, ttr, vtr, rr);
 		double thresh = (double)i / portions;
 
 		std::cout << thresh << "\n";
@@ -197,22 +268,21 @@ void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>*
 			std::vector<int> cluster;
 			for (int i = 0; i < samples_size; i++) {
 				Rule& r = rules_adj_list[ind_ptr + i];
-				if (r.is_c() || r.is_ac2()) {
-					cluster.push_back(i);
-				}
+				cluster.push_back(i);
 			}
 			clusters.push_back(cluster);
 
 			std::cout << clusters[0].size() << "\n";
 
-			NoisyOrEngine* noe = new NoisyOrEngine(relation, index, graph, ttr, vtr, rr, clusters);
-			auto result = noe->max();
+			
+			auto result = noe->max(clusters);
 
 			res[i] = result;
 			res_clusters[i] = clusters;
 			delete noe;
 		} else {
 
+			NoisyOrEngine* noe = new NoisyOrEngine(relation, rulegraph, index, graph, ttr, vtr, rr);
 			std::vector<std::vector<int>> clusters;
 
 			bool* visited = new bool[samples_size];
@@ -222,25 +292,22 @@ void Clustering::learn_parameters(Graph * g, std::tuple<double, double, double>*
 			}
 
 			for (int i = 0; i < samples_size; i++) {
-				Rule& r = rules_adj_list[ind_ptr + i];
-				if (r.is_c() || r.is_ac2()) {
-					if (visited[i] == false) {
-						visited[i] = true;
-						std::vector<int> sol = g->searchDFS(i, thresh);
-						for (auto x : sol) {
-							visited[x] = true;
-						}
-						clusters.push_back(sol);
+				if (visited[i] == false) {
+					visited[i] = true;
+					std::vector<int> sol = g->searchDFS(i, thresh);
+					for (auto x : sol) {
+						visited[x] = true;
 					}
+					clusters.push_back(sol);
 				}
 			}
 			delete[] visited;
-			
-			NoisyOrEngine* noe = new NoisyOrEngine(relation, index, graph, ttr, vtr, rr, clusters);
-			auto result = noe->noisy();
+
+			auto result = noe->noisy(clusters);
 
 			res_clusters[i] = clusters;
 			res[i] = result;
+			std::cout << result << "\n";
 			delete noe;
 		}
 	}

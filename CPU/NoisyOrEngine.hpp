@@ -13,22 +13,17 @@ class NoisyOrEngine
 {
 public:
 
-	NoisyOrEngine(int relation, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr, std::vector<std::vector<int>> clusters) {
-		this->clusters = clusters;
+	NoisyOrEngine(int relation, RuleGraph* rulegraph, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
 		this->relation = relation;
 		this->index = index;
 		this->graph = graph;
 		this->ttr = ttr;
 		this->rr = rr;
 		this->vtr = vtr;
-		this->rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
+		this->rulegraph = rulegraph;
 	}
 
-	~NoisyOrEngine() {
-		delete rulegraph;
-	}
-
-	std::tuple<double, double, double> noisy() {
+	double noisy(std::vector<std::vector<int>> clusters) {
 
 		int* adj_lists = graph->getCSR()->getAdjList();
 		int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -85,7 +80,12 @@ public:
 							std::vector<int> tailresults_vec;
 
 							if (currRule.is_c()) {
-								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, true);
+								if (currRule.isHeadBuffered(head)) {
+									tailresults_vec = currRule.getHeadBuffered(head);
+								}
+								else {
+									rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, true);
+								}
 							}
 							else {
 
@@ -100,24 +100,7 @@ public:
 									}
 								}
 								else {
-									if (currRule.getRuletype() == Ruletype::XRule) {
-										std::vector<int> comp;
-										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, true);
-#pragma omp critical
-										{
-											if (!currRule.isBuffered())currRule.setBuffer(comp);
-										}
-										if (util::in_sorted(comp, head)) {
-											tailresults_vec.push_back(*currRule.getHeadconstant());
-										}
-									}
-									else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, false, true);
-#pragma omp critical
-										{
-											if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
-										}
-									}
+									throw new std::runtime_error("NOT BUFFERED");
 								}
 							}
 
@@ -171,13 +154,7 @@ public:
 								rank = i;
 							}
 							if (tail == tailresults_vec[i].first) {
-								if (rank == 0) {
-									hit1++;
-								}
-								if (rank < 3) {
-									hit3++;
-								}
-								hit10++;
+								mrr = mrr + (1.0 / (rank + 1));
 							}
 						}
 						predicted++;
@@ -213,7 +190,12 @@ public:
 							std::vector<int> headresults_vec;
 
 							if (currRule.is_c()) {
-								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, true);
+								if (currRule.isTailBuffered(tail)) {
+									headresults_vec = currRule.getTailBuffered(tail);
+								}
+								else {
+									rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, true);
+								}
 							}
 							else {
 								if (currRule.isBuffered()) {
@@ -227,24 +209,7 @@ public:
 									}
 								}
 								else {
-									if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-										rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, false, true);
-#pragma omp critical
-										{
-											if(!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
-										}
-									}
-									else if (currRule.getRuletype() == Ruletype::YRule) {
-										std::vector<int> comp;
-										rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, true);
-#pragma omp critical
-										{
-											if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-										}
-										if (util::in_sorted(comp, tail)) {
-											headresults_vec.push_back(*currRule.getHeadconstant());
-										}
-									}
+									throw new std::runtime_error("NOT BUFFERED");
 								}
 							}
 
@@ -298,13 +263,7 @@ public:
 								rank = i;
 							}
 							if (head == headresults_vec[i].first) {
-								if (rank == 0) {
-									hit1++;
-								}
-								if (rank < 3) {
-									hit3++;
-								}
-								hit10++;
+								mrr = mrr + (1.0 / (rank + 1));
 							}
 						}
 						predicted++;
@@ -320,10 +279,10 @@ public:
 		delete[] cluster_result_tail;
 		delete[] result_head;
 		delete[] result_tail;
-		return std::make_tuple((double)hit1 / (double)predicted, (double)hit3 / (double)predicted, (double)hit10 / (double)predicted);
+		return (double)mrr / (double)predicted;
 	}
 
-	std::tuple<double, double, double> max() {
+	double max(std::vector<std::vector<int>> clusters) {
 
 		int* adj_lists = graph->getCSR()->getAdjList();
 		int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -367,7 +326,12 @@ public:
 						std::vector<int> tailresults_vec;
 
 						if (currRule.is_c()) {
-							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, false);
+							if (currRule.isHeadBuffered(head)) {
+								tailresults_vec = currRule.getHeadBuffered(head);
+							}
+							else {
+								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, false, false);
+							}
 						}
 						else {
 							if (currRule.isBuffered()) {
@@ -381,24 +345,7 @@ public:
 								}
 							}
 							else {
-								if (currRule.getRuletype() == Ruletype::XRule) {
-									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(comp);
-									}
-									if (util::in_sorted(comp, head)) {
-										tailresults_vec.push_back(*currRule.getHeadconstant());
-									}
-								}
-								else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, false, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
-									}
-								}
+								throw new std::runtime_error("NOT BUFFERED");
 							}
 						}
 						if (tailresults_vec.size() > 0) {
@@ -446,13 +393,7 @@ public:
 								rank = i;
 							}
 							if (tail == tailresults_vec[i].first) {
-								if (rank == 0) {
-									hit1++;
-								}
-								if (rank < 3) {
-									hit3++;
-								}
-								hit10++;
+								mrr = mrr + (1.0 / (rank + 1));
 							}
 						}
 						predicted++;
@@ -485,7 +426,12 @@ public:
 						std::vector<int> headresults_vec;
 
 						if (currRule.is_c()) {
-							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, false);
+							if (currRule.isTailBuffered(tail)) {
+								headresults_vec = currRule.getTailBuffered(tail);
+							}
+							else {
+								rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, false, false);
+							}
 						}
 						else {
 							if (currRule.isBuffered()) {
@@ -499,24 +445,7 @@ public:
 								}
 							}
 							else {
-								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, false, false);
-#pragma omp critical
-									{
-										if(!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-									}
-								}
-								else if (currRule.getRuletype() == Ruletype::YRule) {
-									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, false, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-									}
-									if (util::in_sorted(comp, tail)) {
-										headresults_vec.push_back(*currRule.getHeadconstant());
-									}
-								}
+								throw new std::runtime_error("NOT BUFFERED");
 							}
 						}
 
@@ -560,13 +489,7 @@ public:
 								rank = i;
 							}
 							if (head == headresults_vec[i].first) {
-								if (rank == 0) {
-									hit1++;
-								}
-								if (rank < 3) {
-									hit3++;
-								}
-								hit10++;
+								mrr = mrr + (1.0 / (rank + 1));
 							}
 						}
 						predicted++;
@@ -578,30 +501,14 @@ public:
 			}
 		}
 
-		return std::make_tuple((double)hit1 / (double)predicted, (double)hit3 / (double)predicted, (double)hit10 / (double)predicted);
-	}
-
-	double get_hit1() {
-		return (double)hit1 / (double)predicted;
-	}
-
-	double get_hit3() {
-		return (double)hit3 / (double)predicted;
-	}
-
-	double get_hit10() {
-		return (double)hit10 / (double)predicted;
+		return (double)mrr / (double)predicted;
 	}
 
 private:
 	int relation;
 
-	int hit1 = 0;
-	int hit3 = 0;
-	int hit10 = 0;
+	double mrr = 0;
 	int predicted = 0;
-
-	std::vector<std::vector<int>> clusters;
 
 	Index* index; 
 	TraintripleReader* graph;

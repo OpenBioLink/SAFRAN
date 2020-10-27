@@ -74,10 +74,19 @@ private:
 					if (rule_i.is_c() && rule_j.is_c() && conf > thresh) {
 						stack.push(u);
 					}
+					else if (rule_i.is_ac1() and rule_j.is_ac1() && conf > thresh) {
+						stack.push(u);
+					}
 					else if (rule_i.is_ac2() and rule_j.is_ac2() && conf > thresh) {
 						stack.push(u);
 					}
 					else if (((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) && conf > thresh) {
+						stack.push(u);
+					}
+					else if (((rule_i.is_c() and rule_j.is_ac1()) or (rule_i.is_ac1() and rule_j.is_c())) && conf > thresh) {
+						stack.push(u);
+					}
+					else if (((rule_i.is_ac1() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_ac1())) && conf > thresh) {
 						stack.push(u);
 					}
 				}

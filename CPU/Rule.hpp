@@ -55,13 +55,39 @@ class Rule
 		void setRulestring(std::string rule) {
 			rulestring = rule;
 		}
+
 		void setBuffer(std::vector<int> buffer) {
 			this->buffer = buffer;
 			buffered = true;
 		}
-
 		bool isBuffered() {
 			return buffered;
+		}
+
+		void setHeadBuffer(int head, std::vector<int> buffer) {
+			headBuffer[head] = buffer;
+		}
+		bool isHeadBuffered(int head) {
+			return headBuffer.find(head) != headBuffer.end();
+		}
+		std::vector<int>& getHeadBuffered(int head) {
+			return headBuffer[head];
+		}
+		void clearHeadBuffer() {
+			headBuffer.clear();
+		}
+
+		void setTailBuffer(int tail, std::vector<int> buffer) {
+			tailBuffer[tail] = buffer;
+		}
+		bool isTailBuffered(int tail) {
+			return tailBuffer.find(tail) != tailBuffer.end();
+		}
+		std::vector<int>& getTailBuffered(int tail) {
+			return tailBuffer[tail];
+		}
+		void clearTailBuffer() {
+			tailBuffer.clear();
 		}
 
 		bool is_c() {
@@ -194,6 +220,7 @@ class Rule
 			bodyhash = other->bodyhash;
 			tail_exceptions = other->tail_exceptions;
 			head_exceptions = other->head_exceptions;
+			std::cout << "HOI";
 			return *this;
 		}
 
@@ -226,6 +253,9 @@ class Rule
 
 		std::vector<int> buffer;
 		bool buffered = false;
+
+		std::unordered_map<int, std::vector<int>> tailBuffer;
+		std::unordered_map<int, std::vector<int>> headBuffer;
 
 };
 

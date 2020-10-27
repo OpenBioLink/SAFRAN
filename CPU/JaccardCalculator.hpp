@@ -35,7 +35,7 @@ public:
 
 	void calculate_jaccard() {
 		int rellen = index->getRelSize();
-		for (int i = 0; i < rellen; i++) {
+		for (int i = 2; i < rellen; i++) {
 
 			int ind_ptr = adj_begin[3 + i];
 			int len = adj_begin[3 + i + 1] - ind_ptr;
@@ -111,9 +111,6 @@ private:
 
 			Rule& currRule = rules_adj_list[ind_ptr + j];
 			rules[j] = &currRule;
-			if (currRule.is_ac1()) {
-				continue;
-			}
 
 			int rulelength = currRule.getRulelength();
 			bool** visited = new bool* [rulelength];
@@ -132,8 +129,17 @@ private:
 				}
 				else {
 					std::vector<int> results;
-					//rulegraph->searchDFSMultiStart(currRule, true, results);
-					heads.push_back(results);
+					rulegraph->searchDFSMultiStart(currRule, true, results);
+
+					std::vector<int> filt_results;
+					for (auto res : results) {
+						if (currRule.head_exceptions.find(res) != currRule.head_exceptions.end()) {
+							continue;
+						}
+						filt_results.push_back(res);
+					}
+
+					heads.push_back(filt_results);
 					tails.push_back(std::vector<int> {*currRule.getHeadconstant()});
 				}
 			}
@@ -147,9 +153,18 @@ private:
 				}
 				else {
 					std::vector<int> results;
-					//rulegraph->searchDFSMultiStart(currRule, true, results);
+					rulegraph->searchDFSMultiStart(currRule, true, results);
 					heads.push_back(std::vector<int> {*currRule.getHeadconstant()});
-					tails.push_back(results);
+
+					std::vector<int> filt_results;
+					for (auto res : results) {
+						if (currRule.tail_exceptions.find(res) != currRule.tail_exceptions.end()) {
+							continue;
+						}
+						filt_results.push_back(res);
+					}
+
+					tails.push_back(filt_results);
 				}
 			}
 			else {
@@ -238,41 +253,15 @@ private:
 					Rule& rule_i = *rules[i];
 					Rule& rule_j = *rules[j];
 
-					if (rule_i.is_c() and rule_j.is_c()) {
-						int c = 0;
-						for (int m = 0; m < k; m++) {
-							if (solutions[i][m] == solutions[j][m]) {
-								c++;
-							}
-						}
-						double jaccard = (double)c / k;
-						if (jaccard > 0.0) {
-							jacc[i].push_back(std::make_pair(j, jaccard));
+					int c = 0;
+					for (int m = 0; m < k; m++) {
+						if (solutions[i][m] == solutions[j][m]) {
+							c++;
 						}
 					}
-					else if (rule_i.is_ac2() and rule_j.is_ac2()) {
-						int c = 0;
-						for (int m = 0; m < k; m++) {
-							if (solutions[i][m] == solutions[j][m]) {
-								c++;
-							}
-						}
-						double jaccard = (double)c / k;
-						if (jaccard > 0.0) {
-							jacc[i].push_back(std::make_pair(j, jaccard));
-						}
-					}
-					else if ((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) {
-						int c = 0;
-						for (int m = 0; m < k; m++) {
-							if (solutions[i][m] == solutions[j][m]) {
-								c++;
-							}
-						}
-						double jaccard = (double)c / k;
-						if (jaccard > 0.0) {
-							jacc[i].push_back(std::make_pair(j, jaccard));
-						}
+					double jaccard = (double)c / k;
+					if (jaccard > 0.0) {
+						jacc[i].push_back(std::make_pair(j, jaccard));
 					}
 				}
 			}

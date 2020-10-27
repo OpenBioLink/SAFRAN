@@ -54,12 +54,11 @@ class RuleReader
 				exit(-1);
 			}
 
-			auto it = rules.begin();
-			while (it != rules.end()) {
-				std::cout << it->first << "\n";
-				auto& comp_rules = it->second;
+#pragma omp parallel for schedule(dynamic)
+			for (int i = 0; i < index->getRelSize(); i++) {
+				auto& comp_rules = rules[i];
 				for (auto rule_x : comp_rules) {
-					if (!rule_x->is_c()) {
+					if (rule_x->is_ac2()) {
 						continue;
 					}
 					for (auto rule_y : comp_rules) {
@@ -67,20 +66,21 @@ class RuleReader
 							continue;
 						}
 						else {
-							if (*(rule_y->getBodyconstantId()) == *(rule_y->getHeadconstant()) && rule_x->get_body_hash() == rule_y->get_body_hash()) {
-								if (rule_y->getRuletype() == Ruletype::XRule) {
-									rule_x->add_tail_exception(*(rule_y->getHeadconstant()));
-								}
-								else {
-									rule_x->add_head_exception(*(rule_y->getHeadconstant()));
+							if (rule_x->is_c()) {
+								if (*(rule_y->getBodyconstantId()) == *(rule_y->getHeadconstant()) && rule_x->get_body_hash() == rule_y->get_body_hash()) {
+									if (rule_y->getRuletype() == Ruletype::XRule) {
+										rule_x->add_tail_exception(*(rule_y->getHeadconstant()));
+									}
+									else {
+										rule_x->add_head_exception(*(rule_y->getHeadconstant()));
+									}
 								}
 							}
 						}
 					}
 				}
-				it++;
 			}
-
+			std::cout << "DSONE";
 
 			csr = new CSR<int, Rule>(index->getRelSize(), rules);
 		}

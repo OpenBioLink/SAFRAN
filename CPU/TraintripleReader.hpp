@@ -15,7 +15,6 @@ class TraintripleReader
     public:
 		TraintripleReader(std::string filepath, Index * index) {
 			this->index = index;
-			RelNodeToNodes relTailToHeads;
 			relCounter = new std::unordered_map<int, std::unordered_set<int>>;
 
 			read(filepath, relHeadToTails, relTailToHeads, relCounter);
@@ -39,8 +38,12 @@ class TraintripleReader
 			return relCounter;
 		}
 
-		RelNodeToNodes& getrelHeadToTails() {
+		RelNodeToNodes& getRelHeadToTails() {
 			return relHeadToTails;
+		}
+
+		RelNodeToNodes& getRelTailToHeads() {
+			return relTailToHeads;
 		}
 
     protected:
@@ -50,6 +53,7 @@ class TraintripleReader
 		CSR<int, int> * csr;
 		std::unordered_map<int, std::unordered_set<int>>* relCounter;
 		RelNodeToNodes relHeadToTails;
+		RelNodeToNodes relTailToHeads;
 
 		void read(std::string filepath, RelNodeToNodes& relHeadToTails, RelNodeToNodes& relTailToHeads, std::unordered_map<int, std::unordered_set<int>>* relCounter) {
 			std::string line;

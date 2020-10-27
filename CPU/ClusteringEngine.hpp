@@ -43,7 +43,7 @@ public:
 
 		int rellen = index->getRelSize();
 		for(int i = 0; i < rellen; i++){
-			std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << "\n";
+			std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << " " << rellen << "\n";
 			int ind_ptr = adj_begin[3 + i];
 			int len = adj_begin[3 + i + 1] - ind_ptr;
 

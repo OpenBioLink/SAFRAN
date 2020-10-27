@@ -35,6 +35,7 @@ public:
 		return relTailToHeads;
 	}
 
+	std::unordered_map<int, std::vector<std::pair<int, int>>> RelTuples;
 protected:
 
 private:
@@ -74,6 +75,7 @@ private:
 					testtriplesVector.push_back(testtriple);
 					relHeadToTails[*relId][*headId].insert(*tailId);
 					relTailToHeads[*relId][*tailId].insert(*headId);
+					RelTuples[*relId].push_back(std::make_pair(*headId, *tailId));
 				} catch(std::runtime_error& e){}
 			}
 			myfile.close();
