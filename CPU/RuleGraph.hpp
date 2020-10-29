@@ -71,7 +71,7 @@ public:
 				if (it != valid_relHeadToTails.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						trains = it_v->second;
+						second_filt_set = it_v->second;
 					}
 				}
 			}
@@ -80,7 +80,7 @@ public:
 				if (it != valid_relTailToHeads.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						trains = it_v->second;
+						second_filt_set = it_v->second;
 					}
 				}
 			}
@@ -91,7 +91,7 @@ public:
 				if (it != test_relHeadToTails.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						trains = it_v->second;
+						second_filt_set = it_v->second;
 					}
 				}
 			}
@@ -100,7 +100,7 @@ public:
 				if (it != test_relTailToHeads.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						trains = it_v->second;
+						second_filt_set = it_v->second;
 					}
 				}
 			}
@@ -124,30 +124,63 @@ public:
 
 		std::set<int> trains;
 		if (headNotTail) {
-			trains = train_relHeadToTails[*r.getHeadrelation()][filt_v];
-
+			auto it = train_relHeadToTails.find(*r.getHeadrelation());
+			if (it != train_relHeadToTails.end()) {
+				auto it_v = it->second.find(filt_v);
+				if (it_v != it->second.end()) {
+					trains = it_v->second;
+				}
+			}
 		}
 		else {
-			trains = train_relTailToHeads[*r.getHeadrelation()][filt_v];
+			auto it = train_relTailToHeads.find(*r.getHeadrelation());
+			if (it != train_relTailToHeads.end()) {
+				auto it_v = it->second.find(filt_v);
+				if (it_v != it->second.end()) {
+					trains = it_v->second;
+				}
+			}
 		}
 
 		std::set<int> second_filt_set;
 		if (filtValidNotTest) {
 			if (headNotTail) {
-				second_filt_set = valid_relHeadToTails[*r.getHeadrelation()][filt_v];
-
+				auto it = valid_relHeadToTails.find(*r.getHeadrelation());
+				if (it != valid_relHeadToTails.end()) {
+					auto it_v = it->second.find(filt_v);
+					if (it_v != it->second.end()) {
+						second_filt_set = it_v->second;
+					}
+				}
 			}
 			else {
-				second_filt_set = valid_relTailToHeads[*r.getHeadrelation()][filt_v];
+				auto it = valid_relTailToHeads.find(*r.getHeadrelation());
+				if (it != valid_relTailToHeads.end()) {
+					auto it_v = it->second.find(filt_v);
+					if (it_v != it->second.end()) {
+						second_filt_set = it_v->second;
+					}
+				}
 			}
 		}
 		else {
 			if (headNotTail) {
-				second_filt_set = test_relHeadToTails[*r.getHeadrelation()][filt_v];
-
+				auto it = test_relHeadToTails.find(*r.getHeadrelation());
+				if (it != test_relHeadToTails.end()) {
+					auto it_v = it->second.find(filt_v);
+					if (it_v != it->second.end()) {
+						second_filt_set = it_v->second;
+					}
+				}
 			}
 			else {
-				second_filt_set = test_relTailToHeads[*r.getHeadrelation()][filt_v];
+				auto it = test_relTailToHeads.find(*r.getHeadrelation());
+				if (it != test_relTailToHeads.end()) {
+					auto it_v = it->second.find(filt_v);
+					if (it_v != it->second.end()) {
+						second_filt_set = it_v->second;
+					}
+				}
 			}
 		}
 
@@ -158,6 +191,12 @@ public:
 		for (int val = 0; val < size_indptr - 1; val++) {
 			//OI
 			if (val == *r.getHeadconstant()) continue;
+			if (r.getRuletype() == Ruletype::YRule and r.head_exceptions.find(val) != r.head_exceptions.end()) {
+				continue;
+			}
+			if (r.getRuletype() == Ruletype::XRule and r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
+				continue;
+			}
 			int ind_ptr = adj_list[start_indptr + val];
 			int len = adj_list[start_indptr + val + 1] - ind_ptr;
 			if (len > 0) {

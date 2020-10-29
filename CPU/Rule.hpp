@@ -220,7 +220,6 @@ class Rule
 			bodyhash = other->bodyhash;
 			tail_exceptions = other->tail_exceptions;
 			head_exceptions = other->head_exceptions;
-			std::cout << "HOI";
 			return *this;
 		}
 

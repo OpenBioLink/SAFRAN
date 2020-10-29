@@ -32,9 +32,11 @@ class RuleReader
 		TraintripleReader* graph;
 		Index * index;
 		CSR<int, Rule> * csr;
+		RelToRules rules;
 
 		void read(std::string filepath) {
-			RelToRules rules;
+
+			std::cout << "NAME: " << sizeof(Rule);
 			std::string line;
 			std::ifstream myfile(filepath);
 			if (myfile.is_open()) {
@@ -54,6 +56,7 @@ class RuleReader
 				exit(-1);
 			}
 
+/*
 #pragma omp parallel for schedule(dynamic)
 			for (int i = 0; i < index->getRelSize(); i++) {
 				auto& comp_rules = rules[i];
@@ -76,11 +79,22 @@ class RuleReader
 									}
 								}
 							}
-						}
+							else if (rule_x->is_ac1()) {
+								if (rule_x->get_body_hash() == rule_y->get_body_hash() and rule_x->getRuletype() == rule_y->getRuletype() and *rule_x->getHeadconstant() == *rule_y->getHeadconstant()) {
+									if (rule_y->getRuletype() == Ruletype::XRule) {
+										rule_x->add_tail_exception(*(rule_y->getBodyconstantId()));
+									}
+									else {
+										rule_x->add_head_exception(*(rule_y->getBodyconstantId()));
+									}
+								}
+							}
+						} 
 					}
 				}
 			}
 			std::cout << "DSONE";
+*/
 
 			csr = new CSR<int, Rule>(index->getRelSize(), rules);
 		}

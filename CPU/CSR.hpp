@@ -173,6 +173,10 @@ private:
 				*(indptr + 1) = *indptr;
 				indptr++;
 			}
+			for (auto p : rules[rel])
+			{
+				delete p;
+			}
 		}
 	}
 

@@ -96,12 +96,12 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 		}
 		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
 			std::vector<int> results_vec;
-			rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, results_vec, false, false);
+			rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, results_vec, false, true);
 			currRule.setBuffer(results_vec);
 		}
 		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
 			std::vector<int> results_vec;
-			rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, results_vec, false, false);
+			rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, results_vec, false, true);
 			currRule.setBuffer(results_vec);
 		}
 
@@ -115,6 +115,7 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 
 			{
 				int* v_adj_list = &(vt_adj_list[vt_adj_begin[relation * 2]]);
+				if (vtr->getRelHeadToTails().find(relation) == vtr->getRelHeadToTails().end()) continue;
 				for (auto heads = vtr->getRelHeadToTails()[relation].begin(); heads != vtr->getRelHeadToTails()[relation].end(); heads++) {
 					int head = heads->first;
 					int lenTails = heads->second.size();
@@ -208,7 +209,7 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 
 	std::cout << "MAX " << max_thresh << " " << max_mrr << "\n";
 	std::ostringstream stringStream;
-	stringStream << "Relation\t" << *index->getStringOfRelId(relation) << "\t" << max_thresh << "\n";
+	stringStream << "Relation\t" << *index->getStringOfRelId(relation) << "\t" << max_thresh << " " << max_mrr << "\n";
 	for (auto cluster : res_clusters[max_param]) {
 		for (auto rule : cluster) {
 			Rule& r = rules_adj_list[ind_ptr + rule];

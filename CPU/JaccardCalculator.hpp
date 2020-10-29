@@ -35,7 +35,7 @@ public:
 
 	void calculate_jaccard() {
 		int rellen = index->getRelSize();
-		for (int i = 2; i < rellen; i++) {
+		for (int i = 0; i < rellen; i++) {
 
 			int ind_ptr = adj_begin[3 + i];
 			int len = adj_begin[3 + i + 1] - ind_ptr;
@@ -252,17 +252,23 @@ private:
 
 					Rule& rule_i = *rules[i];
 					Rule& rule_j = *rules[j];
-
-					int c = 0;
-					for (int m = 0; m < k; m++) {
-						if (solutions[i][m] == solutions[j][m]) {
-							c++;
+					/*
+					if (rule_i.get_body_hash() == rule_j.get_body_hash()) {
+						jacc[i].push_back(std::make_pair(j, 1.0));
+					}
+					else {
+					*/
+						int c = 0;
+						for (int m = 0; m < k; m++) {
+							if (solutions[i][m] == solutions[j][m]) {
+								c++;
+							}
 						}
-					}
-					double jaccard = (double)c / k;
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
+						double jaccard = (double)c / k;
+						if (jaccard > 0.0) {
+							jacc[i].push_back(std::make_pair(j, jaccard));
+						}
+					//}
 				}
 			}
 		}
