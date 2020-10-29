@@ -32,11 +32,9 @@ class RuleReader
 		TraintripleReader* graph;
 		Index * index;
 		CSR<int, Rule> * csr;
-		RelToRules rules;
 
 		void read(std::string filepath) {
-
-			std::cout << "NAME: " << sizeof(Rule);
+			RelToRules rules;
 			std::string line;
 			std::ifstream myfile(filepath);
 			if (myfile.is_open()) {
