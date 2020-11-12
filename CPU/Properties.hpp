@@ -52,6 +52,8 @@ public:
 
 	unsigned long long BUFFER_SIZE = std::numeric_limits<unsigned long long>().max();
 
+	std::string REFLEXIV_TOKEN = "me_myself_i";
+
 
 	static Properties& get()
 	{

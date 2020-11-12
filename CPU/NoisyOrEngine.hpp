@@ -21,6 +21,7 @@ public:
 		this->rr = rr;
 		this->vtr = vtr;
 		this->rulegraph = rulegraph;
+		reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
 	}
 
 	double noisy(std::vector<std::vector<int>> clusters) {
@@ -133,6 +134,9 @@ public:
 						MinHeap tails(10);
 						for (auto i : touched_tails) {
 							if (result_tail[i] >= tails.getMin().second) {
+								if (i == reflexiv_token) {
+									i = tail;
+								}
 								if (i == tail || heads->second.find(i) == heads->second.end()) {
 									tails.deleteMin();
 									tails.insertKey(std::make_pair(i, result_tail[i]));
@@ -242,6 +246,9 @@ public:
 						MinHeap heads(10);
 						for (auto i : touched_heads) {
 							if (result_head[i] >= heads.getMin().second) {
+								if (i == reflexiv_token) {
+									i = head;
+								}
 								if (i == head || tails->second.find(i) == tails->second.end()) {
 									heads.deleteMin();
 									heads.insertKey(std::make_pair(i, result_head[i]));
@@ -355,6 +362,9 @@ public:
 									int tail = v_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
 									std::vector<int> filtered_testresults_vec;
 									for (auto a : tailresults_vec) {
+										if (a == reflexiv_token) {
+											a = tail;
+										}
 										if (a == tail || heads->second.find(a) == heads->second.end()) {
 											filtered_testresults_vec.push_back(a);
 										}
@@ -456,6 +466,9 @@ public:
 									int head = v_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
 									std::vector<int> filtered_headresults_vec;
 									for (auto a : headresults_vec) {
+										if (a == reflexiv_token) {
+											a = head;
+										}
 										if (a == head || tails->second.find(a) == tails->second.end()) {
 											filtered_headresults_vec.push_back(a);
 										}
@@ -509,6 +522,8 @@ private:
 
 	double mrr = 0;
 	int predicted = 0;
+
+	int reflexiv_token;
 
 	Index* index; 
 	TraintripleReader* graph;
