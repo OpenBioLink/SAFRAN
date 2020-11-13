@@ -16,7 +16,7 @@
 
 class Clustering {
 public:
-	Clustering(int portions, int relation, int size, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr);
+	Clustering(int relation, int size, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr);
 	std::string learn_cluster(std::string jacc_path);
 private:
 	int portions;
@@ -24,12 +24,12 @@ private:
 	uint32_t features_size;
 	int relation;
 
-	int k = 200;
-
 	Index* index;
 	TraintripleReader* graph;
 	TesttripleReader* ttr;
 	ValidationtripleReader* vtr;
+
+	std::string strat;
 
 	RuleReader* rr;
 	int* adj_begin;
@@ -39,17 +39,27 @@ private:
 
 	int WORKER_THREADS;
 
+	double max_c_c = 0.0;
+	double max_ac1_ac1 = 0.0;
+	double max_ac2_ac2 = 0.0;
+	double max_c_ac2 = 0.0;
+	double max_c_ac1 = 0.0;
+	double max_ac1_ac2 = 0.0;
+	double max_mrr = 0.0;
+	std::vector<std::vector<int>> max_cluster;
+
 	static bool sortbysec(const std::pair<int, double>& a, const std::pair<int, double>& b)
 	{
 		return (a.second >= b.second);
 	}
 
 	std::vector<std::pair<int, double>>* read_jaccard(std::string path);
-	void learn_parameters(Graph* g, RuleGraph* rulegraph, double* res, std::vector<std::vector<int>>* res_clusters);
+	void learn_parameters(Graph* g, RuleGraph* rulegraph);
 };
 
-Clustering::Clustering(int portions, int relation, int size, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
-	this->portions = portions;
+Clustering::Clustering(int relation, int size, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
+	this->strat = Properties::get().STRATEGY;
+	this->portions = Properties::get().PORTIONS;
 	this->index = index;
 	this->graph = graph;
 	this->ttr = ttr;
@@ -80,9 +90,11 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 	int* vt_adj_begin = vtr->getCSR()->getAdjBegin();
 
 	RuleGraph* rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
-	#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < lenRules; i++) {
-		if (i % 100 == 0) { std::cout << i << "\n"; }
+		if (lenRules > 100 and (i % ((lenRules - 1) / 100)) == 0) {
+			util::printProgress((double)i / (double)(lenRules - 1));
+		}
 		Rule& currRule = rules_adj_list[ind_ptr + i];
 		if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
 			std::vector<int> results_vec;
@@ -174,9 +186,7 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 	}
 	std::cout << "DONE buffering " << CURR_BUF << "\n";
 
-	double* res = new double[portions + 1];
-	std::vector<std::vector<int>>* res_clusters = new std::vector<std::vector<int>>[portions + 1];
-	learn_parameters(g, rulegraph, res, res_clusters);
+	learn_parameters(g, rulegraph);
 
 	delete rulegraph;
 	for (int i = 0; i < lenRules; i++) {
@@ -192,25 +202,10 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 
 	std::cout << "Calced params\n";
 
-	int max_param = 0;
-	double max_thresh = 0.0;
-	double max_mrr = 0.0;
-
-	for (int i = 0; i < portions + 1; i++) {
-
-		double thresh = (double)i / portions;
-
-		if (res[i] > max_mrr) {
-			max_param = i;
-			max_thresh = thresh;
-			max_mrr = res[i];
-		}
-	}
-
-	std::cout << "MAX " << max_thresh << " " << max_mrr << "\n";
+	std::cout << "MAX " << max_c_c << " " << max_ac1_ac1 << " " << max_ac2_ac2 << " " << max_c_ac2 << " " << max_c_ac1 << " " << max_ac1_ac2 << " " << max_mrr << "\n";
 	std::ostringstream stringStream;
-	stringStream << "Relation\t" << *index->getStringOfRelId(relation) << "\t" << max_thresh << " " << max_mrr << "\n";
-	for (auto cluster : res_clusters[max_param]) {
+	stringStream << "Relation\t" << *index->getStringOfRelId(relation) << "\t" << max_c_c << " " << max_ac1_ac1 << " " << max_ac2_ac2 << " " << max_c_ac2 << " " << max_c_ac1 << " " << max_ac1_ac2 << " " << max_mrr << "\n";
+	for (auto cluster : max_cluster) {
 		for (auto rule : cluster) {
 			Rule& r = rules_adj_list[ind_ptr + rule];
 			stringStream << r.getRulestring() << "\t";
@@ -220,8 +215,6 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 	stringStream << "\n";
 	delete[] jacc;
 	delete g;
-	delete[] res;
-	delete[] res_clusters;
 
 	return stringStream.str();
 }
@@ -256,15 +249,29 @@ std::vector<std::pair<int, double>>* Clustering::read_jaccard(std::string path) 
 	}
 }
 
-void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph, double* res, std::vector<std::vector<int>>* res_clusters) {
+void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
+
+	int iterations;
+	if (strat.compare("gridsingle") == 0) {
+		iterations = portions + 1;
+	}
+	else if (strat.compare("random") == 0) {
+		iterations = Properties::get().ITERATIONS;
+	}
+	else {
+		throw std::runtime_error("Strategy not supported");
+	}
+
+
 #pragma omp parallel for schedule(dynamic)
-	for(int i = 0; i < portions+1; i++){
+	for(int i = 0; i < iterations; i++){
+		if ((i % ((iterations - 1) / 100)) == 0) {
+			util::printProgress((double)i / (double)(iterations - 1));
+		}
+
 		NoisyOrEngine* noe = new NoisyOrEngine(relation, rulegraph, index, graph, ttr, vtr, rr);
-		double thresh = (double)i / portions;
 
-		std::cout << thresh << "\n";
-
-		if (thresh == 0.0) {
+		if (i == 0) {
 			std::vector<std::vector<int>> clusters;
 			std::vector<int> cluster;
 			for (int i = 0; i < samples_size; i++) {
@@ -272,16 +279,45 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph, double* res,
 				cluster.push_back(i);
 			}
 			clusters.push_back(cluster);
-
-			std::cout << clusters[0].size() << "\n";
-
 			
 			auto result = noe->max(clusters);
 
-			res[i] = result;
-			res_clusters[i] = clusters;
+			if (result > max_mrr) {
+#pragma omp critical
+				if (result > max_mrr) {
+					max_mrr = result;
+					max_c_c = 0.0;
+					max_ac1_ac1 = 0.0;
+					max_ac2_ac2 = 0.0;
+					max_c_ac2 = 0.0;
+					max_c_ac1 = 0.0;
+					max_ac1_ac2 = 0.0;
+					max_cluster = clusters;
+				}
+			}
 			delete noe;
 		} else {
+			double c_c, ac1_ac1, ac2_ac2, c_ac2, c_ac1, ac1_ac2;
+			if(strat.compare("gridsingle")==0){
+				double thresh = (double)i / portions;
+				c_c = thresh;
+				ac1_ac1 = thresh;
+				ac2_ac2 = thresh;
+				c_ac2 = thresh;
+				c_ac1 = thresh;
+				ac1_ac2 = thresh;
+			}
+			else if (strat.compare("random")==0) {
+				portions = 10;
+				std::mt19937 a = util::get_prng();
+				c_c = (double)(a() % (portions + 1)) / portions;
+				ac1_ac1 = (double)(a() % (portions + 1)) / portions;
+				ac2_ac2 = (double)(a() % (portions + 1)) / portions;
+				c_ac2 = (double)(a() % (portions + 1)) / portions;
+				c_ac1 = (double)(a() % (portions + 1)) / portions;
+				ac1_ac2 = (double)(a() % (portions + 1)) / portions;
+			}
+
 
 			NoisyOrEngine* noe = new NoisyOrEngine(relation, rulegraph, index, graph, ttr, vtr, rr);
 			std::vector<std::vector<int>> clusters;
@@ -295,7 +331,7 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph, double* res,
 			for (int i = 0; i < samples_size; i++) {
 				if (visited[i] == false) {
 					visited[i] = true;
-					std::vector<int> sol = g->searchDFS(i, thresh);
+					std::vector<int> sol = g->searchDFS(i, c_c, ac1_ac1, ac2_ac2, c_ac2, c_ac1, ac1_ac2);
 					for (auto x : sol) {
 						visited[x] = true;
 					}
@@ -306,12 +342,24 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph, double* res,
 
 			auto result = noe->noisy(clusters);
 
-			res_clusters[i] = clusters;
-			res[i] = result;
-			std::cout << result << "\n";
+			if (result > max_mrr) {
+#pragma omp critical
+				if (result > max_mrr) {
+					max_mrr = result;
+					max_c_c = c_c;
+					max_ac1_ac1 = ac1_ac1;
+					max_ac2_ac2 = ac2_ac2;
+					max_c_ac2 = c_ac2;
+					max_c_ac1 = c_ac1;
+					max_ac1_ac2 = ac1_ac2;
+					max_cluster = clusters;
+				}
+			}
 			delete noe;
 		}
 	}
 }
+
+
 
 #endif // CL_H

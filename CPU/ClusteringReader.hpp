@@ -26,7 +26,7 @@ public:
 		return csr;
 	}
 
-	std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>>& getRelToClusters() {
+	std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>>& getRelToClusters() {
 		return relToClusters;
 	}
 
@@ -36,7 +36,7 @@ private:
 	TraintripleReader* graph;
 	Index* index;
 	CSR<int, Rule>* csr;
-	std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>> relToClusters;
+	std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> relToClusters;
 
 	void read(CSR<int, Rule>* rulecsr, std::string clusteringpath) {
 		std::unordered_map<std::string, int> rulestringToID;
@@ -65,8 +65,14 @@ private:
 
 				std::vector<std::string> rel_conf = util::split(line, '\t');
 				int relation = *index->getIdOfRelationstring(rel_conf[1]);
-				double thresh = std::stod(rel_conf[2]);
-
+				std::vector<std::string> thresholds_str = util::split(rel_conf[2], ' ');
+				bool is_max_approach = true;
+				for (int q = 0; q < 6; q++) {
+					if (std::stod(thresholds_str[q]) > 0.0) {
+						is_max_approach = false;
+						break;
+					}
+				}
 
 				std::vector<std::vector<int>> id_clusters;
 				while (true) {
@@ -92,7 +98,7 @@ private:
 					}
 					id_clusters.push_back(id_cluster);
 				}
-				relToClusters[relation] = std::make_pair(thresh, id_clusters);
+				relToClusters[relation] = std::make_pair(is_max_approach, id_clusters);
 			}
 			myfile.close();
 		}

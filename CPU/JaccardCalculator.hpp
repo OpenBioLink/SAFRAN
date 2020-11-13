@@ -14,12 +14,12 @@ class JaccardCalculator {
 
 public:
 
-	JaccardCalculator(Index* index, TraintripleReader* graph, ValidationtripleReader* vtr, RuleReader* rr, int k) {
+	JaccardCalculator(Index* index, TraintripleReader* graph, ValidationtripleReader* vtr, RuleReader* rr) {
 		this->index = index;
 		this->graph = graph;
 		this->vtr = vtr;
 		this->rr = rr;
-		this->k = k;
+		this->k = Properties::get().PORTIONS;
 		adj_lists = graph->getCSR()->getAdjList();
 		adj_list_starts = graph->getCSR()->getAdjBegin();
 		vt_adj_lists = vtr->getCSR()->getAdjList();
@@ -102,8 +102,8 @@ private:
 
 #pragma omp parallel for schedule(dynamic)
 		for (int j = 0; j < len; j++) {
-			if (j % 100 == 0) {
-				std::cout << j << "\n";
+			if (len > 100 and (j % ((len - 1) / 100)) == 0) {
+				util::printProgress((double)j / (double)(len - 1));
 			}
 
 			std::vector<std::vector<int>> heads;
@@ -224,6 +224,9 @@ private:
 	void calc_jaccs(std::vector<long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc) {
 #pragma omp parallel for schedule(dynamic)
 		for (int i = 0; i < len; i++) {
+			if (len > 100 and (i % ((len - 1) / 100)) == 0) {
+				util::printProgress((double)i / (double)(len - 1));
+			}
 			for (int j = 0; j < len; j++) {
 				if (i != j) {
 					/*

@@ -10,7 +10,7 @@ class ClusteringApplication : public RuleEngine
 {
 public:
 
-	ClusteringApplication(std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>> rel2clusters, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) : RuleEngine(index, graph, ttr, vtr, rr) {
+	ClusteringApplication(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) : RuleEngine(index, graph, ttr, vtr, rr) {
 		this->rel2clusters = rel2clusters;
 		it = ttr->getUniqueRelations().begin();
 		this->rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
@@ -30,15 +30,18 @@ public:
 	}
 
 	void run(int threadId) {
+		int iterations = index->getRelSize();
 #pragma omp parallel for schedule(dynamic)
-		for (int rel = 0; rel < index->getRelSize(); rel++) {
-			std::cout << rel << "\n";
+		for (int rel = 0; rel < iterations; rel++) {
+			if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
+				util::printProgress((double)rel / (double)(iterations - 1));
+			}
 			std::pair<double, std::vector<std::vector<int>>> cluster = rel2clusters[rel];
 			if (cluster.second.size() == 0) {
 				continue;
 			}
 
-			if (cluster.first == 0) {
+			if (cluster.first == true) {
 				max(rel, cluster.second);
 			}
 			else {
@@ -636,7 +639,7 @@ public:
 
 private:
 	RuleGraph* rulegraph;
-	std::unordered_map<int, std::pair<double, std::vector<std::vector<int>>>> rel2clusters;
+	std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters;
 
 	int reflexiv_token;
 

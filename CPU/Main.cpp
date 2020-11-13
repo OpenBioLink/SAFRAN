@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 
 	}
 	else if (Properties::get().ACTION.compare("calcjacc") == 0) {
-		JaccardCalculator* jacccalc = new JaccardCalculator(index, graph, vtr, rr, 200);
+		JaccardCalculator* jacccalc = new JaccardCalculator(index, graph, vtr, rr);
 		jacccalc->calculate_jaccard();
 	}
 

@@ -43,11 +43,11 @@ public:
 
 		int rellen = index->getRelSize();
 		for(int i = 0; i < rellen; i++){
-			std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << " " << rellen << "\n";
 			int ind_ptr = adj_begin[3 + i];
 			int len = adj_begin[3 + i + 1] - ind_ptr;
+			std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << " " << len << "\n";
 
-			Clustering* cluster = new Clustering(200, i, len, index, graph, ttr, vtr, rr);
+			Clustering* cluster = new Clustering(i, len, index, graph, ttr, vtr, rr);
 
 			std::string jacc_file = Properties::get().PATH_JACCARD + std::string("/") + std::to_string(i) + std::string("_jacc.bin");
 			auto result = cluster->learn_cluster(jacc_file);

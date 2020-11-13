@@ -54,6 +54,9 @@ public:
 
 	std::string REFLEXIV_TOKEN = "me_myself_i";
 
+	std::string STRATEGY = "gridsingle";
+	int ITERATIONS = 10000;
+	int PORTIONS = 200;
 
 	static Properties& get()
 	{
@@ -145,6 +148,18 @@ public:
 			}
 			else if (strKey.compare("BUFFER_SIZE") == 0) {
 				BUFFER_SIZE = std::stoull(strVal);
+			}
+			else if (strKey.compare("REFLEXIV_TOKEN") == 0) {
+				REFLEXIV_TOKEN = strVal;
+			}
+			else if (strKey.compare("STRATEGY") == 0) {
+				STRATEGY = strVal;
+			}
+			else if (strKey.compare("ITERATIONS") == 0) {
+				ITERATIONS = std::stoi(strVal);
+			}
+			else if (strKey.compare("PORTIONS") == 0) {
+				PORTIONS = std::stoi(strVal);
 			}
 			else {
 				std::cout << "Properties key "  << strKey <<" not recognized";

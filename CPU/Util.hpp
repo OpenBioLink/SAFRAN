@@ -1,10 +1,14 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
+
 #include <vector>
 #include <string>
 #include <sstream>
 #include <memory>
+#include <random>
 
 namespace util{
 	inline std::vector<std::string> split(const std::string& str, char delim = ' ') {
@@ -84,6 +88,22 @@ namespace util{
 			}
 		}
 		return false;
+	}
+
+	std::mt19937 get_prng() {
+		std::random_device r;
+		std::seed_seq seed{ r(), r(), r(), r(), r(), r(), r(), r() };
+		return std::mt19937(seed);
+	}
+
+	void printProgress(double percentage) {
+		if (percentage > 1.0) percentage = 1.0;
+		int val = (int)(percentage * 100);
+		int lpad = (int)(percentage * PBWIDTH);
+		int rpad = PBWIDTH - lpad;
+		printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+		fflush(stdout);
+		if (percentage >= 1.0) printf("\n");
 	}
 }
 

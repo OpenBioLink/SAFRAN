@@ -44,13 +44,13 @@ public:
 		std::vector<int> previous(rulelength);
 		std::vector<std::vector<bool>> visited(rulelength, std::vector<bool>(size));
 
-		std::set<int> trains;
+		std::set<int>* trains = nullptr;
 		if (headNotTail) {
 			auto it = train_relHeadToTails.find(*r.getHeadrelation());
 			if (it != train_relHeadToTails.end()) {
 				auto it_v = it->second.find(filt_v);
 				if (it_v != it->second.end()) {
-					trains = it_v->second;
+					trains = &it_v->second;
 				}
 			}
 		}
@@ -59,19 +59,19 @@ public:
 			if (it != train_relTailToHeads.end()) {
 				auto it_v = it->second.find(filt_v);
 				if (it_v != it->second.end()) {
-					trains = it_v->second;
+					trains = &it_v->second;
 				}
 			}
 		}
 
-		std::set<int> second_filt_set;
+		std::set<int>* second_filt_set = nullptr;
 		if (filtValidNotTest) {
 			if (headNotTail) {
 				auto it = valid_relHeadToTails.find(*r.getHeadrelation());
 				if (it != valid_relHeadToTails.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -80,7 +80,7 @@ public:
 				if (it != valid_relTailToHeads.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -91,7 +91,7 @@ public:
 				if (it != test_relHeadToTails.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -100,7 +100,7 @@ public:
 				if (it != test_relTailToHeads.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -122,13 +122,13 @@ public:
 		std::vector<int> previous(rulelength);
 		std::vector<std::vector<bool>> visited(rulelength, std::vector<bool>(size));
 
-		std::set<int> trains;
+		std::set<int>* trains = nullptr;
 		if (headNotTail) {
 			auto it = train_relHeadToTails.find(*r.getHeadrelation());
 			if (it != train_relHeadToTails.end()) {
 				auto it_v = it->second.find(filt_v);
 				if (it_v != it->second.end()) {
-					trains = it_v->second;
+					trains = &it_v->second;
 				}
 			}
 		}
@@ -137,19 +137,19 @@ public:
 			if (it != train_relTailToHeads.end()) {
 				auto it_v = it->second.find(filt_v);
 				if (it_v != it->second.end()) {
-					trains = it_v->second;
+					trains = &it_v->second;
 				}
 			}
 		}
 
-		std::set<int> second_filt_set;
+		std::set<int>* second_filt_set = nullptr;
 		if (filtValidNotTest) {
 			if (headNotTail) {
 				auto it = valid_relHeadToTails.find(*r.getHeadrelation());
 				if (it != valid_relHeadToTails.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -158,7 +158,7 @@ public:
 				if (it != valid_relTailToHeads.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -169,7 +169,7 @@ public:
 				if (it != test_relHeadToTails.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -178,7 +178,7 @@ public:
 				if (it != test_relTailToHeads.end()) {
 					auto it_v = it->second.find(filt_v);
 					if (it_v != it->second.end()) {
-						second_filt_set = it_v->second;
+						second_filt_set = &it_v->second;
 					}
 				}
 			}
@@ -276,7 +276,7 @@ private:
 	RelNodeToNodes valid_relTailToHeads;
 	std::unordered_map<int, std::unordered_set<int>>* relCounter;
 
-	void searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, bool filtValidNotTest, bool filtExceptions, std::set<int>& trains, std::set<int>& second_filt_set) {
+	void searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, bool filtValidNotTest, bool filtExceptions, std::set<int>* trains, std::set<int>* second_filt_set) {
 
 		if (solution.size() >= limit and limit > 0) {
 			return;
@@ -301,15 +301,17 @@ private:
 				ex_tail = filt_ex;
 			}
 
-			
-			auto tit = trains.find(value);
-			if (tit != trains.end()) {
-				return;
+			if (trains != nullptr) {
+				auto tit = trains->find(value);
+				if (tit != trains->end()) {
+					return;
+				}
 			}
-
-			auto sfit = second_filt_set.find(value);
-			if (sfit != second_filt_set.end()) {
-				return;
+			if (second_filt_set != nullptr) {
+				auto sfit = second_filt_set->find(value);
+				if (sfit != second_filt_set->end()) {
+					return;
+				}
 			}
 			
 			if (filtExceptions and (r->is_c() or r->is_ac1())) {

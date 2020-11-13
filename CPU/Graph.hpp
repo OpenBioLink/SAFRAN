@@ -17,12 +17,12 @@ public:
 		this->ind_ptr = ind_ptr;
 	}
 
-	std::vector<int> searchDFS(int v, double thresh) {
+	std::vector<int> searchDFS(int v, double c_c, double ac1_ac1, double ac2_ac2, double c_ac2, double c_ac1, double ac1_ac2) {
 		std::vector<int> solution;
 		bool* visited = new bool[*size];
 		std::fill(visited, visited + *size, false);
 
-		searchDFSUtil(solution, visited, v, thresh);
+		searchDFSUtil(solution, visited, v, c_c, ac1_ac1, ac2_ac2, c_ac2, c_ac1, ac1_ac2);
 		delete[] visited;
 		return solution;
 	}
@@ -34,7 +34,7 @@ private:
 	int ind_ptr;
 
 
-	void searchDFSUtil(std::vector<int>& solution, bool* visited, int v, double thresh) {
+	void searchDFSUtil(std::vector<int>& solution, bool* visited, int v, double c_c, double ac1_ac1, double ac2_ac2, double c_ac2, double c_ac1, double ac1_ac2) {
 
 
 
@@ -71,22 +71,22 @@ private:
 					Rule& rule_i = rules[ind_ptr + u];
 					Rule& rule_j = rules[ind_ptr + v];
 
-					if (rule_i.is_c() && rule_j.is_c() && conf > thresh) {
+					if (rule_i.is_c() && rule_j.is_c() && conf > c_c) {
 						stack.push(u);
 					}
-					else if (rule_i.is_ac1() and rule_j.is_ac1() && conf > thresh) {
+					else if (rule_i.is_ac1() and rule_j.is_ac1() && conf > ac1_ac1) {
 						stack.push(u);
 					}
-					else if (rule_i.is_ac2() and rule_j.is_ac2() && conf > thresh) {
+					else if (rule_i.is_ac2() and rule_j.is_ac2() && conf > ac2_ac2) {
 						stack.push(u);
 					}
-					else if (((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) && conf > thresh) {
+					else if (((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) && conf > c_ac2) {
 						stack.push(u);
 					}
-					else if (((rule_i.is_c() and rule_j.is_ac1()) or (rule_i.is_ac1() and rule_j.is_c())) && conf > thresh) {
+					else if (((rule_i.is_c() and rule_j.is_ac1()) or (rule_i.is_ac1() and rule_j.is_c())) && conf > c_ac1) {
 						stack.push(u);
 					}
-					else if (((rule_i.is_ac1() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_ac1())) && conf > thresh) {
+					else if (((rule_i.is_ac1() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_ac1())) && conf > ac1_ac2) {
 						stack.push(u);
 					}
 				}
