@@ -6,30 +6,22 @@
 #include <map>
 #include <functional>
 
-class ClusteringApplication : public RuleEngine
+class ClusteringApplication
 {
 public:
 
-	ClusteringApplication(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) : RuleEngine(index, graph, ttr, vtr, rr) {
-		this->rel2clusters = rel2clusters;
-		it = ttr->getUniqueRelations().begin();
+	ClusteringApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
+		this->index = index;
+		this->graph = graph;
+		this->ttr = ttr;
+		this->vtr = vtr;
+		this->rr = rr;
 		this->rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
 		reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
 	}
 
-	void start() {
-		std::thread* threads = new std::thread[WORKER_THREADS];
-		out = new std::stringstream[WORKER_THREADS];
-
+	void apply_nr_noisy(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters) {
 		fopen_s(&pFile, Properties::get().PATH_OUTPUT.c_str(), "w");
-
-
-		run(0);
-
-		fclose(pFile);
-	}
-
-	void run(int threadId) {
 		int iterations = index->getRelSize();
 #pragma omp parallel for schedule(dynamic)
 		for (int rel = 0; rel < iterations; rel++) {
@@ -48,10 +40,61 @@ public:
 				noisy(rel, cluster.second);
 			}
 		}
-
+		fclose(pFile);
 	}
 
+	void apply_only_noisy() {
+		fopen_s(&pFile, Properties::get().PATH_OUTPUT.c_str(), "w");
 
+		int* adj_begin = rr->getCSR()->getAdjBegin();
+		Rule* rules_adj_list = rr->getCSR()->getAdjList();
+
+		int iterations = index->getRelSize();
+#pragma omp parallel for schedule(dynamic)
+		for (int rel = 0; rel < iterations; rel++) {
+			if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
+				util::printProgress((double)rel / (double)(iterations - 1));
+			}
+			int ind_ptr = adj_begin[3 + rel];
+			int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+			std::vector<std::vector<int>> clusters;
+			for (int i = 0; i < lenRules; i++) {
+				std::vector<int> cluster;
+				Rule& r = rules_adj_list[ind_ptr + i];
+				cluster.push_back(i);
+				clusters.push_back(cluster);
+			}
+			noisy(rel, clusters);
+		}
+		fclose(pFile);
+	}
+
+	void apply_only_max() {
+		fopen_s(&pFile, Properties::get().PATH_OUTPUT.c_str(), "w");
+		int* adj_begin = rr->getCSR()->getAdjBegin();
+		Rule* rules_adj_list = rr->getCSR()->getAdjList();
+
+		int iterations = index->getRelSize();
+//#pragma omp parallel for schedule(dynamic)
+		for (int rel = 0; rel < iterations; rel++) {
+			if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
+				util::printProgress((double)rel / (double)(iterations - 1));
+			}
+			int ind_ptr = adj_begin[3 + rel];
+			int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+			std::vector<std::vector<int>> clusters;
+			std::vector<int> cluster;
+			for (int i = 0; i < lenRules; i++) {
+				Rule& r = rules_adj_list[ind_ptr + i];
+				cluster.push_back(i);
+			}
+			clusters.push_back(cluster);
+			max(rel, clusters);
+		}
+		fclose(pFile);
+	}
+
+private:
 	void noisy(int rel, std::vector<std::vector<int>> clusters) {
 
 		int* adj_lists = graph->getCSR()->getAdjList();
@@ -350,7 +393,10 @@ public:
 		while (it_head != headTailResults.end()) {
 			auto it_tail = it_head->second.begin();
 			while (it_tail != it_head->second.end()) {
-				writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
+				#pragma omp critical
+				{
+					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
+				}
 				it_tail++;
 			}
 			it_head++;
@@ -630,40 +676,47 @@ public:
 		while (it_head != headTailResults.end()) {
 			auto it_tail = it_head->second.begin();
 			while (it_tail != it_head->second.end()) {
-				writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
+				#pragma omp critical
+				{
+					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, Properties::get().TOP_K_OUTPUT);
+				}
 				it_tail++;
 			}
 			it_head++;
 		}
 	}
 
-private:
-	RuleGraph* rulegraph;
-	std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters;
+	Index* index;
+	TraintripleReader* graph;
+	TesttripleReader* ttr;
+	ValidationtripleReader* vtr;
+	RuleReader* rr;
 
+	FILE* pFile;
+	RuleGraph* rulegraph;
 	int reflexiv_token;
 
-	typedef std::function<bool(std::pair<int, double>, std::pair<int, double>)> Comparator;
-	Comparator compFunctor =
-		[](std::pair<int, double> elem1, std::pair<int, double> elem2)
-	{
-		return elem1.second > elem2.second;
-	};
+	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, double>> headresults, std::vector<std::pair<int, double>> tailresults, FILE* pFile, int& K) {
+		fprintf(pFile, "%s %s %s\nHeads: ", index->getStringOfNodeId(head)->c_str(), index->getStringOfRelId(rel)->c_str(), index->getStringOfNodeId(tail)->c_str());
 
-	std::vector<int>::iterator it;
-	int getNextRel() {
-		int rel;
-		lock->lock();
-		if (it == ttr->getUniqueRelations().end()) {
-			rel = -1;
+		int maxHead = headresults.size() < K ? headresults.size() : K;
+		for (int i = 0; i < maxHead; i++) {
+			fprintf(pFile, "%s\t%.16f\t", index->getStringOfNodeId(headresults[i].first)->c_str(), headresults[i].second);
 		}
-		else {
-			rel = *it;
-			it++;
+		fprintf(pFile, "\nTails: ");
+		int maxTail = tailresults.size() < K ? tailresults.size() : K;
+		for (int i = 0; i < maxTail; i++) {
+			fprintf(pFile, "%s\t%.16f\t", index->getStringOfNodeId(tailresults[i].first)->c_str(), tailresults[i].second);
 		}
-		lock->unlock();
-		return rel;
+		fprintf(pFile, "\n");
 	}
+
+	struct {
+		bool operator()(std::pair<int, double> const& a, std::pair<int, double> const& b) const
+		{
+			return a.second > b.second;
+		}
+	} finalResultComperator;
 };
 
 

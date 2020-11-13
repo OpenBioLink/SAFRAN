@@ -75,11 +75,16 @@ int main(int argc, char** argv)
 	}
 	else if (Properties::get().ACTION.compare("applynoisy") == 0) {
 		ClusteringReader* cr = new ClusteringReader(Properties::get().PATH_CLUSTER, rr->getCSR(), index, graph);
-		ClusteringApplication* ca = new ClusteringApplication(cr->getRelToClusters(), index, graph, ttr, vtr, rr);
-		ca->start();
+		ClusteringApplication* ca = new ClusteringApplication(index, graph, ttr, vtr, rr);
+		ca->apply_nr_noisy(cr->getRelToClusters());
 	}
-	else if (Properties::get().ACTION.compare("applymax") == 0) {
-
+	else if (Properties::get().ACTION.compare("applyonlymax") == 0) {
+		ClusteringApplication* ca = new ClusteringApplication(index, graph, ttr, vtr, rr);
+		ca->apply_only_max();
+	}
+	else if (Properties::get().ACTION.compare("applyonlynoisy") == 0) {
+		ClusteringApplication* ca = new ClusteringApplication(index, graph, ttr, vtr, rr);
+		ca->apply_only_noisy();
 	}
 	else if (Properties::get().ACTION.compare("calcjacc") == 0) {
 		JaccardCalculator* jacccalc = new JaccardCalculator(index, graph, vtr, rr);
