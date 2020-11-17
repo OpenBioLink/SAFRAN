@@ -29,6 +29,10 @@ int main(int argc, char** argv)
 	}
 	std::cout << Properties::get().toString() << "\n";
 
+	if (Properties::get().WORKER_THREADS != -1) {
+		omp_set_num_threads(Properties::get().WORKER_THREADS);
+	}
+
 	auto start = std::chrono::high_resolution_clock::now();
 	Index* index = new Index();
 
@@ -90,11 +94,11 @@ int main(int argc, char** argv)
 		JaccardCalculator* jacccalc = new JaccardCalculator(index, graph, vtr, rr);
 		jacccalc->calculate_jaccard();
 	}
-
-	
-
 	finish = std::chrono::high_resolution_clock::now();
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 	std::cout << "Rules read in " << milliseconds.count() << " ms\n";
+	
+
+	
 
 }

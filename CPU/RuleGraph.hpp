@@ -206,6 +206,89 @@ public:
 		std::sort(solution.begin(), solution.end());
 	}
 
+	bool existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest) {
+		int* relations = rule.getRelationsFwd();
+		int* constantnode = nullptr;
+		if (rule.getBodyconstantId() != nullptr) {
+			constantnode = rule.getBodyconstantId();
+		}
+		if (existsAcyclic(valId, constantnode, relations, rule.getRulelength())) {
+			if (rule.getRuletype() == Ruletype::XRule) {
+				auto it = train_relHeadToTails.find(*rule.getHeadrelation());
+				if (it != train_relHeadToTails.end()) {
+					auto it_v = it->second.find(*rule.getHeadconstant());
+					if (it_v != it->second.end()) {
+						if (it_v->second.find(*valId) != it_v->second.end()) {
+							return false;
+						}
+					}
+				}
+			}
+			else {
+				auto it = train_relTailToHeads.find(*rule.getHeadrelation());
+				if (it != train_relTailToHeads.end()) {
+					auto it_v = it->second.find(*valId);
+					if (it_v != it->second.end()) {
+						if (it_v->second.find(*rule.getHeadconstant()) != it_v->second.end()) {
+							return false;
+						}
+					}
+				}
+			}
+			if (filtValidNotTest) {
+				if (rule.getRuletype() == Ruletype::XRule) {
+					auto it = valid_relHeadToTails.find(*rule.getHeadrelation());
+					if (it != valid_relHeadToTails.end()) {
+						auto it_v = it->second.find(*rule.getHeadrelation());
+						if (it_v != it->second.end()) {
+							if (it_v->second.find(*valId) != it_v->second.end()) {
+								return false;
+							}
+						}
+					}
+				}
+				else {
+					auto it = valid_relTailToHeads.find(*rule.getHeadrelation());
+					if (it != valid_relTailToHeads.end()) {
+						auto it_v = it->second.find(*valId);
+						if (it_v != it->second.end()) {
+							if (it_v->second.find(*rule.getHeadconstant()) != it_v->second.end()) {
+								return false;
+							}
+						}
+					}
+				}
+			}
+			else {
+				if (rule.getRuletype() == Ruletype::XRule) {
+					auto it = test_relHeadToTails.find(*rule.getHeadrelation());
+					if (it != test_relHeadToTails.end()) {
+						auto it_v = it->second.find(*rule.getHeadrelation());
+						if (it_v != it->second.end()) {
+							if (it_v->second.find(*valId) != it_v->second.end()) {
+								return false;
+							}
+						}
+					}
+				}
+				else {
+					auto it = test_relTailToHeads.find(*rule.getHeadrelation());
+					if (it != test_relTailToHeads.end()) {
+						auto it_v = it->second.find(*valId);
+						if (it_v != it->second.end()) {
+							if (it_v->second.find(*rule.getHeadconstant()) != it_v->second.end()) {
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+
+		return existsAcyclic(valId, constantnode, relations, rule.getRulelength());
+	}
+
 	void searchDFSSingleStart(int v, Rule& r, bool bwd, std::vector<int>& solution, int* previous, bool** visited) {
 		int rulelength = r.getRulelength();
 		int* relations;
@@ -421,6 +504,44 @@ private:
 		}
 		if (node_fully_visited and this_level > 0) {
 			visited[this_level - 1][value] = true;
+		}
+	}
+
+	bool existsAcyclic(int* valId, int* constant, int* relations, int N) {
+		int* adj_list = &(adj_lists[adj_list_starts[*relations]]);
+		int start_indptr = 3;
+		int size_indptr = adj_list[1];
+		int start_ind = start_indptr + size_indptr;
+		//int size_ind = adj_list[2];
+
+		relations++;
+		N--;
+		int ind_ptr = adj_list[start_indptr + *valId];
+		int len = adj_list[start_indptr + *valId + 1] - ind_ptr;
+		if (N == 0 && constant != nullptr) {
+			for (int j = 0; j < len; j++) {
+				int to = adj_list[start_ind + ind_ptr + j];
+				if (to == *constant) {
+					return true;
+				}
+			}
+			return false;
+		}
+		else if (N == 0 && constant == nullptr) {
+			if (len > 0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			for (int j = 0; j < len; j++) {
+				if (existsAcyclic(&adj_list[start_ind + ind_ptr + j], constant, relations, N)) {
+					return true;
+				};
+			}
+			return false;
 		}
 	}
 

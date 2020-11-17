@@ -75,7 +75,7 @@ public:
 		Rule* rules_adj_list = rr->getCSR()->getAdjList();
 
 		int iterations = index->getRelSize();
-//#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(dynamic)
 		for (int rel = 0; rel < iterations; rel++) {
 			if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
 				util::printProgress((double)rel / (double)(iterations - 1));
@@ -456,53 +456,21 @@ private:
 							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true, false);
 						}
 						else {
-							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule) {
-									if (util::in_sorted(currRule.getBuffer(), head)) {
-										tailresults_vec.push_back(*currRule.getHeadconstant());
-									}
-								}
-								else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
-									tailresults_vec = currRule.getBuffer();
-								}
-							}
-							else {
 								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
-									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(comp);
-									}
-									if (util::in_sorted(comp, head)) {
+									if (rulegraph->existsAcyclic(&head, currRule, true)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
 								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
-									}
 								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
-									std::vector<int> comp;
-									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(comp);
-									}
-									if (util::in_sorted(comp, head)) {
+									if (rulegraph->existsAcyclic(&head, currRule, true)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
 								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
-									}
 								}
-							}
 						}
 						if (tailresults_vec.size() > 0) {
 							stop = true;
@@ -578,53 +546,21 @@ private:
 							rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true, false);
 						}
 						else {
-							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
-									headresults_vec = currRule.getBuffer();
-								}
-								else {
-									if (util::in_sorted(currRule.getBuffer(), tail)) {
-										headresults_vec.push_back(*currRule.getHeadconstant());
-									}
-								}
-							}
-							else {
 								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-									}
 								}
 								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
-									std::vector<int> comp;
-									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-									}
-									if (util::in_sorted(comp, tail)) {
+									if (rulegraph->existsAcyclic(&tail, currRule, true)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-									}
 								}
 								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
-									std::vector<int> comp;
-									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true, false);
-#pragma omp critical
-									{
-										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
-									}
-									if (util::in_sorted(comp, tail)) {
+									if (rulegraph->existsAcyclic(&tail, currRule, true)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-							}
 						}
 
 						if (headresults_vec.size() > 0) {

@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>applyonlymax C:\Users\Simon\Desktop\fb15k237\config-apply.properties</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>calcjacc C:\Users\Simon\Desktop\obl\config-apply.properties</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release1|x64'">
