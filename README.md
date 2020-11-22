@@ -1,4 +1,4 @@
-# SAFRAN
+![](C:\Users\sott\SAFRAN\resources\img\logo.png)
 
 SAFRAN (Scalable and fast non-redundant rule application) is a framework for fast inference and aggregation of logical rules on large heterogeneous knowledge graphs. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
 
@@ -58,14 +58,14 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 ### FB15K-237
 
-|                                     |                                                        | hits@1        | hits@3        | hits@10       |
-| ----------------------------------- | ------------------------------------------------------ | ------------- | ------------- | ------------- |
-| ***AnyBURL*** Maximum approach      |                                                        | 0.2727        | 0.3884        | 0.5228        |
-| ***AnyBURL*** Noisy-Or              |                                                        | 0.2228        | 0.3298        | 0.4621        |
-| ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2888        | 0.4046        | 0.5346        |
-|                                     | random search, multi threshold, k=10, iterations=10000 | <u>0.3013</u> | <u>0.3175</u> | <u>0.5465</u> |
+|                                     |                                                        | hits@1     | hits@3     | hits@10    |
+| ----------------------------------- | ------------------------------------------------------ | ---------- | ---------- | ---------- |
+| ***AnyBURL*** Maximum approach      |                                                        | 0.2727     | 0.3884     | 0.5228     |
+| ***AnyBURL*** Noisy-Or              |                                                        | 0.2228     | 0.3298     | 0.4621     |
+| ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2888     | 0.4046     | 0.5346     |
+|                                     | random search, multi threshold, k=10, iterations=10000 | **0.3013** | **0.3175** | **0.5465** |
 
-### OpenBioLink (Positive edges only)
+### OpenBioLink (Positive edges only, [repository](https://github.com/OpenBioLink/OpenBioLink))
 
 |                                     |                                                        | hits@1 | hits@3 | hits@10 |
 | ----------------------------------- | ------------------------------------------------------ | ------ | ------ | ------- |
