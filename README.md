@@ -1,10 +1,8 @@
-# IRIFAB
+# SAFRAN
 
-IRIFAB (Improved rule inference for AnyBurl) is a application for inferencing the results of symbolic rules and create candidate rankings of them. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
+SAFRAN (Scalable and fast non-redundant rule application) is a framework for fast inference and aggregation of logical rules on large heterogeneous knowledge graphs. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
 
-There are two versions of the rule applicator. 
-+ The ***CPU*** version is designed for the excecution on one or multiple CPU threads. 
-+ The ***CUDA*** version was designed for the excecution on CUDA-capable GPU's, but does currently ***NOT*** work
+
 
 ## Download binaries
 
@@ -16,90 +14,62 @@ There are two versions of the rule applicator.
 
 ## Build from source
 
+### Requirements
+
+* cmake 9.6.0
+
 1. Have cmake installed
-2. Create folder **build** in {PATH_TO_PROJECT}/CPU/
-3. Switch to {PATH_TO_PROJECT}/CPU/build
-4. Run `cmake ../`
+2. Create and change to directory **build**
+3. Run `cmake ../`
+4. Run `make`
 
 If building using Visual Studio
-1. Open IRIFAB.sln
+1. Open SAFRAN.sln
 2. Select **Release** as build type
 4. Click on **Build** → **Build Solution**
 
-Else
-1. Run `make` from **build** folder
-
 ## Manual
 
-If you get unexplainable errors, please check the [troubleshooting](https://github.com/OpenBioLink/IRIFAB/wiki/Troubleshooting) page or create an issue.
+To run IRIFAB a properties file called apply-config.properties is required as an startup argument. To quickly perform a test run with the FB15k237 dataset, clone this repository, change to path `resources/binaries` and run:
 
-To run IRIFAB a properties file called apply-config.properties is required as an startup argument. To quickly perform a test run with the FB15k dataset, clone this repository, change to path `resources/binaries` and run:
+### Actions
+
+| Action       | Description                                                  | Properties |
+| ------------ | ------------------------------------------------------------ | ---------- |
+| calcjacc     | Calculation of the similarity matrices (Jaccard index) for each relation. |            |
+| learnnrnoisy | Learning of the optimal thresholds for the clustering used by non redundant noisy or (requires similarity matrices) |            |
+| applynrnoisy | Application of non redundant noisy or to the test set (requires learned clusters) |            |
+| applymax     | Application using the maximum approach only                  |            |
+| applynoisy   | Application using noisy-or only                              |            |
 
 #### Windows
 
-`IRIFAB.exe apply-config.properties`
+`IRIFAB.exe {action} {path_to_properties}`
 
 #### Linux
 
-`./IRIFAB apply-config.properties`
-
-#### Properties file
-
-An overview of the format and possible parameters can be found [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file).
-
-#### Trials
-
-To be able to quickly estimate evaluation results, the prediction can be performed only on a sample of the test set. The sample size is dependent on the confidence level and the margin of error, both can be set in the properties file.
-
-If f.e. the confidence level is set to 95% and the margin of error is set to 5%, then the evaluation results of  95% of trials lie between ±5% of the evaluation results of the whole test set. An example on the accuracy and runtimes can be seen [here](https://github.com/OpenBioLink/IRIFAB#trial), where the runtime was improved from 50 minutes to 40 seconds with estimated similar results.
+`./IRIFAB {action} {path_to_properties}`
 
 ## Performance
 
 ***For more details on the performance see [here](https://github.com/OpenBioLink/IRIFAB/wiki/Performance)***
 
-### Used datasets
+## Results
 
-|                              | Train     | Test    | Valid   | Entites | Relations |
-| ---------------------------- | --------- | ------- | ------- | ------- | --------- |
-| FB15k                        | 483,142   | 59,071  | 50,000  | 14,951  | 1,345     |
-| OpenBioLink (positive edges) | 4,193,905 | 180,509 | 183,653 | 180,926 | 28        |
+### FB15K-237
 
-### Test runs
-
-Performance test performed on Windows on an Intel i7-6500U CPU @ 2.50GHz, 2 Cores, 4 Logical Processors. Almost all results were averaged over 10 runs (Except runs taking longer than 4 hours).
-
-***Due to faster I/O, runs on Linux tend to be 20-25% faster.***
-
-Each test was run with the following properties:
-
-```
-UNSEEN_NEGATIVE_EXAMPLES = 5
-TOP_K_OUTPUT = 10
-WORKER_THREADS = 3
-```
-
-### FB15K
-
-|               | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
-| ------------- | ----------- | ---------------- | ------ | ------ | ------- |
-| ***AnyBURL*** | 7.09 s      | 148.87 s         | 0.8094 | 0.8443 | 0.8785  |
-| ***IRIFAB***  | 11.75 s     | 10.44 s          | 0.8090 | 0.8445 | 0.8782  |
+|                                     |                                                        | hits@1        | hits@3        | hits@10       |
+| ----------------------------------- | ------------------------------------------------------ | ------------- | ------------- | ------------- |
+| ***AnyBURL*** Maximum approach      |                                                        | 0.2727        | 0.3884        | 0.5228        |
+| ***AnyBURL*** Noisy-Or              |                                                        | 0.2228        | 0.3298        | 0.4621        |
+| ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2888        | 0.4046        | 0.5346        |
+|                                     | random search, multi threshold, k=10, iterations=10000 | <u>0.3013</u> | <u>0.3175</u> | <u>0.5465</u> |
 
 ### OpenBioLink (Positive edges only)
 
-#### alpha-50 (4,845 rules)
-
-|               | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
-| ------------- | ----------- | ---------------- | ------ | ------ | ------- |
-| ***AnyBURL*** | 79.19 s     | 789 min (13.2 h) | 0.1160 | 0.2107 | 0.3514  |
-| ***IRIFAB***  | 42.9 s      | 56.73 s          | 0.1191 | 0.2135 | 0.3560  |
-
-#### alpha-1000 reinforced (393,841 rules)
-
-|                    | Preparation | Rule application | hits@1 | hits@3 | hits@10 |
-| ------------------ | ----------- | ---------------- | ------ | ------ | ------- |
-| ***AnyBURL***      | 88.19 s     | 142 days*        | -      | -      | -       |
-| ***IRIFAB***       | 47.27 s     | 52.1 min         | 0.1646 | 0.2798 | 0.4375  |
-| ***IRIFAB Trial*** | 46.96 s     | 45.43 s          | 0.1672 | 0.2866 | 0.4372  |
-
-*) Projection - After 4 hours predictions for 212 testtriple were made.
+|                                     |                                                        | hits@1 | hits@3 | hits@10 |
+| ----------------------------------- | ------------------------------------------------------ | ------ | ------ | ------- |
+| ***AnyBURL*** Maximum approach      |                                                        | 0.1948 | 0.3066 | 0.4630  |
+| ***AnyBURL*** Noisy-Or              |                                                        | 0.0754 | 0.1513 | 0.4217  |
+| ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2205 | 0.3424 | 0.5056  |
+|                                     | random search, multi threshold, k=10, iterations=10000 |        |        |         |
