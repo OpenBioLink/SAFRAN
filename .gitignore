@@ -1,6 +1,7 @@
 .vs/
 x64/
-
+*.filters
+*.user
 # Prerequisites
 *.d
 
