@@ -23,13 +23,13 @@
     <ClInclude Include="include\Clustering.h" />
     <ClInclude Include="include\ClusteringEngine.h" />
     <ClInclude Include="include\ClusteringReader.h" />
-    <ClInclude Include="include\CSR.h" />
+    <ClInclude Include="include\CSR.hpp" />
     <ClInclude Include="include\Graph.h" />
     <ClInclude Include="include\Index.h" />
     <ClInclude Include="include\JaccardEngine.h" />
     <ClInclude Include="include\MinHash.h" />
     <ClInclude Include="include\MinHeap.h" />
-    <ClInclude Include="include\Properties.h" />
+    <ClInclude Include="include\Properties.hpp" />
     <ClInclude Include="include\Rule.h" />
     <ClInclude Include="include\RuleApplication.h" />
     <ClInclude Include="include\RuleGraph.h" />

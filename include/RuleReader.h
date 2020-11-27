@@ -10,7 +10,7 @@
 #include "Index.h"
 #include "Util.hpp"
 #include "TraintripleReader.h"
-#include "CSR.h"
+#include "CSR.hpp"
 #include "Types.h"
 
 class RuleReader

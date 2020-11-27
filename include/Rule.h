@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "Properties.h"
+#include "Properties.hpp"
 
 enum Ruletype { XYRule, XRule, YRule, None };
 

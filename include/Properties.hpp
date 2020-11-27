@@ -12,8 +12,10 @@
 class Properties {
 
 public:
+	// ACTION
 	std::string ACTION = "applymax";
 
+	// PATHS
 	std::string PATH_TRAINING = "train.txt";
 	std::string PATH_TEST = "test.txt";
 	std::string PATH_VALID = "valid.txt";
@@ -22,42 +24,34 @@ public:
 	std::string PATH_CLUSTER = "cluster";
 	std::string PATH_JACCARD = "jaccard";
 
-	// rule application
-	int TRIAL_SIZE = 100000;
-	int DISCRIMINATION_BOUND = 1000;
-
-	//noisy
-	std::string CLUSTER_SET = "train";
-	int REL_SIZE = 0;
-	int UNSEEN_NEGATIVE_EXAMPLES = 5;
-	int ONLY_UNCONNECTED = 0;
+	// GENERAL
+	int REL_SIZE;
 	int TOP_K_OUTPUT = 10;
 	int WORKER_THREADS = -1;
-	int THRESHOLD_CORRECT_PREDICTIONS = 2;
+	int TRIAL_SIZE = 100000;
+	int DISCRIMINATION_BOUND = 1000;
+	std::string REFLEXIV_TOKEN = "me_myself_i"; 
+	int UNSEEN_NEGATIVE_EXAMPLES = 5;
+	int ONLY_UNCONNECTED = 0;
 
-	double THRESHOLD_CONFIDENCE = 0.0001;
+	// JACCARD
+	std::string CLUSTER_SET = "train";
+	// JACCARD + LEARNNR
+	int RESOLUTION = 200;
+	int SEED = -1;
 
-	int CLUSTER_LIMIT = 0;
 
-	//performance
-	int DISCRIMINATION_UNIQUE = 1;
-	int FAST = 0;
-	int INTERMEDIATE_DISCRIMINATION = 0;
+	// LEARNNR
+	unsigned long long BUFFER_SIZE = std::numeric_limits<unsigned long long>().max();
+	std::string STRATEGY = "grid";
+	int ITERATIONS = 10000;
 
 	//trial
 	int TRIAL = 0;
 	int CONFIDENCE_LEVEL = 95;
 	int MARGIN_OF_ERROR = 5;
 	std::string PATH_TEST_SAMPLE = "test_sample.txt";
-
-	unsigned long long BUFFER_SIZE = std::numeric_limits<unsigned long long>().max();
-
-	std::string REFLEXIV_TOKEN = "me_myself_i";
-
-	std::string STRATEGY = "gridsingle";
-	int ITERATIONS = 10000;
-	int PORTIONS = 200;
-
+	
 	static Properties& get()
 	{
 		static Properties instance;
@@ -99,26 +93,11 @@ public:
 			else if (strKey.compare("WORKER_THREADS") == 0) {
 				WORKER_THREADS = std::stoi(strVal);
 			}
-			else if (strKey.compare("THRESHOLD_CORRECT_PREDICTIONS") == 0) {
-				THRESHOLD_CORRECT_PREDICTIONS = std::stoi(strVal);
-			}
-			else if (strKey.compare("THRESHOLD_CONFIDENCE") == 0) {
-				THRESHOLD_CONFIDENCE = std::stod(strVal);
-			}
 			else if (strKey.compare("TRIAL_SIZE") == 0) {
 				TRIAL_SIZE = std::stoi(strVal);
 			}
 			else if (strKey.compare("DISCRIMINATION_BOUND") == 0) {
 				DISCRIMINATION_BOUND = std::stoi(strVal);
-			}
-			else if (strKey.compare("DISCRIMINATION_UNIQUE") == 0) {
-				DISCRIMINATION_UNIQUE = std::stoi(strVal);
-			}
-			else if (strKey.compare("FAST") == 0) {
-				FAST = std::stoi(strVal);
-			}
-			else if (strKey.compare("INTERMEDIATE_DISCRIMINATION") == 0) {
-				INTERMEDIATE_DISCRIMINATION = std::stoi(strVal);
 			}
 			else if (strKey.compare("TRIAL") == 0) {
 				TRIAL = std::stoi(strVal);
@@ -141,9 +120,6 @@ public:
 			else if (strKey.compare("ONLY_UNCONNECTED") == 0) {
 				ONLY_UNCONNECTED = std::stoi(strVal);
 			}
-			else if (strKey.compare("CLUSTER_LIMIT") == 0) {
-				CLUSTER_LIMIT = std::stoi(strVal);
-			}
 			else if (strKey.compare("CLUSTER_SET") == 0) {
 				CLUSTER_SET = strVal;
 			}
@@ -159,8 +135,11 @@ public:
 			else if (strKey.compare("ITERATIONS") == 0) {
 				ITERATIONS = std::stoi(strVal);
 			}
-			else if (strKey.compare("PORTIONS") == 0) {
-				PORTIONS = std::stoi(strVal);
+			else if (strKey.compare("RESOLUTION") == 0) {
+				RESOLUTION = std::stoi(strVal);
+			}
+			else if (strKey.compare("SEED") == 0) {
+				SEED = std::stoi(strVal);
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";
@@ -175,29 +154,59 @@ public:
 		std::ostringstream string_rep;
 
 		string_rep << "ACTION = " << ACTION << std::endl;
+
+		// PATHS
 		string_rep << "PATH_TRAINING = " << PATH_TRAINING << std::endl;
 		string_rep << "PATH_TEST = " << PATH_TEST << std::endl;
 		string_rep << "PATH_VALID = " << PATH_VALID << std::endl;
 		string_rep << "PATH_RULES = " << PATH_RULES << std::endl;
-		string_rep << "PATH_OUTPUT = " << PATH_OUTPUT << std::endl;
-		string_rep << "PATH_CLUSTER = " << PATH_CLUSTER << std::endl;
-		string_rep << "TRIAL_SIZE = " << TRIAL_SIZE << std::endl;
+		if (ACTION.compare("learnnrnoisy") == 0 || ACTION.compare("calcjacc") == 0) {
+			string_rep << "PATH_JACCARD = " << PATH_JACCARD << std::endl;
+		}
+		if (ACTION.compare("learnnrnoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
+			string_rep << "PATH_CLUSTER = " << PATH_CLUSTER << std::endl;
+		}
+		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
+			string_rep << "PATH_OUTPUT = " << PATH_OUTPUT << std::endl;
+		}
+
+		// GENERAL PROPS
+		string_rep << "WORKER_THREADS = " << WORKER_THREADS << std::endl;
 		string_rep << "DISCRIMINATION_BOUND = " << DISCRIMINATION_BOUND << std::endl;
 		string_rep << "UNSEEN_NEGATIVE_EXAMPLES = " << UNSEEN_NEGATIVE_EXAMPLES << std::endl;
 		string_rep << "TOP_K_OUTPUT = " << TOP_K_OUTPUT << std::endl;
-		string_rep << "WORKER_THREADS = " << WORKER_THREADS << std::endl;
-		string_rep << "THRESHOLD_CORRECT_PREDICTIONS = " << THRESHOLD_CORRECT_PREDICTIONS << std::endl;
-		string_rep << "THRESHOLD_CONFIDENCE = " << THRESHOLD_CONFIDENCE << std::endl;
-		string_rep << "ONLY_UNCONNECTED = " << ONLY_UNCONNECTED << std::endl;
-		string_rep << "DISCRIMINATION_UNIQUE = " << DISCRIMINATION_UNIQUE << std::endl;
-		string_rep << "FAST = " << FAST << std::endl;
-		string_rep << "INTERMEDIATE_DISCRIMINATION = " << INTERMEDIATE_DISCRIMINATION << std::endl;
-		string_rep << "TRIAL = " << TRIAL << std::endl;
-		string_rep << "CONFIDENCE_LEVEL = " << CONFIDENCE_LEVEL << std::endl;
-		string_rep << "MARGIN_OF_ERROR = " << MARGIN_OF_ERROR << std::endl;
-		string_rep << "PATH_TEST_SAMPLE = " << PATH_TEST_SAMPLE << std::endl;
-		string_rep << "CLUSTER_LIMIT = " << CLUSTER_LIMIT << std::endl;
-		string_rep << "BUFFER_SIZE = " << BUFFER_SIZE << std::endl;
+		string_rep << "REFLEXIV_TOKEN = " << REFLEXIV_TOKEN << std::endl;
+
+		// SPECIFIC PROPS
+		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0 || ACTION.compare("learnnrnoisy")) {
+			string_rep << "ONLY_UNCONNECTED = " << ONLY_UNCONNECTED << std::endl;
+		}
+
+		if (ACTION.compare("learnnrnoisy") == 0) {
+			string_rep << "STRATEGY = " << STRATEGY << std::endl;
+			if (STRATEGY.compare("random") == 0) {
+				string_rep << "ITERATIONS = " << ITERATIONS << std::endl;
+			}
+		}
+		if (ACTION.compare("learnnrnoisy") == 0 || ACTION.compare("calcjacc") == 0) {
+			string_rep << "RESOLUTION = " << RESOLUTION << std::endl;
+			string_rep << "SEED = " << SEED << std::endl;
+		}
+
+		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
+			string_rep << "TRIAL = " << TRIAL << std::endl;
+			if (TRIAL == 1) {
+				string_rep << "TRIAL_SIZE = " << TRIAL_SIZE << std::endl;
+				string_rep << "CONFIDENCE_LEVEL = " << CONFIDENCE_LEVEL << std::endl;
+				string_rep << "MARGIN_OF_ERROR = " << MARGIN_OF_ERROR << std::endl;
+				string_rep << "PATH_TEST_SAMPLE = " << PATH_TEST_SAMPLE << std::endl;
+			}
+		}
+		
+		if (ACTION.compare("calcjacc") == 0) {
+			string_rep << "CLUSTER_SET = " << CLUSTER_SET << std::endl;
+			string_rep << "BUFFER_SIZE = " << BUFFER_SIZE << std::endl;
+		}
 
 		return string_rep.str().c_str();
 	}

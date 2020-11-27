@@ -3,7 +3,7 @@
 #include "RuleReader.h"
 #include "TesttripleReader.h"
 #include "ValidationtripleReader.h"
-#include "Properties.h"
+#include "Properties.hpp"
 #include "ApplicationEngine.h"
 #include "ClusteringEngine.h"
 #include "ClusteringReader.h"
@@ -16,12 +16,10 @@
 
 int main(int argc, char** argv)
 {
-	/*
-	if (argc != 2) {
-		std::cout << "Wrong number of elements" << std::endl;
+	if (argc != 3) {
+		std::cout << "Wrong number of startup arguments, please make sure that arguments are in form of {action} {path to properties}" << std::endl;
 		exit(-1);
 	}
-	*/
 	Properties::get().ACTION = argv[1];
 	bool success = Properties::get().read(argv[2]);
 	if (!success) {
@@ -58,7 +56,7 @@ int main(int argc, char** argv)
 	start = finish;
 
 	std::cout << "Reading testset..." << std::endl;
-	TesttripleReader* ttr = new TesttripleReader(Properties::get().PATH_TEST, index, graph);
+	TesttripleReader* ttr = new TesttripleReader(Properties::get().PATH_TEST, index, graph, Properties::get().TRIAL);
 	finish = std::chrono::high_resolution_clock::now();
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 	std::cout << "Testset read in " << milliseconds.count() << " ms\n";
@@ -73,26 +71,30 @@ int main(int argc, char** argv)
 
 	std::cout << "Applying rules..." << std::endl;
 
-	if (Properties::get().ACTION.compare("learnnoisy") == 0) {
+	if (Properties::get().ACTION.compare("learnnrnoisy") == 0) {
 		ClusteringEngine* ce = new ClusteringEngine(index, graph, ttr, vtr, rr);
 		ce->learn();
 	}
-	else if (Properties::get().ACTION.compare("applynoisy") == 0) {
+	else if (Properties::get().ACTION.compare("applynrnoisy") == 0) {
 		ClusteringReader* cr = new ClusteringReader(Properties::get().PATH_CLUSTER, rr->getCSR(), index, graph);
 		RuleApplication* ca = new RuleApplication(index, graph, ttr, vtr, rr);
 		ca->apply_nr_noisy(cr->getRelToClusters());
 	}
-	else if (Properties::get().ACTION.compare("applyonlymax") == 0) {
+	else if (Properties::get().ACTION.compare("applymax") == 0) {
 		RuleApplication* ca = new RuleApplication(index, graph, ttr, vtr, rr);
 		ca->apply_only_max();
 	}
-	else if (Properties::get().ACTION.compare("applyonlynoisy") == 0) {
+	else if (Properties::get().ACTION.compare("applynoisy") == 0) {
 		RuleApplication* ca = new RuleApplication(index, graph, ttr, vtr, rr);
 		ca->apply_only_noisy();
 	}
 	else if (Properties::get().ACTION.compare("calcjacc") == 0) {
 		JaccardEngine* jacccalc = new JaccardEngine(index, graph, vtr, rr);
 		jacccalc->calculate_jaccard();
+	}
+	else {
+		std::cout << "ACTION not found" << "\n";
+		exit(-1);
 	}
 	finish = std::chrono::high_resolution_clock::now();
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);

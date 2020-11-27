@@ -24,7 +24,7 @@ void ValidationtripleReader::read(std::string filepath) {
 	if (myfile.is_open())
 	{
 		std::vector<std::vector<int*>> testtriplesVector;
-		while (getline(myfile, line))
+		while (!util::safeGetline(myfile, line).eof())
 		{
 			std::istringstream iss(line);
 			std::vector<std::string> results = util::split(line, '\t');

@@ -38,13 +38,13 @@ void TraintripleReader::read(std::string filepath, RelNodeToNodes& relHeadToTail
 	std::ifstream myfile(filepath);
 	if (myfile.is_open())
 	{
-		while (getline(myfile, line))
+		while (!util::safeGetline(myfile, line).eof())
 		{
 			std::istringstream iss(line);
 			std::vector<std::string> results = util::split(line, '\t');
 			if (results.size() != 3) {
 				std::cout << "Unsupported Filetype, please make sure you have the following triple format {subject}{TAB}{predicate}{TAB}{object}" << std::endl;
-				exit(-1);
+				//exit(-1);
 			}
 			add(results[0], results[1], results[2], relHeadToTails, relTailToHeads, relCounter);
 		}

@@ -15,29 +15,28 @@
 #include "TraintripleReader.h"
 #include "Util.hpp"
 #include "Trial.h"
-#include "Properties.h"
+#include "Properties.hpp"
 
 class TesttripleReader
 {
 
 public:
-	TesttripleReader(std::string filepath, Index* index, TraintripleReader* graph);
+	TesttripleReader(std::string filepath, Index* index, TraintripleReader* graph, int is_trial);
 
 	int** getTesttriples();
 	int* getTesttriplesSize();
 	CSR<int, int>* getCSR();
-	std::vector<int>& getUniqueRelations();
 	RelNodeToNodes& getRelHeadToTails();
 	RelNodeToNodes& getRelTailToHeads();
 
 protected:
 
 private:
+	int is_trial;
 	int** testtriples;
 	int* testtripleSize;
 	Index* index;
 	TraintripleReader* graph;
-	std::vector<int> uniqueRelations;
 	CSR<int, int>* csr;
 
 	RelNodeToNodes relHeadToTails;

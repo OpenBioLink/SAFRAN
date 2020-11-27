@@ -1,8 +1,9 @@
 #include "TesttripleReader.h"
 
-TesttripleReader::TesttripleReader(std::string filepath, Index * index, TraintripleReader* graph) {
+TesttripleReader::TesttripleReader(std::string filepath, Index * index, TraintripleReader* graph, int is_trial) {
 	this->index = index;
 	this->graph = graph;
+	this->is_trial = is_trial;
 	read(filepath);
 }
 
@@ -16,10 +17,6 @@ int * TesttripleReader::getTesttriplesSize() {
 
 CSR<int, int> * TesttripleReader::getCSR() {
 	return csr;
-}
-
-std::vector<int>& TesttripleReader::getUniqueRelations() {
-	return uniqueRelations;
 }
 
 RelNodeToNodes& TesttripleReader::getRelHeadToTails() {
@@ -37,7 +34,7 @@ void TesttripleReader::read(std::string filepath) {
 	if (myfile.is_open())
 	{
 		std::vector<std::vector<int*>> testtriplesVector;
-		while (getline(myfile, line))
+		while (!util::safeGetline(myfile, line).eof())
 		{
 			std::istringstream iss(line);
 			std::vector<std::string> results = util::split(line, '\t');
@@ -63,16 +60,9 @@ void TesttripleReader::read(std::string filepath) {
 		}
 		myfile.close();
 
-		csr = new CSR<int, int>(index->getRelSize(), index->getNodeSize(), relHeadToTails, relTailToHeads);
+		
 
-		std::vector<int> keys(relHeadToTails.size());
-		std::transform(relHeadToTails.begin(), relHeadToTails.end(), keys.begin(), [](auto pair) {return pair.first; });
-		uniqueRelations = keys;
-
-		if (Properties::get().TRIAL == 1) {
-			if (Properties::get().FAST == 1) {
-				std::cout << "Sorry, currently only the original rule engine is supported wir trials, please set FAST to 0." << std::endl;
-			}
+		if (is_trial == 1) {
 			Trial t = Trial(Properties::get().CONFIDENCE_LEVEL, Properties::get().MARGIN_OF_ERROR, testtriplesVector.size());
 			testtriplesVector = t.getTesttriplesSample(testtriplesVector);
 
@@ -85,6 +75,13 @@ void TesttripleReader::read(std::string filepath) {
 
 			fclose(test_sample_file);
 			std::cout << "Written test sample to " << Properties::get().PATH_TEST_SAMPLE << std::endl;
+
+			TesttripleReader* sample_reader = new TesttripleReader(Properties::get().PATH_TEST_SAMPLE.c_str(), index, graph, 0);
+			csr = sample_reader->getCSR();
+			delete sample_reader;
+		}
+		else {
+			csr = new CSR<int, int>(index->getRelSize(), index->getNodeSize(), relHeadToTails, relTailToHeads);
 		}
 
 		testtripleSize = new int;

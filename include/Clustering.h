@@ -20,7 +20,7 @@
 #include "Rule.h"
 #include "Graph.h"
 #include "RuleGraph.h"
-#include "Properties.h"
+#include "Properties.hpp"
 #include "Util.hpp"
 #include "ApplicationEngine.h"
 
@@ -57,6 +57,8 @@ private:
 	double max_ac1_ac2 = 0.0;
 	double max_mrr = 0.0;
 	std::vector<std::vector<int>> max_cluster;
+
+	std::vector<double>* random_sample;
 
 	static bool sortbysec(const std::pair<int, double>& a, const std::pair<int, double>& b)
 	{

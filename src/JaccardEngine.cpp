@@ -5,7 +5,7 @@ JaccardEngine::JaccardEngine(Index* index, TraintripleReader* graph, Validationt
 	this->graph = graph;
 	this->vtr = vtr;
 	this->rr = rr;
-	this->k = Properties::get().PORTIONS;
+	this->k = Properties::get().RESOLUTION;
 	adj_lists = graph->getCSR()->getAdjList();
 	adj_list_starts = graph->getCSR()->getAdjBegin();
 	vt_adj_lists = vtr->getCSR()->getAdjList();

@@ -10,7 +10,7 @@
 #include "ValidationtripleReader.h"
 #include "RuleReader.h"
 #include "RuleGraph.h"
-#include "Properties.h"
+#include "Properties.hpp"
 #include "MinHeap.h"
 #include "Util.hpp"
 #include "ScoreTree.h"

@@ -11,7 +11,7 @@
 #include "ValidationtripleReader.h"
 #include "RuleReader.h"
 #include "Rule.h"
-#include "Properties.h"
+#include "Properties.hpp"
 #include "Clustering.h"
 #include "Util.hpp"
 

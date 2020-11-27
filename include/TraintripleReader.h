@@ -5,7 +5,7 @@
 #include <fstream>
 #include <unordered_set>
 
-#include "CSR.h"
+#include "CSR.hpp"
 #include "Index.h"
 #include "Types.h"
 #include "Util.hpp"

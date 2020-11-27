@@ -2,7 +2,7 @@
 
 MinHash::MinHash(int k) {
 	this->k = k;
-	std::mt19937 generator(-1);
+	std::mt19937 generator(Properties::get().SEED);
 	std::uniform_int_distribution<long long> distribution_0(0, _mersenne_prime - 1);
 	std::uniform_int_distribution<long long> distribution_1(1, _mersenne_prime - 1);
 	permfuncs = new long long* [k];

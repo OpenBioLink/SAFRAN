@@ -11,6 +11,7 @@
 #include "TraintripleReader.h"
 #include "TesttripleReader.h"
 #include "ValidationtripleReader.h"
+#include "Properties.hpp"
 
 class RuleGraph {
 public:

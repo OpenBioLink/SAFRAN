@@ -7,7 +7,7 @@
 
 #include "Index.h"
 
-#include "CSR.h"
+#include "CSR.hpp"
 #include "Rule.h"
 #include "TraintripleReader.h"
 #include "Util.hpp"

@@ -2,7 +2,7 @@
 
 Clustering::Clustering(int relation, int size, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr) {
 	this->strat = Properties::get().STRATEGY;
-	this->portions = Properties::get().PORTIONS;
+	this->portions = Properties::get().RESOLUTION;
 	this->index = index;
 	this->graph = graph;
 	this->ttr = ttr;
@@ -22,7 +22,7 @@ Clustering::Clustering(int relation, int size, Index* index, TraintripleReader* 
 std::string Clustering::learn_cluster(std::string jacc_path) {
 	std::vector<std::pair<int, double>>* jacc = read_jaccard(jacc_path);
 	Graph* g = new Graph(samples_size, jacc, rules_adj_list, ind_ptr);
-	std::cout << "Calced jaccs\n";
+	std::cout << "Calculated jaccards\n";
 
 	const unsigned long long MAX_BUF = Properties::get().BUFFER_SIZE;
 	long long CURR_BUF = 0;
@@ -143,7 +143,7 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 		}
 	}
 
-	std::cout << "Calced params\n";
+	std::cout << "Calculated parameters\n";
 
 	std::cout << "MAX " << max_c_c << " " << max_ac1_ac1 << " " << max_ac2_ac2 << " " << max_c_ac2 << " " << max_c_ac1 << " " << max_ac1_ac2 << " " << max_mrr << "\n";
 	std::ostringstream stringStream;
@@ -195,11 +195,13 @@ std::vector<std::pair<int, double>>* Clustering::read_jaccard(std::string path) 
 void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 
 	int iterations;
-	if (strat.compare("gridsingle") == 0) {
+	if (strat.compare("grid") == 0) {
 		iterations = portions + 1;
 	}
 	else if (strat.compare("random") == 0) {
 		iterations = Properties::get().ITERATIONS;
+		random_sample = new std::vector<double>[iterations];
+		util::sample_random(random_sample, iterations, portions);
 	}
 	else {
 		throw std::runtime_error("Strategy not supported");
@@ -241,7 +243,7 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 			delete noe;
 		} else {
 			double c_c, ac1_ac1, ac2_ac2, c_ac2, c_ac1, ac1_ac2;
-			if(strat.compare("gridsingle")==0){
+			if(strat.compare("grid")==0){
 				double thresh = (double)i / portions;
 				c_c = thresh;
 				ac1_ac1 = thresh;
@@ -251,14 +253,12 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 				ac1_ac2 = thresh;
 			}
 			else if (strat.compare("random")==0) {
-				portions = 10;
-				std::mt19937 a = util::get_prng();
-				c_c = (double)(a() % (portions + 1)) / portions;
-				ac1_ac1 = (double)(a() % (portions + 1)) / portions;
-				ac2_ac2 = (double)(a() % (portions + 1)) / portions;
-				c_ac2 = (double)(a() % (portions + 1)) / portions;
-				c_ac1 = (double)(a() % (portions + 1)) / portions;
-				ac1_ac2 = (double)(a() % (portions + 1)) / portions;
+				c_c = random_sample[i][0];
+				ac1_ac1 = random_sample[i][1];
+				ac2_ac2 = random_sample[i][2];
+				c_ac2 = random_sample[i][3];
+				c_ac1 = random_sample[i][4];
+				ac1_ac2 = random_sample[i][5];
 			}
 
 

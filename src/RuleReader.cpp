@@ -15,7 +15,7 @@ void RuleReader::read(std::string filepath) {
 	std::string line;
 	std::ifstream myfile(filepath);
 	if (myfile.is_open()) {
-		while (getline(myfile, line))
+		while (!util::safeGetline(myfile, line).eof())
 		{
 			std::vector<std::string> rawrule = util::split(line, '\t');
 			Rule * r = parseRule(rawrule);

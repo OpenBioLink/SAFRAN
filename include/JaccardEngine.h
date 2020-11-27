@@ -11,7 +11,7 @@
 #include "Rule.h"
 #include "RuleGraph.h"
 #include "MinHash.h"
-#include "Properties.h"
+#include "Properties.hpp"
 #include "Util.hpp"
 
 class JaccardEngine {

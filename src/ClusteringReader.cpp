@@ -34,10 +34,10 @@ void ClusteringReader::read(CSR<int, Rule>* rulecsr, std::string clusteringpath)
 	std::ifstream myfile(clusteringpath);
 	if (myfile.is_open()) {
 		int relation;
-		while (getline(myfile, line))
+		while (!util::safeGetline(myfile, line).eof())
 		{
 			while (line.compare("") == 0) {
-				getline(myfile, line);
+				util::safeGetline(myfile, line);
 			}
 
 			std::vector<std::string> rel_conf = util::split(line, '\t');
@@ -53,7 +53,7 @@ void ClusteringReader::read(CSR<int, Rule>* rulecsr, std::string clusteringpath)
 
 			std::vector<std::vector<int>> id_clusters;
 			while (true) {
-				getline(myfile, line);
+				util::safeGetline(myfile, line);
 				if (line.compare("") == 0) {
 					break;
 				}

@@ -9,6 +9,7 @@
 #include <random>
 #include <limits>
 #include <time.h>
+#include "Properties.hpp"
 
 class MinHash {
 public:
