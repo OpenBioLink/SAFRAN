@@ -38,11 +38,11 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 | Action       | Description                                                  | Properties |
 | ------------ | ------------------------------------------------------------ | ---------- |
-| calcjacc     | Calculation of the similarity matrices (Jaccard index) for each relation. |            |
-| learnnrnoisy | Learning of the optimal thresholds for the clustering used by non redundant noisy or (requires similarity matrices) |            |
-| applynrnoisy | Application of non redundant noisy or to the test set (requires learned clusters) |            |
-| applymax     | Application using the maximum approach only                  |            |
-| applynoisy   | Application using noisy-or only                              |            |
+| calcjacc     | Calculation of the similarity matrices (Jaccard index) for each relation. |  [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file#action-calcjacc)      |
+| learnnrnoisy | Learning of the optimal thresholds for the clustering used by non redundant noisy or (requires similarity matrices) |   [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file#action-learnnrnoisy)         |
+| applynrnoisy | Application of non redundant noisy or to the test set (requires learned clusters) |  [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file#action-applynrnoisy)       |
+| applymax     | Application using the maximum approach only                  |      [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file#action-applynoisyonly--applymaxonly)         |
+| applynoisy   | Application using noisy-or only                              |     [here](https://github.com/OpenBioLink/IRIFAB/wiki/Properties-file#action-applynoisyonly--applymaxonly)           |
 
 #### Windows
 
