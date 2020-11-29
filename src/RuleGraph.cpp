@@ -206,9 +206,9 @@ bool RuleGraph::existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest) {
 		if (rule.getRuletype() == Ruletype::XRule) {
 			auto it = train_relHeadToTails.find(*rule.getHeadrelation());
 			if (it != train_relHeadToTails.end()) {
-				auto it_v = it->second.find(*rule.getHeadconstant());
+				auto it_v = it->second.find(*valId);
 				if (it_v != it->second.end()) {
-					if (it_v->second.find(*valId) != it_v->second.end()) {
+					if (it_v->second.find(*rule.getHeadconstant()) != it_v->second.end()) {
 						return false;
 					}
 				}
@@ -229,9 +229,9 @@ bool RuleGraph::existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest) {
 			if (rule.getRuletype() == Ruletype::XRule) {
 				auto it = valid_relHeadToTails.find(*rule.getHeadrelation());
 				if (it != valid_relHeadToTails.end()) {
-					auto it_v = it->second.find(*rule.getHeadrelation());
+					auto it_v = it->second.find(*valId);
 					if (it_v != it->second.end()) {
-						if (it_v->second.find(*valId) != it_v->second.end()) {
+						if (it_v->second.find(*rule.getHeadconstant()) != it_v->second.end()) {
 							return false;
 						}
 					}
@@ -253,9 +253,9 @@ bool RuleGraph::existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest) {
 			if (rule.getRuletype() == Ruletype::XRule) {
 				auto it = test_relHeadToTails.find(*rule.getHeadrelation());
 				if (it != test_relHeadToTails.end()) {
-					auto it_v = it->second.find(*rule.getHeadrelation());
+					auto it_v = it->second.find(*valId);
 					if (it_v != it->second.end()) {
-						if (it_v->second.find(*valId) != it_v->second.end()) {
+						if (it_v->second.find(*rule.getHeadconstant()) != it_v->second.end()) {
 							return false;
 						}
 					}
@@ -273,10 +273,9 @@ bool RuleGraph::existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest) {
 				}
 			}
 		}
+		return true;
 	}
 	return false;
-
-	return existsAcyclic(valId, constantnode, relations, rule.getRulelength());
 }
 
 void RuleGraph::searchDFSSingleStart(int v, Rule& r, bool bwd, std::vector<int>& solution, int* previous, bool** visited) {
