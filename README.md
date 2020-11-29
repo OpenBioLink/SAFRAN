@@ -16,11 +16,7 @@ SAFRAN (Scalable and fast non-redundant rule application) is a framework for fas
 
 ## Build from source
 
-### Requirements
-
-* cmake 9.6.0
-
-1. Have cmake installed
+1. Have cmake installed (> 9.6.0)
 2. Create and change to directory **build**
 3. Run `cmake ../`
 4. Run `make`
@@ -74,4 +70,4 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 | ***AnyBURL*** Maximum approach      |                                                        | 0.1948 | 0.3066 | 0.4630  |
 | ***AnyBURL*** Noisy-Or              |                                                        | 0.0754 | 0.1513 | 0.4217  |
 | ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2205 | 0.3424 | 0.5056  |
-|                                     | random search, multi threshold, k=10, iterations=10000 |        |        |         |
+|                                     | random search, multi threshold, k=10, iterations=10000 | 0.2232 | 0.3473 | 0.5110 |
