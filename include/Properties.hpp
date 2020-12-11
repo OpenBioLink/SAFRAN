@@ -192,6 +192,14 @@ public:
 			string_rep << "RESOLUTION = " << RESOLUTION << std::endl;
 			string_rep << "SEED = " << SEED << std::endl;
 		}
+		
+		if (ACTION.compare("learnnrnoisy") == 0) {
+			string_rep << "BUFFER_SIZE = " << BUFFER_SIZE << std::endl;
+		}
+		
+		if (ACTION.compare("calcjacc") == 0) {
+			string_rep << "CLUSTER_SET = " << CLUSTER_SET << std::endl;
+		}
 
 		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
 			string_rep << "TRIAL = " << TRIAL << std::endl;
@@ -203,10 +211,7 @@ public:
 			}
 		}
 		
-		if (ACTION.compare("applynrnoisy") == 0) {
-			string_rep << "CLUSTER_SET = " << CLUSTER_SET << std::endl;
-			string_rep << "BUFFER_SIZE = " << BUFFER_SIZE << std::endl;
-		}
+		
 
 		return string_rep.str().c_str();
 	}
