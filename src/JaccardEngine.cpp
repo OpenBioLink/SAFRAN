@@ -23,12 +23,12 @@ void JaccardEngine::calculate_jaccard() {
 
 		int ind_ptr = adj_begin[3 + i];
 		int len = adj_begin[3 + i + 1] - ind_ptr;
-		std::cout << "Cluster calculating " << *(index->getStringOfRelId(i)) << " " << len << std::endl;
+		std::cout << "Jaccard calculation for " << *(index->getStringOfRelId(i)) << " " << len << std::endl;
 		Rule** rules = new Rule * [len];
 		std::vector<long long>* solutions = new std::vector<long long>[len];
 		std::cout << "Calulating all solutions of all rules ... \n";
 		calc_sols(solutions, rules, ind_ptr, len);
-		std::cout << "Calculating jaccards\n";
+		std::cout << "Calculating jaccards...\n";
 
 		std::vector<std::pair<int, double>>* jacc = new std::vector<std::pair<int, double>>[len];
 		calc_jaccs(solutions, rules, len, jacc);
@@ -49,7 +49,7 @@ void JaccardEngine::calculate_jaccard() {
 			}
 		}
 		file.close();
-		std::cout << "Cluster calculated for " << i << "/" << rellen << " rule relations" << std::endl;
+		std::cout << "Jaccard calculated for relation " << i << "/" << rellen << std::endl;
 		delete[] rules;
 		delete[] solutions;
 		delete[] jacc;
