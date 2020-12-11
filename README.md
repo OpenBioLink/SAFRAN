@@ -4,6 +4,7 @@
 
 SAFRAN (Scalable and fast non-redundant rule application) is a framework for fast inference of groundings and aggregation of logical rules on large heterogeneous knowledge graphs. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
 
+[Paper preprint on arXiv](http://arxiv.org/abs/2012.05750)
 
 
 ## Download binaries
@@ -38,11 +39,31 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 #### Windows
 
-`IRIFAB.exe {action} {path_to_properties}`
+`SAFRAN.exe {action} {path_to_properties}`
 
 #### Linux
 
-`./IRIFAB {action} {path_to_properties}`
+`./SAFRAN {action} {path_to_properties}`
+
+### Quickstart
+
+Performs non-redundant Noisy-Or using grid search.
+
+1. Download and extract FB15k-237 dataset
+2. Download and extract FB15k-237 ruleset
+3. Create the properties file
+``` bash
+PATH_TRAINING = {path to training set}
+PATH_TEST = {path to test set}
+PATH_VALID = {path to valid set}	
+PATH_RULES = {path to rule set}
+PATH_JACCARD = {path to valid directory}
+PATH_CLUSTER = cluster.txt
+PATH_OUTPUT = predictions.txt
+```
+4. Run ``./SAFRAN calcjacc {path_to_properties}``
+5. Run ``./SAFRAN learnnrnoisy {path_to_properties}``
+6. Run ``./SAFRAN applynrnoisy {path_to_properties}``
 
 ## Performance
 
