@@ -2,7 +2,7 @@
   <img src="https://github.com/OpenBioLink/IRIFAB/raw/dev/resources/img/logo.png">
 </p>
 
-SAFRAN (Scalable and fast non-redundant rule application) is a framework for fast inference and aggregation of logical rules on large heterogeneous knowledge graphs. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
+SAFRAN (Scalable and fast non-redundant rule application) is a framework for fast result inference and aggregation of logical rules on large heterogeneous knowledge graphs. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
 
 
 
@@ -24,7 +24,7 @@ If building using Visual Studio
 
 ## Manual
 
-To run IRIFAB a properties file called apply-config.properties is required as an startup argument. To quickly perform a test run with the FB15k237 dataset, clone this repository, change to path `resources/binaries` and run:
+To run IRIFAB a properties file called apply-config.properties is required as an startup argument. Each action requires different properties (See table below).
 
 ### Actions
 
