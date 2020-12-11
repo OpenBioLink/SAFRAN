@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SAFRAN", "SAFRAN.vcxproj", "{143D4D6B-673B-4B97-A631-6D43DBB9406A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Debug|x64.ActiveCfg = Debug|x64
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Debug|x64.Build.0 = Debug|x64
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Debug|x86.ActiveCfg = Debug|Win32
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Debug|x86.Build.0 = Debug|Win32
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Release|x64.ActiveCfg = Release|x64
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Release|x64.Build.0 = Release|x64
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Release|x86.ActiveCfg = Release|Win32
+		{143D4D6B-673B-4B97-A631-6D43DBB9406A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {69BEC181-909A-444C-B38D-A46EDF6FFCA7}
+	EndGlobalSection
+EndGlobal
