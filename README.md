@@ -8,11 +8,7 @@ SAFRAN (Scalable and fast non-redundant rule application) is a framework for fas
 
 ## Download binaries
 
-[Windows x64](https://github.com/OpenBioLink/IRIFAB/raw/master/resources/binaries/IRIFAB.exe)
-
-[Linux](https://github.com/OpenBioLink/IRIFAB/raw/master/resources/binaries/IRIFAB)
-
-[Example config-apply.properties](https://github.com/OpenBioLink/IRIFAB/raw/master/resources/binaries/config-apply.properties)
+Coming soon...
 
 ## Build from source
 
