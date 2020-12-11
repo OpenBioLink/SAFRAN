@@ -49,8 +49,8 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 Performs non-redundant Noisy-Or using grid search.
 
-1. Download and extract FB15k-237 dataset
-2. Download and extract FB15k-237 ruleset
+1. [Download](http://web.informatik.uni-mannheim.de/AnyBURL/datasets.zip) and extract FB15k-237 dataset
+2. [Download](https://zenodo.org/record/4317155/files/fb15k237-1000.zip?download=1) and extract FB15k-237 ruleset
 3. Create the properties file
 ``` bash
 PATH_TRAINING = {path to training set}
