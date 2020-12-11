@@ -74,6 +74,8 @@ PATH_OUTPUT = predictions.txt
 ## Results
 
 ### FB15K-237
+- [Dataset](http://web.informatik.uni-mannheim.de/AnyBURL/datasets.zip) retrieved from [http://web.informatik.uni-mannheim.de/AnyBURL/](http://web.informatik.uni-mannheim.de/AnyBURL/)
+- [Ruleset](https://zenodo.org/record/4317155/files/fb15k237-1000.zip?download=1) used to achieve these results
 
 |                                     |                                                        | hits@1     | hits@3     | hits@10    |
 | ----------------------------------- | ------------------------------------------------------ | ---------- | ---------- | ---------- |
@@ -82,7 +84,11 @@ PATH_OUTPUT = predictions.txt
 | ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2888     | 0.4046     | 0.5346     |
 |                                     | random search, multi threshold, k=10, iterations=10000 | **0.3013** | **0.3175** | **0.5465** |
 
-### OpenBioLink (Positive edges only, [repository](https://github.com/OpenBioLink/OpenBioLink))
+### OpenBioLink (Positive edges only)
+
+- [Repository](https://github.com/OpenBioLink/OpenBioLink)
+- [Dataset](https://zenodo.org/record/4317155/files/obl-dataset.zip?download=1) (ready for use with AnyBURL)
+- [Ruleset](https://zenodo.org/record/4317155/files/obl-1000.zip?download=1) used to achieve these results
 
 |                                     |                                                        | hits@1 | hits@3 | hits@10 |
 | ----------------------------------- | ------------------------------------------------------ | ------ | ------ | ------- |
