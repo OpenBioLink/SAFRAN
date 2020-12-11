@@ -59,7 +59,6 @@ void JaccardEngine::calculate_jaccard() {
 }
 
 void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, int ind_ptr, int len) {
-	std::cout << Properties::get().CLUSTER_SET << "\n";
 	int size = index->getNodeSize();
 
 #pragma omp parallel for schedule(dynamic)
