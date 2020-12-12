@@ -51,9 +51,15 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		throw "Id not found in relid's";
 	}
 	ruleObj->setHeadrelation(relid);
-	std::getline(ss, token, ',');
-	if (token != std::string("X")) {
-		int * nodeid = index->getIdOfNodestring(token);
+
+	std::string head_tail;
+	std::getline(ss, head_tail, ' ');
+
+	std::string head, tail;
+	std::tie(head, tail) = getHeadTail(head_tail);
+
+	if (head != std::string("X")) {
+		int * nodeid = index->getIdOfNodestring(head);
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
 		}
@@ -63,9 +69,9 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		type = Ruletype::XRule;
 		ruleObj->setRuletype(type);
 	}
-	std::getline(ss, token, ')');
-	if (token != std::string("Y")) {
-		int * nodeid = index->getIdOfNodestring(token);
+	if (tail != std::string("Y")) {
+		
+		int * nodeid = index->getIdOfNodestring(tail);
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
 		}
@@ -83,10 +89,10 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	}
 
 	//skip '<=' sign
-	std::getline(ss, token, ' ');
+	//std::getline(ss, token, ' ');
 	std::getline(ss, token, ' ');
 	//read whole body as string and split
-	std::getline(ss, token);
+	std::getline(ss, token); 
 	std::vector<std::string> atoms = util::split(token, ' ');
 
 	int rulelength = atoms.size();
@@ -95,7 +101,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	int* backwardrelations = new int[rulelength];
 
 	// Get if xToY based on first atom
-	bool xToY = parseXtoY(type, atoms[0]);
+	bool xToY = parseXtoY(type, head, tail);
 
 	// next is variable to start direction and relation parsing
 	std::string next;
@@ -114,7 +120,11 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		if (xToY && type == Ruletype::YRule || (!xToY && (type == Ruletype::XRule || type == Ruletype::XYRule))) {
 			index = rulelength - i - 1;
 		}
-		next = getRelation(atoms[index], next, &forwardrelations[i]);
+		std::string atom = atoms[index];
+		if (atom[atom.size() - 1] == ',') {
+			atom.pop_back();
+		}
+		next = getRelation(atom, next, &forwardrelations[i]);
 		if (!(next.length() == 1 && isupper(next[0])) && i == rulelength - 1 && (type == Ruletype::XRule || type == Ruletype::YRule)) {
 			int * id = this->index->getIdOfNodestring(next);
 			if (id != nullptr) {
@@ -143,14 +153,9 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	return ruleObj;
 }
 
-bool RuleReader::parseXtoY(Ruletype type, std::string atom) {
-	std::string token;
-	std::stringstream atomss(atom);
-	std::getline(atomss, token, '(');
-	std::getline(atomss, token, ')');
-	std::vector<std::string> entities = util::split(token, ',');
+bool RuleReader::parseXtoY(Ruletype type, std::string& head, std::string& tail) {
 	if (type == Ruletype::XYRule || type == Ruletype::XRule) {
-		if (entities[0] == "X" || entities[1] == "X") {
+		if (head == "X" || tail == "X") {
 			return true;
 		}
 		else {
@@ -159,7 +164,7 @@ bool RuleReader::parseXtoY(Ruletype type, std::string atom) {
 	}
 	else {
 		//Ruletype YRule
-		if (entities[0] == "Y" || entities[1] == "Y") {
+		if (head == "Y" || tail == "Y") {
 			return false;
 		}
 		else {
@@ -176,17 +181,38 @@ std::string RuleReader::getRelation(std::string atom, std::string previous, int 
 	if (relationId == nullptr) {
 		throw "No relation found";
 	}
-	std::getline(ss, token, ')');
-	std::vector<std::string> a = util::split(token, ',');
-	if (a[0] == previous) {
+
+	std::string head_tail;
+	std::getline(ss, head_tail);
+	
+	std::string head, tail;
+	std::tie(head, tail) = getHeadTail(head_tail);
+
+	if (head == previous) {
 		*relation = *relationId * 2;
-		return a[1];
+		return tail;
 	}
-	else if (a[1] == previous) {
+	else if (tail == previous) {
 		*relation = *relationId * 2 + 1;
-		return a[0];
+		return head;
 	}
 	else {
 		throw "Error parsing direction";
 	}
+}
+
+// input "asdf,bsdf)"
+std::pair<std::string, std::string> RuleReader::getHeadTail(std::string& atom) {
+	std::regex e("[A-Z],.*\\)");
+
+	std::string head, tail;
+	if (std::regex_match(atom, e)) {
+		head = atom.substr(0, 1);
+		tail = atom.substr(2, atom.size() - 3);
+	}
+	else {
+		head = atom.substr(0, atom.size() - 3);
+		tail = atom.substr(atom.size() - 2, 1);
+	}
+	return std::make_pair(head, tail);
 }

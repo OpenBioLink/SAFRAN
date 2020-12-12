@@ -174,8 +174,6 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 		delete[] previous;
 		solutions[j] = min->getMinimum(heads, tails);
 
-
-
 		//std::cout << currRule.getRuletype() << " " << *headresultlength << " " << *tailresultlength << " " << currRule.getRulelength() << std::endl;
 
 

@@ -1,4 +1,5 @@
 #include "Index.h"
+#include <Windows.h>
 
 void Index::addNode(std::string& nodesstring) {
 	if (nodeToId.find(nodesstring) == nodeToId.end()) {
