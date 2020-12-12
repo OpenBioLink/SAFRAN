@@ -51,21 +51,11 @@ To run IRIFAB a properties file called apply-config.properties is required as an
 
 Performs non-redundant Noisy-Or using grid search.
 
-1. [Download](http://web.informatik.uni-mannheim.de/AnyBURL/datasets.zip) and extract FB15k-237 dataset
-2. [Download](https://zenodo.org/record/4317155/files/fb15k237-1000.zip?download=1) and extract FB15k-237 ruleset
-3. Create the properties file
-``` bash
-PATH_TRAINING = {path to training set}
-PATH_TEST = {path to test set}
-PATH_VALID = {path to valid set}	
-PATH_RULES = {path to rule set}
-PATH_JACCARD = {path to valid directory}
-PATH_CLUSTER = cluster.txt
-PATH_OUTPUT = predictions.txt
-```
-4. Run ``./SAFRAN calcjacc {path_to_properties}``
-5. Run ``./SAFRAN learnnrnoisy {path_to_properties}``
-6. Run ``./SAFRAN applynrnoisy {path_to_properties}``
+1. Clone project
+2. To performs non-redundant Noisy-Or using grid search and a small ruleset of the FB15k-237 dataset, run from the directory ``resources/binaries``:
+   1. Run ``./SAFRAN calcjacc quickstart/config-quickstart.properties``
+   2. Run ``./SAFRAN learnnrnoisy quickstart/config-quickstart.properties``
+   3. Run ``./SAFRAN applynrnoisy quickstart/config-quickstart.properties``
 
 ## Performance
 
