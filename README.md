@@ -57,10 +57,6 @@ Performs non-redundant Noisy-Or using grid search.
    2. Run ``./SAFRAN learnnrnoisy quickstart/config-quickstart.properties``
    3. Run ``./SAFRAN applynrnoisy quickstart/config-quickstart.properties``
 
-## Performance
-
-***For more details on the performance see [here](https://github.com/OpenBioLink/IRIFAB/wiki/Performance)***
-
 ## Results
 
 ### FB15K-237
@@ -86,3 +82,17 @@ Performs non-redundant Noisy-Or using grid search.
 | ***AnyBURL*** Noisy-Or              |                                                        | 0.0754 | 0.1513 | 0.4217  |
 | ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2205 | 0.3424 | 0.5056  |
 |                                     | random search, multi threshold, k=10, iterations=10000 | **0.2232** | **0.3473** | **0.5110** |
+
+
+## Performance
+
+|                                                | AnyBURL    | SAFRAN    | Speed up |
+| ---------------------------------------------- | ---------- | --------- | -------- |
+| **FB15k-237**                                  |            |           |          |
+| Rule inference (inference of complete ruleset) | 615 259 ms | 46 205 ms | 13.3 x   |
+| Maximum aggregation                            | 24 523 ms  | 4222 ms   | 5.8 x    |
+| **OpenBioLink**                                |            |           |          |
+| Rule inference (inference of complete ruleset) | 2252 h*    | 2.85 h    | 790.2 x  |
+| Maximum aggregation                            | 35.9 h     | 43 min    | 50.1 x   |
+
+Comparison of AnyBURL and SAFRAN runtimes (22 threads, Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz). Note that maximum aggregation takes less time than the inference of the complete ruleset, as maximum aggregation, unlike Noisy-Or, does not require the inference of all rules. \*Estimation: After a runtime of 12 hours all rules were inferenced for 975 prediction tasks.
