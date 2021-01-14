@@ -68,7 +68,7 @@ Performs non-redundant Noisy-Or using grid search.
 | ***AnyBURL*** Maximum approach      |                                                        | 0.2727     | 0.3884     | 0.5228     |
 | ***AnyBURL*** Noisy-Or              |                                                        | 0.2228     | 0.3298     | 0.4621     |
 | ***SAFRAN*** Non-redundant Noisy-Or | parameter sweep, single threshold, k=200               | 0.2888     | 0.4046     | 0.5346     |
-|                                     | random search, multi threshold, k=10, iterations=10000 | **0.3013** | **0.3175** | **0.5465** |
+|                                     | random search, multi threshold, k=10, iterations=10000 | **0.3013** | **0.4175** | **0.5465** |
 
 ### OpenBioLink (Positive edges only)
 
