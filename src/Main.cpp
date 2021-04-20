@@ -15,8 +15,6 @@
 #include "Explaination.h"
 #include <Util.hpp>
 
-bool explain = true;
-
 int main(int argc, char** argv)
 {
 	std::cout << sqlite3_threadsafe();
@@ -81,7 +79,7 @@ int main(int argc, char** argv)
 
 	Explaination* explaination;
 	std::string db;
-	if (explain) {
+	if (Properties::get().EXPLAIN) {
 		std::cout << "Writing entities, relations and rules to db file..." << std::endl;
 		db = util::getDbName();
 		explaination = new Explaination(db, true);
@@ -106,7 +104,7 @@ int main(int argc, char** argv)
 	}
 	else {
 		RuleApplication* ca;
-		if (explain) {
+		if (Properties::get().EXPLAIN) {
 			ca = new RuleApplication(index, graph, ttr, vtr, rr, explaination);
 		}
 		else {
@@ -123,7 +121,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	if (explain) {
+	if (Properties::get().EXPLAIN) {
 		explaination->commit_tr();
 	}
 	

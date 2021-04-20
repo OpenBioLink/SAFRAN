@@ -35,6 +35,7 @@ public:
 	std::string REFLEXIV_TOKEN = "me_myself_i"; 
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
+	bool EXPLAIN = true;
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";

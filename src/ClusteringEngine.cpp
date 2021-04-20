@@ -20,7 +20,6 @@ void ClusteringEngine::learn() {
 
 	int rellen = index->getRelSize();
 	for (int i = 0; i < rellen; i++) {
-		i = 6;
 		int ind_ptr = adj_begin[3 + i];
 		int len = adj_begin[3 + i + 1] - ind_ptr;
 		std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << " " << len << "\n";
