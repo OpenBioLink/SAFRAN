@@ -1,6 +1,18 @@
 #include "ScoreTree.h"
 
 ScoreTree::ScoreTree() {
+	this->len = 0;
+	this->score = 0.0;
+	this->storedValues = nullptr;
+	this->nStoredValues = 0;
+	this->closed = false;
+	this->numOfValues = 0;
+	this->index = 0;
+	this->root = true;
+};
+
+ScoreTree::ScoreTree(int len) {
+	this->len = len;
 	this->score = 0.0;
 	this->storedValues = nullptr;
 	this->nStoredValues = 0;
@@ -17,7 +29,8 @@ void ScoreTree::Free() {
 	delete[] storedValues;
 }
 
-ScoreTree::ScoreTree(double score, int * values, int valuelength, int index) {
+ScoreTree::ScoreTree(int len, double score, int * values, int valuelength, int index) {
+	this->len = len;
 	this->score = score;
 	nStoredValues = valuelength;
 	storedValues = new int[nStoredValues];
@@ -34,7 +47,7 @@ ScoreTree::ScoreTree(double score, int * values, int valuelength, int index) {
 bool ScoreTree::fine() {
 	if (root && children.size() > 0) {
 		int i = children[children.size() - 1].index;
-		if (i >= LOWER_BOUND && i <= UPPER_BOUND) {
+		if (i >= LOWER_BOUND + len && i <= UPPER_BOUND + len) {
 			return isFirstUnique();
 		}
 	}
@@ -116,7 +129,7 @@ void ScoreTree::addValues(double score, int * values, int& nValues, int counter)
 
 	if (touched.size() > 0 && nStoredValues > 1 && touched.size() < nStoredValues) {
 		int childIndex = index - untouched.size();
-		if (childIndex >= LOWER_BOUND) {
+		if (childIndex >= LOWER_BOUND + len) {
 			nStoredValues = touched.size();
 			if (storedValues != nullptr) { delete[] storedValues; }
 			storedValues = new int[nStoredValues];
@@ -133,12 +146,12 @@ void ScoreTree::addValues(double score, int * values, int& nValues, int counter)
 			for (int i = 0; i < nStoredValues; i++) {
 				storedValues[i] = untouched[i];
 			}
-			addChild(score, &touched[0], touched.size(), childIndex);
+			addChild(this->len, score, &touched[0], touched.size(), childIndex);
 		}
 	}
 
-	if (root == true && nValues > 0 && numOfValues < LOWER_BOUND) {
-		addChild(score, values, nValues, numOfValues + nValues);
+	if (root == true && nValues > 0 && numOfValues < LOWER_BOUND + len) {
+		addChild(this->len, score, values, nValues, numOfValues + nValues);
 		numOfValues += nValues;
 	}
 
@@ -154,8 +167,8 @@ void ScoreTree::addValues(double score, int * values, int& nValues, int counter)
 	}
 }
 
-ScoreTree ScoreTree::addChild(double score, int * values, int valuelength, int childIndex) {
-	ScoreTree child = ScoreTree(score, values, valuelength, childIndex);
+ScoreTree ScoreTree::addChild(int len, double score, int * values, int valuelength, int childIndex) {
+	ScoreTree child = ScoreTree(len, score, values, valuelength, childIndex);
 	children.push_back(child);
 	return child;
 }

@@ -14,6 +14,7 @@
 #include <memory>
 #include <random>
 #include <iostream>
+#include <time.h>
 #include "Properties.hpp"
 
 namespace util{
@@ -59,8 +60,36 @@ namespace util{
 		return d_first;
 	}
 
+
+	inline bool binarySearch(std::vector<int>& arr, int l, int r, int x)
+	{
+		if (r >= l) {
+			int mid = l + (r - l) / 2;
+
+			// If the element is present at the middle 
+			// itself 
+			if (arr[mid] == x)
+				return true;
+
+			// If element is smaller than mid, then 
+			// it can only be present in left subarray 
+			if (arr[mid] > x)
+				return binarySearch(arr, l, mid - 1, x);
+
+			// Else the element can only be present 
+			// in right subarray 
+			return binarySearch(arr, mid + 1, r, x);
+		}
+
+		// We reach here when element is not 
+		// present in array 
+		return false;
+	}
+
 	inline bool in_sorted(std::vector<int>& vector, int ele) {
 		if (vector.size() == 0) return false;
+		if (vector.size() == 1) return vector[0] == ele;
+		if (vector.size() == 2) return vector[0] == ele || vector[1] == ele;
 		int a = 0;
 		int b = (vector.size() - 1) / 2;
 		int c = vector.size() - 1;
@@ -81,14 +110,14 @@ namespace util{
 				exit(-1);
 			}
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}
@@ -130,7 +159,7 @@ namespace util{
 		// That is faster than reading them one-by-one using the std::istream.
 		// Code that uses streambuf this way must be guarded by a sentry object.
 		// The sentry object performs various tasks,
-		// such as thread synchronization and updating the stream state.
+		// such as thread synchronization && updating the stream state.
 
 		std::istream::sentry se(is, true);
 		std::streambuf* sb = is.rdbuf();
@@ -153,6 +182,15 @@ namespace util{
 				t += (char)c;
 			}
 		}
+	}
+
+	inline std::string getDbName() {
+		time_t     now = time(0);
+		struct tm  tstruct;
+		char       buf[80];
+		tstruct = *localtime(&now);
+		strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S.db", &tstruct);
+		return buf;
 	}
 }
 

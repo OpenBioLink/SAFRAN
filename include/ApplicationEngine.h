@@ -1,6 +1,7 @@
 #ifndef NOISYORENGINE_H
 #define NOISYORENGINE_H
 
+
 #include <map>
 #include <functional>
 #include "RuleGraph.h"
@@ -52,6 +53,5 @@ private:
 		}
 	} finalResultComperator;
 };
-
 
 #endif //NoisyOR

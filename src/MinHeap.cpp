@@ -65,7 +65,7 @@ std::pair<int, double> MinHeap::extractMin()
         return harr[0];
     }
 
-    // Store the minimum value, and remove it from heap 
+    // Store the minimum value, && remove it from heap 
     std::pair<int, double> root = harr[0];
     harr[0] = harr[heap_size - 1];
     heap_size--;

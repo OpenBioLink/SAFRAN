@@ -16,9 +16,9 @@
 class ScoreTree
 {
 public:
-
 	ScoreTree();
-	ScoreTree(double score, int* values, int valuelength, int index);
+	ScoreTree(int len);
+	ScoreTree(int len, double score, int* values, int valuelength, int index);
 
 	void Free();
 	bool fine();
@@ -31,6 +31,7 @@ public:
 protected:
 
 private:
+	int len;
 	double score;
 	int numOfValues;
 	int index;
@@ -41,7 +42,7 @@ private:
 	std::vector<ScoreTree> children;
 
 	void addValues(double score, int* values, int& nValues, int counter);
-	ScoreTree addChild(double score, int* values, int valuelength, int childIndex);
+	ScoreTree addChild(int len, double score, int* values, int valuelength, int childIndex);
 
 };
 

@@ -76,6 +76,8 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 							}
 						}
 						else {
+							if (currRule.isTrivial())
+								continue;
 
 							if (currRule.isBuffered()) {
 								if (currRule.getRuletype() == Ruletype::XRule) {
@@ -83,15 +85,17 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if(currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()){
+								else if(currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()){
 									tailresults_vec = currRule.getBuffer();
+								}
+								else {
+									continue;
 								}
 							}
 							else {
 								throw new std::runtime_error("NOT BUFFERED");
 							}
 						}
-
 						if (tailresults_vec.size() > 0) {
 							for (auto tailresult : tailresults_vec) {
 								if (cluster_result_tail[tailresult] == 0.0) {
@@ -106,12 +110,14 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 							}
 						}
 					}
-					for (auto i : touched_cluster_tails) {
-						if (result_tail[i] == 0.0) {
-							touched_tails.push_back(i);
+					if (touched_cluster_tails.size() > 0) {
+						for (auto i : touched_cluster_tails) {
+							if (result_tail[i] == 0.0) {
+								touched_tails.push_back(i);
+							}
+							result_tail[i] = 1.0 - (1.0 - result_tail[i]) * (1.0 - cluster_result_tail[i]);
+							cluster_result_tail[i] = 0.0;
 						}
-						result_tail[i] = 1.0 - (1.0 - result_tail[i]) * (1.0 - cluster_result_tail[i]);
-						cluster_result_tail[i] = 0.0;
 					}
 				}
 
@@ -141,7 +147,7 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 					int size_tails = tailresults_vec.size() > 10 ? 10 : tailresults_vec.size();
 					int rank;
 					for (int i = size_tails - 1; i >= 0; i--) {
-						if (i == size_tails - 1 or tailresults_vec[i].second != tailresults_vec[i + 1].second) {
+						if (i == size_tails - 1 || tailresults_vec[i].second != tailresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (tail == tailresults_vec[i].first) {
@@ -189,8 +195,10 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 							}
 						}
 						else {
+							if (currRule.isTrivial())
+								continue;
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+								if (currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 									headresults_vec = currRule.getBuffer();
 								}
 								else if(currRule.getRuletype() == Ruletype::YRule){
@@ -253,7 +261,7 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 					int size_heads = headresults_vec.size() > 10 ? 10 : headresults_vec.size();
 					int rank;
 					for (int i = size_heads - 1; i >= 0; i--) {
-						if (i == size_heads - 1 or headresults_vec[i].second != headresults_vec[i + 1].second) {
+						if (i == size_heads - 1 || headresults_vec[i].second != headresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (head == headresults_vec[i].first) {
@@ -277,7 +285,6 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 }
 
 double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
-
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
 
@@ -328,13 +335,15 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 						}
 					}
 					else {
+						if (currRule.isTrivial())
+							continue;
 						if (currRule.isBuffered()) {
 							if (currRule.getRuletype() == Ruletype::XRule) {
 								if (util::in_sorted(currRule.getBuffer(), head)) {
 									tailresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
-							else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+							else if (currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 								tailresults_vec = currRule.getBuffer();
 							}
 						}
@@ -378,7 +387,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 						return a.second > b.second;
 					};
 
-					// Get Tailresults and final sorting
+					// Get Tailresults && final sorting
 					std::vector<std::pair<int, double>> tailresults_vec;
 					tailScoreTrees[tailIndex].getResults(tailresults_vec);
 					std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
@@ -386,7 +395,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 					int size_tails = tailresults_vec.size() > 10 ? 10 : tailresults_vec.size();
 					int rank;
 					for (int i = size_tails - 1; i >= 0; i--) {
-						if (i == size_tails - 1 or tailresults_vec[i].second != tailresults_vec[i + 1].second) {
+						if (i == size_tails - 1 || tailresults_vec[i].second != tailresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (tail == tailresults_vec[i].first) {
@@ -431,8 +440,10 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 						}
 					}
 					else {
+						if (currRule.isTrivial())
+							continue;
 						if (currRule.isBuffered()) {
-							if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+							if (currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 								headresults_vec = currRule.getBuffer();
 							}
 							else {
@@ -476,7 +487,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 				}
 				for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
 					int head = v_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
-					// Get Headresults and final sorting
+					// Get Headresults && final sorting
 					std::vector<std::pair<int, double>> headresults_vec;
 					headScoreTrees[headIndex].getResults(headresults_vec);
 					std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
@@ -485,7 +496,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 					int size_heads = headresults_vec.size() > 10 ? 10 : headresults_vec.size();
 					int rank;
 					for (int i = size_heads - 1; i >= 0; i--) {
-						if (i == size_heads - 1 or headresults_vec[i].second != headresults_vec[i + 1].second) {
+						if (i == size_heads - 1 || headresults_vec[i].second != headresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (head == headresults_vec[i].first) {

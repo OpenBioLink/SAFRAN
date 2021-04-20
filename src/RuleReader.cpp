@@ -11,6 +11,9 @@ CSR<int, Rule> * RuleReader::getCSR() {
 }
 
 void RuleReader::read(std::string filepath) {
+
+	int currID = 0;
+
 	RelToRules rules;
 	std::string line;
 	std::ifstream myfile(filepath);
@@ -18,7 +21,8 @@ void RuleReader::read(std::string filepath) {
 		while (!util::safeGetline(myfile, line).eof())
 		{
 			std::vector<std::string> rawrule = util::split(line, '\t');
-			Rule * r = parseRule(rawrule);
+			Rule * r = parseRule(rawrule, currID);
+			currID++;
 			//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
 			//r->toString();
 			int * relationId = r->getHeadrelation();
@@ -30,15 +34,15 @@ void RuleReader::read(std::string filepath) {
 		std::cout << "Unable to open rule file " << filepath << std::endl;
 		exit(-1);
 	}
-
 	csr = new CSR<int, Rule>(index->getRelSize(), rules);
 }
 
-Rule* RuleReader::parseRule(std::vector<std::string> rule) {
+Rule* RuleReader::parseRule(std::vector<std::string> rule, int currID) {
 	Rule * ruleObj = new Rule(std::stoi(rule[0]), std::stoi(rule[1]), std::stod(rule[2]));
 
 	std::string rawrule = rule[3];
 	ruleObj->setRulestring(rawrule);
+	ruleObj->setID(currID);
 	std::stringstream ss(rawrule);
 
 	Ruletype type = Ruletype::None;
@@ -91,7 +95,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	//skip '<=' sign
 	//std::getline(ss, token, ' ');
 	std::getline(ss, token, ' ');
-	//read whole body as string and split
+	//read whole body as string && split
 	std::getline(ss, token); 
 	std::vector<std::string> atoms = util::split(token, ' ');
 
@@ -103,7 +107,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	// Get if xToY based on first atom
 	bool xToY = parseXtoY(type, head, tail);
 
-	// next is variable to start direction and relation parsing
+	// next is variable to start direction && relation parsing
 	std::string next;
 	if (type == Ruletype::XYRule || type == Ruletype::XRule) {
 		next = "X";
@@ -112,8 +116,8 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		next = "Y";
 	}
 
-	// If XRule or XYRule and atoms have xToY (left to right) direction
-	// or it is a YRule and atoms have yToX direction
+	// If XRule || XYRule && atoms have xToY (left to right) direction
+	// || it is a YRule && atoms have yToX direction
 	for (int i = 0; i < rulelength; i++) {
 		int index = i;
 		//if (!((xToY && type != Ruletype::YRule) || (!xToY && type == Ruletype::YRule))) {
@@ -136,7 +140,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		}
 	}
 
-	// Inverse relations and atoms
+	// Inverse relations && atoms
 	for (int i = 0; i < rulelength; i++) {
 		int indexFwd = rulelength - i - 1;
 		if (forwardrelations[indexFwd] % 2 == 0) {

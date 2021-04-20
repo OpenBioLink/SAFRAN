@@ -10,17 +10,23 @@
 #include "RuleApplication.h"
 #include "JaccardEngine.h"
 #include <chrono>
+#include <ctime>
 #include <stdio.h>
+#include "Explaination.h"
+#include <Util.hpp>
 
-
+bool explain = true;
 
 int main(int argc, char** argv)
 {
+	std::cout << sqlite3_threadsafe();
 	if (argc != 3) {
 		std::cout << "Wrong number of startup arguments, please make sure that arguments are in form of {action} {path to properties}" << std::endl;
 		exit(-1);
 	}
-	Properties::get().ACTION = argv[1];
+	Properties::get().setAction(argv[1]);
+	Action action = Properties::get().ACTION;
+
 	bool success = Properties::get().read(argv[2]);
 	if (!success) {
 		std::cout << "No properties file found, falling back to default\n";
@@ -34,6 +40,7 @@ int main(int argc, char** argv)
 	auto start = std::chrono::high_resolution_clock::now();
 	Index* index = new Index();
 
+	// Adding the reflexive token to the index 
 	index->addNode(Properties::get().REFLEXIV_TOKEN);
 
 	std::cout << "Reading trainingset..." << std::endl;
@@ -45,15 +52,6 @@ int main(int argc, char** argv)
 	start = finish;
 
 	Properties::get().REL_SIZE = index->getRelSize();
-
-
-	//"C:\\Users\\Simon\\Desktop\\data\\alpha-50"
-	std::cout << "Reading rules..." << std::endl;
-	RuleReader* rr = new RuleReader(Properties::get().PATH_RULES, index, graph);
-	finish = std::chrono::high_resolution_clock::now();
-	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
-	std::cout << "Rules read in " << milliseconds.count() << " ms\n";
-	start = finish;
 
 	std::cout << "Reading testset..." << std::endl;
 	TesttripleReader* ttr = new TesttripleReader(Properties::get().PATH_TEST, index, graph, Properties::get().TRIAL);
@@ -69,33 +67,66 @@ int main(int argc, char** argv)
 	std::cout << "Validationset read in " << milliseconds.count() << " ms\n";
 	start = finish;
 
-	std::cout << "Applying rules..." << std::endl;
+	//"C:\\Users\\Simon\\Desktop\\data\\alpha-50"
+	std::cout << "Reading rules..." << std::endl;
+	RuleReader* rr = new RuleReader(Properties::get().PATH_RULES, index, graph);
+	ClusteringReader* cr = nullptr;
+	if (action == applynrnoisy) {
+		cr = new ClusteringReader(Properties::get().PATH_CLUSTER, rr->getCSR(), index, graph);
+	}
+	finish = std::chrono::high_resolution_clock::now();
+	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+	std::cout << "Rules read in " << milliseconds.count() << " ms\n";
+	start = finish;
 
-	if (Properties::get().ACTION.compare("learnnrnoisy") == 0) {
+	Explaination* explaination;
+	std::string db;
+	if (explain) {
+		std::cout << "Writing entities, relations and rules to db file..." << std::endl;
+		db = util::getDbName();
+		explaination = new Explaination(db, true);
+		explaination->begin_tr();
+		explaination->insertEntities(index);
+		explaination->insertRelations(index);
+		explaination->insertRules(rr, index->getRelSize(), cr);
+		finish = std::chrono::high_resolution_clock::now();
+		milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
+		std::cout << "Written in " << milliseconds.count() << " ms\n";
+		start = finish;
+	}
+
+	std::cout << "Applying rules..." << std::endl;
+	if (action == learnnrnoisy) {
 		ClusteringEngine* ce = new ClusteringEngine(index, graph, ttr, vtr, rr);
 		ce->learn();
 	}
-	else if (Properties::get().ACTION.compare("applynrnoisy") == 0) {
-		ClusteringReader* cr = new ClusteringReader(Properties::get().PATH_CLUSTER, rr->getCSR(), index, graph);
-		RuleApplication* ca = new RuleApplication(index, graph, ttr, vtr, rr);
-		ca->apply_nr_noisy(cr->getRelToClusters());
-	}
-	else if (Properties::get().ACTION.compare("applymax") == 0) {
-		RuleApplication* ca = new RuleApplication(index, graph, ttr, vtr, rr);
-		ca->apply_only_max();
-	}
-	else if (Properties::get().ACTION.compare("applynoisy") == 0) {
-		RuleApplication* ca = new RuleApplication(index, graph, ttr, vtr, rr);
-		ca->apply_only_noisy();
-	}
-	else if (Properties::get().ACTION.compare("calcjacc") == 0) {
+	else if (action == calcjacc) {
 		JaccardEngine* jacccalc = new JaccardEngine(index, graph, vtr, rr);
 		jacccalc->calculate_jaccard();
 	}
 	else {
-		std::cout << "ACTION not found" << "\n";
-		exit(-1);
+		RuleApplication* ca;
+		if (explain) {
+			ca = new RuleApplication(index, graph, ttr, vtr, rr, explaination);
+		}
+		else {
+			ca = new RuleApplication(index, graph, ttr, vtr, rr);
+		}
+		if (action == applynrnoisy) {
+			ca->apply_nr_noisy(cr->getRelToClusters());
+		}
+		else if (action == applymax) {
+			ca->apply_only_max();
+		}
+		else if (action == applynoisy) {
+			ca->apply_only_noisy();
+		}
 	}
+
+	if (explain) {
+		explaination->commit_tr();
+	}
+	
 	finish = std::chrono::high_resolution_clock::now();
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 	std::cout << "Rules read in " << milliseconds.count() << " ms\n";

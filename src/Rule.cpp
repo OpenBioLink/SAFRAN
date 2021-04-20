@@ -19,6 +19,9 @@ void Rule::print() {
 }
 
 //Setter
+void Rule::setID(int ID) {
+	this->ID = ID;
+}
 void Rule::setRuletype(Ruletype type) {
 	this->type = type;
 }
@@ -44,38 +47,59 @@ void Rule::setRulestring(std::string rule) {
 	rulestring = rule;
 }
 
+bool Rule::isTrivial() {
+	return trivial;
+}
+
 void Rule::setBuffer(std::vector<int> buffer) {
+	if (buffer.size() == 0) {
+		trivial = true;
+		return;
+	}
 	this->buffer = buffer;
 	buffered = true;
 }
 bool Rule::isBuffered() {
 	return buffered;
 }
+std::vector<int>& Rule::getBuffer() {
+	return *buffer;
+}
+void Rule::removeBuffer() {
+	(*buffer).clear();
+	buffered = false;
+}
 
 void Rule::setHeadBuffer(int head, std::vector<int> buffer) {
-	headBuffer[head] = buffer;
+	if (!headBuffer.has_value()) {
+		headBuffer = std::unordered_map<int, std::vector<int>>();
+	}
+	(*headBuffer)[head] = buffer;
 }
 bool Rule::isHeadBuffered(int head) {
-	return headBuffer.find(head) != headBuffer.end();
+	return (*headBuffer).find(head) != (*headBuffer).end();
 }
 std::vector<int>& Rule::getHeadBuffered(int head) {
-	return headBuffer[head];
+	return (*headBuffer)[head];
 }
 void Rule::clearHeadBuffer() {
-	headBuffer.clear();
+	(*headBuffer).clear();
 }
 
 void Rule::setTailBuffer(int tail, std::vector<int> buffer) {
-	tailBuffer[tail] = buffer;
+	if (!tailBuffer.has_value()) {
+		tailBuffer = std::unordered_map<int, std::vector<int>>();
+	}
+	(*tailBuffer)[tail] = buffer;
 }
 bool Rule::isTailBuffered(int tail) {
-	return tailBuffer.find(tail) != tailBuffer.end();
+	return (*tailBuffer).find(tail) != (*tailBuffer).end();
 }
 std::vector<int>& Rule::getTailBuffered(int tail) {
-	return tailBuffer[tail];
+	return (*tailBuffer)[tail];
 }
 void Rule::clearTailBuffer() {
-	tailBuffer.clear();
+	(*tailBuffer).clear();
 }
 
 bool Rule::is_c() {
@@ -99,6 +123,7 @@ bool Rule::is_ac2() {
 	return false;
 }
 
+/*
 void Rule::add_head_exception(int val) {
 	head_exceptions.insert(val);
 }
@@ -106,8 +131,12 @@ void Rule::add_head_exception(int val) {
 void Rule::add_tail_exception(int val) {
 	tail_exceptions.insert(val);
 }
+*/
 
 //Getter
+int& Rule::getID() {
+	return ID;
+}
 Ruletype Rule::getRuletype() {
 	return type;
 }
@@ -135,13 +164,7 @@ double Rule::getAppliedConfidence() {
 std::string Rule::getRulestring() {
 	return rulestring;
 }
-std::vector<int>& Rule::getBuffer() {
-	return buffer;
-}
-void Rule::removeBuffer() {
-	buffer.clear();
-	buffered = false;
-}
+
 
 long long Rule::get_body_hash() {
 	return bodyhash;
@@ -193,6 +216,7 @@ bool Rule::is_body_equal(Rule other) {
 
 Rule& Rule::operator=(Rule* other)
 {
+	ID = other->ID;
 	type = other->type;
 	rulelength = other->rulelength;
 	predicted = other->predicted;
@@ -206,7 +230,9 @@ Rule& Rule::operator=(Rule* other)
 	rulestring = other->rulestring;
 	applied_confidence = other->applied_confidence;
 	bodyhash = other->bodyhash;
+	/*
 	tail_exceptions = other->tail_exceptions;
 	head_exceptions = other->head_exceptions;
+	*/
 	return *this;
 }

@@ -8,6 +8,20 @@ RuleApplication::RuleApplication(Index* index, TraintripleReader* graph, Testtri
 	this->rr = rr;
 	this->rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
 	reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
+	this->explain = false;
+}
+
+RuleApplication::RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr, Explaination * exp) {
+	this->index = index;
+	this->graph = graph;
+	this->ttr = ttr;
+	this->vtr = vtr;
+	this->rr = rr;
+	this->rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
+	reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
+	this->exp = exp;
+	this->explain = true;
+	this->db = db;
 }
 
 void RuleApplication::apply_nr_noisy(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters) {
@@ -15,7 +29,7 @@ void RuleApplication::apply_nr_noisy(std::unordered_map<int, std::pair<bool, std
 	int iterations = index->getRelSize();
 #pragma omp parallel for schedule(dynamic)
 	for (int rel = 0; rel < iterations; rel++) {
-		if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
+		if (iterations > 100 && (rel % ((iterations - 1) / 100)) == 0) {
 			util::printProgress((double)rel / (double)(iterations - 1));
 		}
 		std::pair<double, std::vector<std::vector<int>>> cluster = rel2clusters[rel];
@@ -42,7 +56,7 @@ void RuleApplication::apply_only_noisy() {
 	int iterations = index->getRelSize();
 #pragma omp parallel for schedule(dynamic)
 	for (int rel = 0; rel < iterations; rel++) {
-		if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
+		if (iterations > 100 && (rel % ((iterations - 1) / 100)) == 0) {
 			util::printProgress((double)rel / (double)(iterations - 1));
 		}
 		int ind_ptr = adj_begin[3 + rel];
@@ -67,7 +81,7 @@ void RuleApplication::apply_only_max() {
 	int iterations = index->getRelSize();
 #pragma omp parallel for schedule(dynamic)
 	for (int rel = 0; rel < iterations; rel++) {
-		if (iterations > 100 and (rel % ((iterations - 1) / 100)) == 0) {
+		if (iterations > 100 && (rel % ((iterations - 1) / 100)) == 0) {
 			util::printProgress((double)rel / (double)(iterations - 1));
 		}
 		int ind_ptr = adj_begin[3 + rel];
@@ -85,6 +99,8 @@ void RuleApplication::apply_only_max() {
 }
 
 void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
+	
+	std::unordered_map<int, std::vector<int>> entityToRules;
 
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -150,15 +166,15 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+								else if (currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 									tailresults_vec = currRule.getBuffer();
 								}
 							}
 							else {
-								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
+								if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule) {
 									std::vector<int> comp;
 									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(comp);
 									}
@@ -166,16 +182,16 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+								else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
 									}
-								}else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
+								}else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule) {
 									std::vector<int> comp;
 									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, comp, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(comp);
 									}
@@ -183,9 +199,9 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+								else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(tailresults_vec);
 									}
@@ -195,6 +211,9 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 
 						if (tailresults_vec.size() > 0) {
 							for (auto tailresult : tailresults_vec) {
+								if (this->explain) {
+									entityToRules[tailresult].push_back(currRule.getID());
+								}
 								if (cluster_result_tail[tailresult] == 0.0) {
 									cluster_result_tail[tailresult] = currRule.getAppliedConfidence();
 									touched_cluster_tails.push_back(tailresult);
@@ -214,6 +233,45 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 						result_tail[i] = 1.0 - (1.0 - result_tail[i]) * (1.0 - cluster_result_tail[i]);
 						cluster_result_tail[i] = 0.0;
 					}
+
+				}
+
+				// INSERT EXPLAINATION
+				if (this->explain) {
+
+					MinHeap tails(10);
+					for (auto i : touched_tails) {
+						if (result_tail[i] >= tails.getMin().second) {
+							tails.deleteMin();
+							tails.insertKey(std::make_pair(i, result_tail[i]));
+						}
+					}
+
+					std::vector<std::pair<int, double>> tailresults_vec;
+					for (int i = 9; i >= 0; i--) {
+						std::pair<int, double> tail_pred = tails.extractMin();
+						if (tail_pred.first != -1) tailresults_vec.push_back(tail_pred);
+					}
+					std::reverse(tailresults_vec.begin(), tailresults_vec.end());
+
+					int task_id = exp->getNextTaskID();
+					exp->begin();
+					exp->insertTask(task_id, true, rel, head);
+					for (auto p : tailresults_vec) {
+						bool hit = false;
+						if (heads->second.find(p.first) != heads->second.end()) {
+							hit = true;
+						}
+						exp->insertPrediction(task_id, p.first, hit, p.second);
+						auto& it = entityToRules.find(p.first);
+						if (it != entityToRules.end()) {
+							for (auto rule : it->second) {
+								exp->insertRule_Entity(rule, task_id, p.first);
+							}
+						}
+					}
+					exp->commit();
+					entityToRules.clear();
 				}
 
 				for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
@@ -276,7 +334,7 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 						}
 						else {
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+								if (currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 									headresults_vec = currRule.getBuffer();
 								}
 								else if (currRule.getRuletype() == Ruletype::YRule) {
@@ -286,34 +344,34 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 								}
 							}
 							else {
-								if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+								if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
 									}
 								}
-								else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
+								else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule) {
 									std::vector<int> comp;
 									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, comp, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
 									}
 									if (util::in_sorted(comp, tail)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
-								} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+								} else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered()) currRule.setBuffer(headresults_vec);
 									}
 								}
-								else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
+								else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule) {
 									std::vector<int> comp;
 									rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, comp, true, true);
-#pragma omp critical
+
 									{
 										if (!currRule.isBuffered())currRule.setBuffer(headresults_vec);
 									}
@@ -326,6 +384,9 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 
 						if (headresults_vec.size() > 0) {
 							for (auto headresult : headresults_vec) {
+								if (this->explain) {
+									entityToRules[headresult].push_back(currRule.getID());
+								}
 								if (cluster_result_head[headresult] == 0.0) {
 									cluster_result_head[headresult] = currRule.getAppliedConfidence();
 									touched_cluster_heads.push_back(headresult);
@@ -345,6 +406,43 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 						result_head[i] = 1.0 - (1.0 - result_head[i]) * (1.0 - cluster_result_head[i]);
 						cluster_result_head[i] = 0.0;
 					}
+				}
+
+				// INSERT EXPLAINATION
+				if (this->explain) {
+					MinHeap heads(10);
+					for (auto i : touched_heads) {
+						if (result_head[i] >= heads.getMin().second) {
+							heads.deleteMin();
+							heads.insertKey(std::make_pair(i, result_head[i]));
+						}
+					}
+
+					std::vector<std::pair<int, double>> headresults_vec;
+					for (int i = 9; i >= 0; i--) {
+						std::pair<int, double> head_pred = heads.extractMin();
+						if (head_pred.first != -1) headresults_vec.push_back(head_pred);
+					}
+					std::reverse(headresults_vec.begin(), headresults_vec.end());
+
+					int task_id = exp->getNextTaskID();
+					exp->begin();
+					exp->insertTask(task_id, false, rel, tail);
+					for (auto p : headresults_vec) {
+						bool hit = false;
+						if (tails->second.find(p.first) != tails->second.end()) {
+							hit = true;
+						}
+						exp->insertPrediction(task_id, p.first, hit, p.second);
+						auto& it = entityToRules.find(p.first);
+						if (it != entityToRules.end()) {
+							for (auto rule : it->second) {
+								exp->insertRule_Entity(rule, task_id, p.first);
+							}
+						}
+					}
+					exp->commit();
+					entityToRules.clear();
 				}
 
 				for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
@@ -397,6 +495,7 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 }
 
 void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
+	std::unordered_map<int, std::vector<int>> entityToRules;
 
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -419,6 +518,8 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 	int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
 
 
+
+
 	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> headTailResults;
 	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> tailHeadResults;
 
@@ -433,61 +534,96 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 			int lenTails = heads->second.size();
 
 
-			if (lenTails > 0) {
-				ScoreTree* tailScoreTrees = new ScoreTree[lenTails];
-				std::vector<bool> fineScoreTrees(lenTails);
-				bool stop = false;
+			// ADD HED/REL -> PREDICTION_ID
+
+			if (lenTails > 0) {;
+				ScoreTree* scoreTree = new ScoreTree(lenTails);
 				for (auto ruleIndex : clusters[0]) {
 					Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
 					std::vector<int> tailresults_vec;
+
 
 					if (currRule.is_c()) {
 						rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true, false);
 					}
 					else {
-							if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
+							if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule) {
 								if (rulegraph->existsAcyclic(&head, currRule, true)) {
 									tailresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
-							else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+							else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 								rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true, false);
-							} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
+							} else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule) {
 								if (rulegraph->existsAcyclic(&head, currRule, true)) {
 									tailresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
-							else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+							else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 								rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, tailresults_vec, true, false);
 							}
 					}
-					if (tailresults_vec.size() > 0) {
-						stop = true;
-						for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
-							if (fineScoreTrees[tailIndex] == false) {
-								int tail = t_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
-								std::vector<int> filtered_testresults_vec;
+
+					if (scoreTree->fine()) {
+						break;
+					}
+					else {
+						if (tailresults_vec.size() > 0) {
+							if (this->explain) {
 								for (auto a : tailresults_vec) {
-									if (a == reflexiv_token) {
-										a = tail;
-									}
-									if (a == tail || heads->second.find(a) == heads->second.end()) {
-										filtered_testresults_vec.push_back(a);
-									}
+									entityToRules[a].push_back(currRule.getID());
 								}
-								tailScoreTrees[tailIndex].addValues(currRule.getAppliedConfidence(), &filtered_testresults_vec[0], filtered_testresults_vec.size());
-								if (tailScoreTrees[tailIndex].fine()) {
-									fineScoreTrees[tailIndex] = true;
-								}
-								else {
-									stop = false;
-								}
+							}
+							scoreTree->addValues(currRule.getAppliedConfidence(), &tailresults_vec[0], tailresults_vec.size());
+						}
+					}
+				}
+
+				// Get Tailresults && final sorting
+				std::vector<std::pair<int, double>> tailresults_vec;
+				scoreTree->getResults(tailresults_vec);
+				std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
+
+				/*
+				// INSERT EXPLAINATION
+				if (this->explain) {
+					int task_id = exp->getNextTaskID();
+					exp->begin();
+					exp->insertTask(task_id, true, rel, head);
+					for (auto p : tailresults_vec) {
+						exp->insertPrediction(task_id, p.first, p.second);
+						exp->insertCluster(task_id, p.first, 0, p.second);
+						auto& it = entityToRules.find(p.first);
+						if (it != entityToRules.end()) {
+							for (auto rule : it->second) {
+								exp->insertRule_Cluster(task_id, p.first, 0, rule);
 							}
 						}
 					}
-					if (stop) {
-						break;
+					exp->commit();
+					entityToRules.clear();
+				}
+				*/
+
+				if (this->explain) {
+					int task_id = exp->getNextTaskID();
+					exp->begin();
+					exp->insertTask(task_id, true, rel, head);
+					for (auto p : tailresults_vec) {
+						bool hit = false;
+						if (heads->second.find(p.first) != heads->second.end()) {
+							hit = true;
+						}
+						exp->insertPrediction(task_id, p.first, hit, p.second);
+						auto& it = entityToRules.find(p.first);
+						if (it != entityToRules.end()) {
+							for (auto rule : it->second) {
+								exp->insertRule_Entity(rule, task_id, p.first);
+							}
+						}
 					}
+					exp->commit();
+					entityToRules.clear();
 				}
 
 				for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
@@ -497,16 +633,24 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 						return a.second > b.second;
 					};
 
-					// Get Tailresults and final sorting
-					std::vector<std::pair<int, double>> tailresults_vec;
-					tailScoreTrees[tailIndex].getResults(tailresults_vec);
-					std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
+					
 
-					headTailResults[head][tail] = tailresults_vec;
+					std::vector<std::pair<int, double>> filtered_testresults_vec;
+					for (auto a : tailresults_vec) {
+						if (a.first == reflexiv_token) {
+							a.first = tail;
+						}
+						if (a.first == tail || heads->second.find(a.first) == heads->second.end()) {
+							filtered_testresults_vec.push_back(a);
+						}
+					}
 
-					tailScoreTrees[tailIndex].Free();
+					headTailResults[head][tail] = filtered_testresults_vec;
+
+					
 				}
-				delete[] tailScoreTrees;
+				scoreTree->Free();
+				delete scoreTree;
 			}
 			heads++;
 		}
@@ -523,9 +667,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 			int lenHeads = tails->second.size();
 
 			if (lenHeads > 0) {
-				ScoreTree* headScoreTrees = new ScoreTree[lenHeads];
-				std::vector<bool> fineScoreTrees(lenHeads);
-				bool stop = false;
+				ScoreTree* scoreTree = new ScoreTree(lenHeads);
 				for (auto ruleIndex : clusters[0]) {
 					Rule& currRule = rules_adj_list[ind_ptr + ruleIndex];
 
@@ -535,63 +677,105 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 						rulegraph->searchDFSSingleStart_filt(false, tail, tail, currRule, true, headresults_vec, true, false);
 					}
 					else {
-							if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+							if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 								rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true, false);
 							}
-							else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
+							else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule) {
 								if (rulegraph->existsAcyclic(&tail, currRule, true)) {
 									headresults_vec.push_back(*currRule.getHeadconstant());
 								}
-							} else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+							} else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 								rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, false);
 							}
-							else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
+							else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule) {
 								if (rulegraph->existsAcyclic(&tail, currRule, true)) {
 									headresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
 					}
 
-					if (headresults_vec.size() > 0) {
-						stop = true;
-						for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
-							if (fineScoreTrees[headIndex] == false) {
-								int head = t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
-								std::vector<int> filtered_headresults_vec;
+					if (scoreTree->fine()) {
+						break;
+					}
+					else {
+						if (headresults_vec.size() > 0) {
+							if (this->explain) {
 								for (auto a : headresults_vec) {
-									if (a == reflexiv_token) {
-										a = head;
-									}
-									if (a == head || tails->second.find(a) == tails->second.end()) {
-										filtered_headresults_vec.push_back(a);
-									}
+									entityToRules[a].push_back(currRule.getID());
 								}
-								headScoreTrees[headIndex].addValues(currRule.getAppliedConfidence(), &filtered_headresults_vec[0], filtered_headresults_vec.size());
-								if (headScoreTrees[headIndex].fine()) {
-									fineScoreTrees[headIndex] = true;
-								}
-								else {
-									stop = false;
-								}
+							}
+							scoreTree->addValues(currRule.getAppliedConfidence(), &headresults_vec[0], headresults_vec.size());
+						}
+					}
+				}
+
+				// Get Headresults && final sorting
+				std::vector<std::pair<int, double>> headresults_vec;
+				scoreTree->getResults(headresults_vec);
+				std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
+
+				/*
+				// INSERT EXPLAINATION
+				if (this->explain) {
+					int task_id = exp->getNextTaskID();
+					exp->begin();
+					exp->insertTask(task_id, false, rel, tail);
+					for (auto p : headresults_vec) {
+						exp->insertPrediction(task_id, p.first, p.second);
+						exp->insertCluster(task_id, p.first, 0, p.second);
+						auto& it = entityToRules.find(p.first);
+						if (it != entityToRules.end()) {
+							for (auto rule : it->second) {
+								exp->insertRule_Cluster(task_id, p.first, 0, rule);
 							}
 						}
 					}
-					if (stop) {
-						break;
-					}
+					exp->commit();
+					entityToRules.clear();
 				}
+				*/
+
+				if (this->explain) {
+					int task_id = exp->getNextTaskID();
+					exp->begin();
+					exp->insertTask(task_id, false, rel, tail);
+					for (auto p : headresults_vec) {
+						bool hit = false;
+						if (tails->second.find(p.first) != tails->second.end()) {
+							hit = true;
+						}
+						exp->insertPrediction(task_id, p.first, hit, p.second);
+						auto& it = entityToRules.find(p.first);
+						if (it != entityToRules.end()) {
+							for (auto rule : it->second) {
+								exp->insertRule_Entity(rule, task_id, p.first);
+							}
+						}
+					}
+					exp->commit();
+					entityToRules.clear();
+				}
+
+
 				for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
 					int head = t_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
-					// Get Headresults and final sorting
-					std::vector<std::pair<int, double>> headresults_vec;
-					headScoreTrees[headIndex].getResults(headresults_vec);
-					std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
 
-					tailHeadResults[tail][head] = headresults_vec;
+					std::vector<std::pair<int, double>> filtered_headresults_vec;
+					for (auto a : headresults_vec) {
+						if (a.first == reflexiv_token) {
+							a.first = head;
+						}
+						if (a.first == head || tails->second.find(a.first) == tails->second.end()) {
+							filtered_headresults_vec.push_back(a);
+						}
+					}
 
-					headScoreTrees[headIndex].Free();
+					tailHeadResults[tail][head] = filtered_headresults_vec;
+
+					
 				}
-				delete[] headScoreTrees;
+				scoreTree->Free();
+				delete scoreTree;
 			}
 			tails++;
 		}

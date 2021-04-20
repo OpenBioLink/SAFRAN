@@ -14,11 +14,13 @@
 #include "MinHeap.h"
 #include "Util.hpp"
 #include "ScoreTree.h"
+#include "Explaination.h"
 
 class RuleApplication
 {
 public:
 	RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr);
+	RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr, Explaination * exp);
 	void apply_nr_noisy(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters);
 	void apply_only_noisy();
 	void apply_only_max();
@@ -29,6 +31,10 @@ private:
 	TesttripleReader* ttr;
 	ValidationtripleReader* vtr;
 	RuleReader* rr;
+
+	Explaination* exp;
+	bool explain;
+	std::string db;
 
 	FILE* pFile;
 	RuleGraph* rulegraph;
