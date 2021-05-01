@@ -203,7 +203,8 @@ std::string RuleReader::getRelation(std::string atom, std::string previous, int 
 
 // input "asdf,bsdf)"
 std::pair<std::string, std::string> RuleReader::getHeadTail(std::string& atom) {
-	std::regex e("[A-Z],.*\\)");
+	
+	std::regex e("[A-D,X,Y],.*\\)");
 
 	std::string head, tail;
 	if (std::regex_match(atom, e)) {
