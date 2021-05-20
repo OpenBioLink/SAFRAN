@@ -29,7 +29,7 @@ public:
 	int TOP_K_OUTPUT = 10;
 	int WORKER_THREADS = -1;
 	int TRIAL_SIZE = 100000;
-	int DISCRIMINATION_BOUND = 4000;
+	int DISCRIMINATION_BOUND = 1000;
 	std::string REFLEXIV_TOKEN = "me_myself_i"; 
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
@@ -178,7 +178,7 @@ public:
 		string_rep << "REFLEXIV_TOKEN = " << REFLEXIV_TOKEN << std::endl;
 
 		// SPECIFIC PROPS
-		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0 || ACTION.compare("learnnrnoisy")) {
+		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0 || ACTION.compare("learnnrnoisy") == 0) {
 			string_rep << "ONLY_UNCONNECTED = " << ONLY_UNCONNECTED << std::endl;
 		}
 
