@@ -42,21 +42,25 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 		if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
+			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}
 			currRule.setBuffer(results_vec);
 		}
 		else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
+			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}
 			currRule.setBuffer(results_vec);
 		}
 		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, results_vec, false, true);
+			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}			
 			currRule.setBuffer(results_vec);
 		}
 		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, results_vec, false, true);
+			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}		
 			currRule.setBuffer(results_vec);
 		}
 
@@ -81,6 +85,7 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 #pragma omp critical
 							{
 								if (tailresults_vec.size() + CURR_BUF < MAX_BUF) {
+									if(tailresults_vec.size() >= Properties::get().DISCRIMINATION_BOUND){tailresults_vec.clear();}									
 									currRule.setHeadBuffer(head, tailresults_vec);
 									CURR_BUF = CURR_BUF + tailresults_vec.size();
 								}
@@ -110,6 +115,7 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 #pragma omp critical
 							{
 								if (headresults_vec.size() + CURR_BUF < MAX_BUF) {
+									if(headresults_vec.size() >= Properties::get().DISCRIMINATION_BOUND){headresults_vec.clear();}								
 									currRule.setTailBuffer(tail, headresults_vec);
 									CURR_BUF = CURR_BUF + headresults_vec.size();
 								}

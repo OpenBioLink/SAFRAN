@@ -222,12 +222,13 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 					MinHeap tails(10);
 					for (auto i : touched_tails) {
 						if (result_tail[i] >= tails.getMin().second) {
+							double confidence = result_tail[i];
 							if (i == reflexiv_token) {
-								i = tail;
+								i = head;
 							}
 							if (i == tail || heads->second.find(i) == heads->second.end()) {
 								tails.deleteMin();
-								tails.insertKey(std::make_pair(i, result_tail[i]));
+								tails.insertKey(std::make_pair(i, confidence));
 							}
 						}
 					}
@@ -353,12 +354,13 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 					MinHeap heads(10);
 					for (auto i : touched_heads) {
 						if (result_head[i] >= heads.getMin().second) {
+							double confidence = result_head[i];
 							if (i == reflexiv_token) {
-								i = head;
+								i = tail;
 							}
 							if (i == head || tails->second.find(i) == tails->second.end()) {
 								heads.deleteMin();
-								heads.insertKey(std::make_pair(i, result_head[i]));
+								heads.insertKey(std::make_pair(i, confidence));
 							}
 						}
 					}
@@ -469,7 +471,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 								std::vector<int> filtered_testresults_vec;
 								for (auto a : tailresults_vec) {
 									if (a == reflexiv_token) {
-										a = tail;
+										a = head;
 									}
 									if (a == tail || heads->second.find(a) == heads->second.end()) {
 										filtered_testresults_vec.push_back(a);
@@ -560,7 +562,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 								std::vector<int> filtered_headresults_vec;
 								for (auto a : headresults_vec) {
 									if (a == reflexiv_token) {
-										a = head;
+										a = tail;
 									}
 									if (a == head || tails->second.find(a) == tails->second.end()) {
 										filtered_headresults_vec.push_back(a);
