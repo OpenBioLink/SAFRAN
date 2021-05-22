@@ -202,6 +202,14 @@ bool RuleGraph::existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest) {
 	if (rule.getBodyconstantId() != nullptr) {
 		constantnode = rule.getBodyconstantId();
 	}
+	if (Properties::get().ONLY_UNCONNECTED == 1) {
+		if ((*relCounter).find(*valId) != (*relCounter).end()) {
+			auto& it = (*relCounter).find(*valId)->second;
+			if (it.find(*rule.getHeadconstant()) != it.end()) {
+				return false;
+			}
+		}
+	}
 	if (existsAcyclic(valId, constantnode, relations, rule.getRulelength())) {
 		if (rule.getRuletype() == Ruletype::XRule) {
 			auto it = train_relHeadToTails.find(*rule.getHeadrelation());

@@ -50,32 +50,52 @@ void ClusteringReader::read(CSR<int, Rule>* rulecsr, std::string clusteringpath)
 					break;
 				}
 			}
+			if (!is_max_approach) {
+				std::vector<std::vector<int>> id_clusters;
+				while (true) {
+					util::safeGetline(myfile, line);
+					if (line.compare("") == 0) {
+						break;
+					}
+					std::vector<std::string> rules = util::split(line, '\t');
+					std::vector<int> id_cluster;
+					for (auto rule : rules) {
+						if (rule.compare("") == 0) {
+							continue;
+						}
 
-			std::vector<std::vector<int>> id_clusters;
-			while (true) {
-				util::safeGetline(myfile, line);
-				if (line.compare("") == 0) {
-					break;
+						auto id = rulestringToID.find(rule);
+						if (id != rulestringToID.end()) {
+							id_cluster.push_back(id->second);
+						}
+						else {
+							std::cout << "Rule in cluster not found in ruleset";
+							exit(-1);
+						}
+					}
+					id_clusters.push_back(id_cluster);
 				}
-				std::vector<std::string> rules = util::split(line, '\t');
+				relToClusters[relation] = std::make_pair(is_max_approach, id_clusters);
+			}
+			else {
+				std::vector<std::vector<int>> id_clusters;
+				int ind_ptr = adj_begin[3 + relation];
+				int len = adj_begin[3 + relation + 1] - ind_ptr;
 				std::vector<int> id_cluster;
-				for (auto rule : rules) {
-					if (rule.compare("") == 0) {
-						continue;
-					}
-
-					auto id = rulestringToID.find(rule);
-					if (id != rulestringToID.end()) {
-						id_cluster.push_back(id->second);
-					}
-					else {
-						std::cout << "Rule in cluster not found in ruleset";
-						exit(-1);
-					}
+				for (int j = 0; j < len; j++) {
+					id_cluster.push_back(j);
 				}
 				id_clusters.push_back(id_cluster);
+				relToClusters[relation] = std::make_pair(is_max_approach, id_clusters);
+
+				// skip lines until empty line
+				while (true) {
+					util::safeGetline(myfile, line);
+					if (line.compare("") == 0) {
+						break;
+					}
+				}
 			}
-			relToClusters[relation] = std::make_pair(is_max_approach, id_clusters);
 		}
 		myfile.close();
 	}
