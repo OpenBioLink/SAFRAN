@@ -1,8 +1,6 @@
 #ifndef SCORETREE_H
 #define SCORETREE_H
 
-#define LOWER_BOUND 10
-#define UPPER_BOUND 10
 #define EPSILON 0.0001
 
 #include <stdio.h>
@@ -12,6 +10,11 @@
 #include <vector>
 
 #include "Index.h"
+#include "Properties.hpp"
+
+#include <iostream>
+#include<iomanip>
+#include<limits>
 
 class ScoreTree
 {
@@ -39,6 +42,9 @@ private:
 	int* storedValues;
 	int nStoredValues;
 	std::vector<ScoreTree> children;
+
+	int LOWER_BOUND;
+	int UPPER_BOUND;
 
 	void addValues(double score, int* values, int& nValues, int counter);
 	ScoreTree addChild(double score, int* values, int valuelength, int childIndex);

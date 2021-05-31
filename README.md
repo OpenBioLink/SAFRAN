@@ -15,10 +15,13 @@ SAFRAN (Scalable and fast non-redundant rule application) is a framework for fas
 
 ## Build from source
 
-1. Have cmake installed (> 9.6.0)
-2. Create and change to directory **build**
-3. Run `cmake ../`
-4. Run `make`
+1. Download and extract boost 1.76.0 to project root directory
+   1. Windows: https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.zip
+   2. Unix: https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz
+2. Have cmake installed (> 9.6.0)
+3. Create and change to directory **build**
+4. Run `cmake ../`
+5. Run `make`
 
 If building using Visual Studio
 1. Open SAFRAN.sln

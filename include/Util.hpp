@@ -154,6 +154,25 @@ namespace util{
 			}
 		}
 	}
+
+	inline int compFraction(long long num_first, long long denum_fist, long long num_second, long long denum_second)
+	{
+		// Compute ad-bc
+		long long Y = num_first * denum_second - denum_fist * num_second;
+
+		if (Y > 0) {
+			// first is bigger
+			return 1;
+		}
+		else if (Y < 0) {
+			// second is bigger
+			return -1;
+		}
+		else {
+			// eq
+			return 0;
+		}
+	}
 }
 
 #endif // UTIL_H

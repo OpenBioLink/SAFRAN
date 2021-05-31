@@ -8,6 +8,7 @@ ScoreTree::ScoreTree() {
 	this->numOfValues = 0;
 	this->index = 0;
 	this->root = true;
+	this->LOWER_BOUND = this->UPPER_BOUND = Properties::get().TOP_K_OUTPUT;
 };
 
 void ScoreTree::Free() {
@@ -29,6 +30,7 @@ ScoreTree::ScoreTree(double score, int * values, int valuelength, int index) {
 	this->numOfValues = valuelength;
 	this->root = false;
 	this->index = index;
+	this->LOWER_BOUND = this->UPPER_BOUND = Properties::get().TOP_K_OUTPUT;
 }
 
 bool ScoreTree::fine() {
@@ -114,7 +116,7 @@ void ScoreTree::addValues(double score, int * values, int& nValues, int counter)
 	}
 
 
-	if (touched.size() > 0 && nStoredValues > 1 && touched.size() < nStoredValues) {
+	if (touched.size() > 0 && ((nStoredValues > 1 && touched.size() < nStoredValues) || (score == this->score && touched.size() <= nStoredValues))){
 		int childIndex = index - untouched.size();
 		if (childIndex >= LOWER_BOUND) {
 			nStoredValues = touched.size();

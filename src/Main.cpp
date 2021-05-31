@@ -15,7 +15,16 @@
 
 
 int main(int argc, char** argv)
-{
+{/*
+	long double score = 0.7;
+	long double psUpdated = 0.7 * 1000000.0;
+	for (int i = 1; i < 100; i++)
+	{
+		psUpdated = 1000000.0 - (1000000.0 - psUpdated) * (1000000.0 - score * 1000000.0);
+		std::cout << i << " " << std::setprecision(308) << psUpdated << "\n";
+	}
+	exit(-1);
+	*/
 	if (argc != 3) {
 		std::cout << "Wrong number of startup arguments, please make sure that arguments are in form of {action} {path to properties}" << std::endl;
 		exit(-1);
@@ -68,6 +77,53 @@ int main(int argc, char** argv)
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 	std::cout << "Validationset read in " << milliseconds.count() << " ms\n";
 	start = finish;
+
+	/*
+	Rule* rules_adj_list = rr->getCSR()->getAdjList();
+	int* adj_begin = rr->getCSR()->getAdjBegin();
+	std::string r("/award/award_winning_work/awards_won./award/award_honor/award_winner");
+	int relation = *index->getIdOfRelationstring(r);
+
+	std::string t("/m/0g69lg");
+	int tail = *index->getIdOfNodestring(t);
+
+	std::string h("/m/015ppk");
+	int head = *index->getIdOfNodestring(h);
+
+	auto tails = ttr->getRelTailToHeads()[relation][tail];
+
+	int reflexiv_token = 0;
+
+	int ind_ptr = adj_begin[3 + relation];
+	int lenRules = adj_begin[3 + relation + 1] - ind_ptr;
+	RuleGraph* rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
+	for (int i = 0; i < lenRules; i++) {
+		std::vector<int> headresults_vec;
+		Rule& r = rules_adj_list[ind_ptr + i];
+		if (r.getRulestring().compare("/award/award_winning_work/awards_won./award/award_honor/award_winner(/m/015ppk,Y) <= /award/award_winner/awards_won./award/award_honor/award_winner(Y,/m/05cqhl)") == 0) {
+			if (r.is_ac2() and r.getRuletype() == Ruletype::YRule and *r.getHeadconstant() != tail) {
+				if (rulegraph->existsAcyclic(&tail, r, true)) {
+					headresults_vec.push_back(*r.getHeadconstant());
+				}
+			}
+		}
+		std::vector<int> filtered_headresults_vec;
+		for (auto a : headresults_vec) {
+			if (a == tail) continue;
+			if (a == reflexiv_token) {
+				a = tail;
+			}
+			if (a == head || tails.find(a) == tails.end()) {
+				filtered_headresults_vec.push_back(a);
+			}
+		}
+		for (auto a : filtered_headresults_vec) {
+			std::cout << a << " " << *index->getStringOfNodeId(a) << " ";
+		}
+	}
+
+	exit(-1);
+	*/
 
 	std::cout << "Applying rules..." << std::endl;
 

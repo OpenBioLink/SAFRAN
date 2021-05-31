@@ -184,6 +184,9 @@ private:
 	struct {
 		bool operator()(Rule a, Rule b) const
 		{
+			if (*a.getHeadrelation() != *b.getHeadrelation()) {
+				throw std::runtime_error("HI");
+			}
 			return a.getAppliedConfidence() > b.getAppliedConfidence();
 		}
 	} ruleComp;

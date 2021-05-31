@@ -14,6 +14,9 @@
 #include "MinHeap.h"
 #include "ScoreTree.h"
 
+#include "boost/multiprecision/cpp_bin_float.hpp"
+typedef boost::multiprecision::cpp_bin_float_50 float50;
+
 class ApplicationEngine
 {
 public:
@@ -28,6 +31,8 @@ private:
 
 	double mrr = 0;
 	int predicted = 0;
+
+	int k;
 
 	int reflexiv_token;
 

@@ -57,6 +57,8 @@ public:
 	int* getRelationsBwd();
 	int* getBodyconstantId();
 	int* getHeadconstant();
+	long long getCorrectlyPredicted();
+	long long getPredicted();
 	double getAppliedConfidence();
 	std::string getRulestring();
 	std::vector<int>& getBuffer();

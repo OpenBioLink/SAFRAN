@@ -3,7 +3,7 @@
 
 #include <map>
 #include <functional>
-
+#include <math.h>
 #include "Index.h"
 #include "TraintripleReader.h"
 #include "TesttripleReader.h"
@@ -14,6 +14,13 @@
 #include "MinHeap.h"
 #include "Util.hpp"
 #include "ScoreTree.h"
+#include "boost/multiprecision/cpp_bin_float.hpp"
+
+#include <iostream>
+#include<iomanip>
+#include<limits>
+
+typedef boost::multiprecision::cpp_bin_float_50 float50;
 
 class RuleApplication
 {
@@ -33,10 +40,12 @@ private:
 	FILE* pFile;
 	RuleGraph* rulegraph;
 	int reflexiv_token;
+	int k;
 
 	void noisy(int rel, std::vector<std::vector<int>> clusters);
 	void max(int rel, std::vector<std::vector<int>> clusters);
 	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, double>> headresults, std::vector<std::pair<int, double>> tailresults, FILE* pFile, int& K);
+	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, float50>> headresults, std::vector<std::pair<int, float50>> tailresults, FILE* pFile, int& K);
 
 	struct {
 		bool operator()(std::pair<int, double> const& a, std::pair<int, double> const& b) const

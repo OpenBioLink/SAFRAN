@@ -5,7 +5,7 @@ MinHeap::MinHeap(int cap)
 {
     heap_size = cap;
     capacity = cap;
-    harr = new std::pair<int, double>[cap];
+    harr = new std::pair<int, float50>[cap];
     for (int i = 0; i < cap; i++) {
         harr[i] = std::make_pair(-1, 0.0);
     }
@@ -17,7 +17,7 @@ MinHeap::~MinHeap()
 }
 
 // Inserts a new key 'k' 
-void MinHeap::insertKey(std::pair<int, double> k)
+void MinHeap::insertKey(std::pair<int, float50> k)
 {
     if (heap_size == capacity)
     {
@@ -55,7 +55,7 @@ void MinHeap::deleteMin()
     MinHeapify(0);
 }
 
-std::pair<int, double> MinHeap::extractMin()
+std::pair<int, float50> MinHeap::extractMin()
 {
     if (heap_size <= 0)
         return std::make_pair(-1, 0.0);
@@ -66,7 +66,7 @@ std::pair<int, double> MinHeap::extractMin()
     }
 
     // Store the minimum value, and remove it from heap 
-    std::pair<int, double> root = harr[0];
+    std::pair<int, float50> root = harr[0];
     harr[0] = harr[heap_size - 1];
     heap_size--;
     MinHeapify(0);
@@ -91,9 +91,9 @@ void MinHeap::MinHeapify(int i)
 }
 
 // A utility function to swap two elements 
-void  MinHeap::swapperoni(std::pair<int, double>* x, std::pair<int, double>* y)
+void  MinHeap::swapperoni(std::pair<int, float50>* x, std::pair<int, float50>* y)
 {
-    std::pair<int, double> temp = *x;
+    std::pair<int, float50> temp = *x;
     *x = *y;
     *y = temp;
 }

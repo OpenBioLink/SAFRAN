@@ -9,10 +9,10 @@ ApplicationEngine::ApplicationEngine(int relation, RuleGraph* rulegraph, Index* 
 	this->vtr = vtr;
 	this->rulegraph = rulegraph;
 	reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
+	this->k = Properties::get().TOP_K_OUTPUT;
 }
 
 double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
-
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
 
@@ -34,8 +34,8 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 	int ind_ptr = adj_begin[3 + rel];
 	int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
 
-	double* result_head = new double[nodesize];
-	double* result_tail = new double[nodesize];
+	float50* result_head = new float50[nodesize];
+	float50* result_tail = new float50[nodesize];
 	double* cluster_result_head = new double[nodesize];
 	double* cluster_result_tail = new double[nodesize];
 	std::fill(result_head, result_head + nodesize, 0.0);
@@ -78,8 +78,8 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 						else {
 
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule) {
-									if (util::in_sorted(currRule.getBuffer(), head)) {
+								if (currRule.getRuletype() == Ruletype::XRule and *currRule.getHeadconstant() != head) {
+									if (rulegraph->existsAcyclic(&head, currRule, false)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
@@ -118,10 +118,11 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 				for (int tailIndex = 0; tailIndex < lenTails; tailIndex++) {
 					int tail = v_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
 
-					MinHeap tails(10);
+					MinHeap tails(k);
 					for (auto i : touched_tails) {
 						if (result_tail[i] >= tails.getMin().second) {
-							double confidence = result_tail[i];
+							float50 confidence = result_tail[i];
+							if (i == head) continue;
 							if (i == reflexiv_token) {
 								i = head;
 							}
@@ -132,14 +133,14 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 						}
 					}
 
-					std::vector<std::pair<int, double>> tailresults_vec;
-					for (int i = 9; i >= 0; i--) {
-						std::pair<int, double> tail_pred = tails.extractMin();
+					std::vector<std::pair<int, float50>> tailresults_vec;
+					for (int i = k-1; i >= 0; i--) {
+						std::pair<int, float50> tail_pred = tails.extractMin();
 						if (tail_pred.first != -1) tailresults_vec.push_back(tail_pred);
 					}
 					std::reverse(tailresults_vec.begin(), tailresults_vec.end());
 
-					int size_tails = tailresults_vec.size() > 10 ? 10 : tailresults_vec.size();
+					int size_tails = tailresults_vec.size() > k ? k : tailresults_vec.size();
 					int rank;
 					for (int i = size_tails - 1; i >= 0; i--) {
 						if (i == size_tails - 1 or tailresults_vec[i].second != tailresults_vec[i + 1].second) {
@@ -194,8 +195,8 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
 									headresults_vec = currRule.getBuffer();
 								}
-								else if(currRule.getRuletype() == Ruletype::YRule){
-									if (util::in_sorted(currRule.getBuffer(), tail)) {
+								else if(currRule.getRuletype() == Ruletype::YRule and tail != *currRule.getHeadconstant()){
+									if (rulegraph->existsAcyclic(&tail, currRule, false)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
@@ -231,10 +232,11 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 				for (int headIndex = 0; headIndex < lenHeads; headIndex++) {
 					int head = v_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
 
-					MinHeap heads(10);
+					MinHeap heads(k);
 					for (auto i : touched_heads) {
 						if (result_head[i] >= heads.getMin().second) {
-							double confidence = result_head[i];
+							float50 confidence = result_head[i];
+							if (i == tail) continue;
 							if (i == reflexiv_token) {
 								i = tail;
 							}
@@ -245,14 +247,14 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 						}
 					}
 
-					std::vector<std::pair<int,double>> headresults_vec;
-					for (int i = 9; i >= 0; i--) {
-						std::pair<int, double> head_pred = heads.extractMin();
+					std::vector<std::pair<int, float50>> headresults_vec;
+					for (int i = k-1; i >= 0; i--) {
+						std::pair<int, float50> head_pred = heads.extractMin();
 						if (head_pred.first != 1) headresults_vec.push_back(head_pred);
 					}
 					std::reverse(headresults_vec.begin(), headresults_vec.end());
 
-					int size_heads = headresults_vec.size() > 10 ? 10 : headresults_vec.size();
+					int size_heads = headresults_vec.size() > k ? k : headresults_vec.size();
 					int rank;
 					for (int i = size_heads - 1; i >= 0; i--) {
 						if (i == size_heads - 1 or headresults_vec[i].second != headresults_vec[i + 1].second) {
@@ -331,8 +333,8 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 					}
 					else {
 						if (currRule.isBuffered()) {
-							if (currRule.getRuletype() == Ruletype::XRule) {
-								if (util::in_sorted(currRule.getBuffer(), head)) {
+							if (currRule.getRuletype() == Ruletype::XRule and head != *currRule.getHeadconstant()) {
+								if (rulegraph->existsAcyclic(&head, currRule, false)) {
 									tailresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
@@ -351,6 +353,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 								int tail = v_adj_list[3 + lenHeads + *head_ind_ptr + tailIndex];
 								std::vector<int> filtered_testresults_vec;
 								for (auto a : tailresults_vec) {
+									if (a == head) continue;
 									if (a == reflexiv_token) {
 										a = head;
 									}
@@ -385,7 +388,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 					tailScoreTrees[tailIndex].getResults(tailresults_vec);
 					std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
 
-					int size_tails = tailresults_vec.size() > 10 ? 10 : tailresults_vec.size();
+					int size_tails = tailresults_vec.size() > k ? k : tailresults_vec.size();
 					int rank;
 					for (int i = size_tails - 1; i >= 0; i--) {
 						if (i == size_tails - 1 or tailresults_vec[i].second != tailresults_vec[i + 1].second) {
@@ -437,8 +440,8 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 							if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
 								headresults_vec = currRule.getBuffer();
 							}
-							else {
-								if (util::in_sorted(currRule.getBuffer(), tail)) {
+							else if (currRule.getRuletype() == Ruletype::YRule and tail != *currRule.getHeadconstant()) {
+								if (rulegraph->existsAcyclic(&tail, currRule, false)) {
 									headresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
@@ -455,6 +458,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 								int head = v_adj_list[3 + lenTails + *tail_ind_ptr + headIndex];
 								std::vector<int> filtered_headresults_vec;
 								for (auto a : headresults_vec) {
+									if (a == tail) continue;
 									if (a == reflexiv_token) {
 										a = tail;
 									}
@@ -484,7 +488,7 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 					std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
 						
 
-					int size_heads = headresults_vec.size() > 10 ? 10 : headresults_vec.size();
+					int size_heads = headresults_vec.size() > k ? k : headresults_vec.size();
 					int rank;
 					for (int i = size_heads - 1; i >= 0; i--) {
 						if (i == size_heads - 1 or headresults_vec[i].second != headresults_vec[i + 1].second) {

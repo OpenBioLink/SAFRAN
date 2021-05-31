@@ -95,8 +95,9 @@ void RuleGraph::searchDFSSingleStart_filt(bool headNotTail, int filt_v, int v, R
 			}
 		}
 	}
-
-	searchDFSUtil_filt(&r, headNotTail, filt_v, filt_v, v, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, filtValidNotTest, filtExceptions, trains, second_filt_set);
+	int* c = new int(0);
+	searchDFSUtil_filt(&r, headNotTail, filt_v, filt_v, v, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, c, filtValidNotTest, filtExceptions, trains, second_filt_set);
+	delete c;
 	std::sort(solution.begin(), solution.end());
 }
 
@@ -178,6 +179,7 @@ void RuleGraph::searchDFSMultiStart_filt(bool headNotTail, int filt_v, Rule& r, 
 	int start_indptr = 3;
 	int size_indptr = adj_list[1];
 	int start_ind = start_indptr + size_indptr;
+	int* c = new int(0);
 	for (int val = 0; val < size_indptr - 1; val++) {
 		//OI
 		if (val == *r.getHeadconstant()) continue;
@@ -190,9 +192,10 @@ void RuleGraph::searchDFSMultiStart_filt(bool headNotTail, int filt_v, Rule& r, 
 		int ind_ptr = adj_list[start_indptr + val];
 		int len = adj_list[start_indptr + val + 1] - ind_ptr;
 		if (len > 0) {
-			searchDFSUtil_filt(&r, headNotTail, filt_v, val, val, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, filtValidNotTest, filtExceptions, trains, second_filt_set);
+			searchDFSUtil_filt(&r, headNotTail, filt_v, val, val, solution, relations, visited, previous, 0, rulelength, Properties::get().DISCRIMINATION_BOUND, c, filtValidNotTest, filtExceptions, trains, second_filt_set);
 		}
 	}
+	delete c;
 	std::sort(solution.begin(), solution.end());
 }
 
@@ -343,9 +346,10 @@ void RuleGraph::searchDFSMultiStart(Rule& r, bool bwd, std::vector<int>& solutio
 	std::sort(solution.begin(), solution.end());
 }
 
-void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, bool filtValidNotTest, bool filtExceptions, std::set<int>* trains, std::set<int>* second_filt_set) {
-
-	if (solution.size() >= limit and limit > 0) {
+void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, int* c, bool filtValidNotTest, bool filtExceptions, std::set<int>* trains, std::set<int>* second_filt_set) {
+	(*c)++;
+	if (*c >= limit and limit > 0) {
+		solution.clear();
 		return;
 	}
 	if (level >= rulelength) {
@@ -431,8 +435,8 @@ void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, in
 				node_fully_visited = false;
 				continue;
 			}
-			searchDFSUtil_filt(r, headNotTail, filt_value, filt_ex, nextval, solution, relations, visited, previous, level, rulelength, limit, filtValidNotTest, filtExceptions, trains, second_filt_set);
-			if (solution.size() >= limit and limit > 0) {
+			searchDFSUtil_filt(r, headNotTail, filt_value, filt_ex, nextval, solution, relations, visited, previous, level, rulelength, limit, c, filtValidNotTest, filtExceptions, trains, second_filt_set);
+			if (*c >= limit and limit > 0) {
 				return;
 			}
 		}

@@ -36,7 +36,7 @@ private:
 	RelNodeToNodes valid_relTailToHeads;
 	std::unordered_map<int, std::unordered_set<int>>* relCounter;
 
-	void searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, bool filtValidNotTest, bool filtExceptions, std::set<int>* trains, std::set<int>* second_filt_set);
+	void searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, int*c, bool filtValidNotTest, bool filtExceptions, std::set<int>* trains, std::set<int>* second_filt_set);
 	void searchDFSUtil(int value, std::vector<int>& solution, int* relations, bool** visited, int* previous, int level, int rulelength, int limit);
 	bool existsAcyclic(int* valId, int* constant, int* relations, int N);
 

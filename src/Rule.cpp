@@ -132,6 +132,12 @@ int* Rule::getHeadconstant() {
 double Rule::getAppliedConfidence() {
 	return applied_confidence;
 }
+long long Rule::getCorrectlyPredicted() {
+	return correctlyPredicted;
+}
+long long Rule::getPredicted() {
+	return predicted + Properties::get().UNSEEN_NEGATIVE_EXAMPLES;
+}
 std::string Rule::getRulestring() {
 	return rulestring;
 }
