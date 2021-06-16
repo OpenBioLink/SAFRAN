@@ -26,7 +26,7 @@ class RuleApplication
 {
 public:
 	RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr);
-	void apply_nr_noisy(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters);
+	void apply_nr_noisy(std::unordered_map<int, std::pair<std::pair<bool, std::vector<std::vector<int>>>, std::pair<bool, std::vector<std::vector<int>>>>> rel2clusters);
 	void apply_only_noisy();
 	void apply_only_max();
 
@@ -42,8 +42,8 @@ private:
 	int reflexiv_token;
 	int k;
 
-	void noisy(int rel, std::vector<std::vector<int>> clusters);
-	void max(int rel, std::vector<std::vector<int>> clusters);
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> noisy(int rel, std::vector<std::vector<int>> clusters, bool predictHeadNotTail);
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> max(int rel, std::vector<std::vector<int>> clusters, bool predictHeadNotTail);
 	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, double>> headresults, std::vector<std::pair<int, double>> tailresults, FILE* pFile, int& K);
 	void writeTopKCandidates(int head, int rel, int tail, std::vector<std::pair<int, float50>> headresults, std::vector<std::pair<int, float50>> tailresults, FILE* pFile, int& K);
 

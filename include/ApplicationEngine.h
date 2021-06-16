@@ -23,14 +23,11 @@ public:
 
 	ApplicationEngine(int relation, RuleGraph* rulegraph, Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr);
 
-	double noisy(std::vector<std::vector<int>> clusters);
-	double max(std::vector<std::vector<int>> clusters);
+	std::pair<double,double> noisy(std::vector<std::vector<int>> clusters);
+	std::pair<double,double> max(std::vector<std::vector<int>> clusters);
 
 private:
 	int relation;
-
-	double mrr = 0;
-	int predicted = 0;
 
 	int k;
 

@@ -12,7 +12,7 @@ ApplicationEngine::ApplicationEngine(int relation, RuleGraph* rulegraph, Index* 
 	this->k = Properties::get().TOP_K_OUTPUT;
 }
 
-double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
+std::pair<double,double> ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
 
@@ -43,6 +43,10 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 	std::fill(cluster_result_head, cluster_result_head + nodesize, 0.0);
 	std::fill(cluster_result_tail, cluster_result_tail + nodesize, 0.0);
 
+	double mrr_head = 0.0;
+	int predicted_head = 0;
+	double mrr_tail = 0.0;
+	int predicted_tail = 0;
 		
 
 	{
@@ -78,7 +82,7 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 						else {
 
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule and *currRule.getHeadconstant() != head) {
+								if (currRule.getRuletype() == Ruletype::XRule and *currRule.getHeadconstant() != head && cluster_result_tail[*currRule.getHeadconstant()] < currRule.getAppliedConfidence()) {
 									if (rulegraph->existsAcyclic(&head, currRule, false)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
@@ -147,10 +151,10 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 							rank = i;
 						}
 						if (tail == tailresults_vec[i].first) {
-							mrr = mrr + (1.0 / (rank + 1));
+							mrr_tail = mrr_tail + (1.0 / (rank + 1));
 						}
 					}
-					predicted++;
+					predicted_tail++;
 				}
 				for (auto i : touched_tails) {
 					result_tail[i] = 0.0;
@@ -195,7 +199,7 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
 									headresults_vec = currRule.getBuffer();
 								}
-								else if(currRule.getRuletype() == Ruletype::YRule and tail != *currRule.getHeadconstant()){
+								else if(currRule.getRuletype() == Ruletype::YRule and tail != *currRule.getHeadconstant() && cluster_result_head[*currRule.getHeadconstant()] < currRule.getAppliedConfidence()){
 									if (rulegraph->existsAcyclic(&tail, currRule, false)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
@@ -261,10 +265,10 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 							rank = i;
 						}
 						if (head == headresults_vec[i].first) {
-							mrr = mrr + (1.0 / (rank + 1));
+							mrr_head = mrr_head + (1.0 / (rank + 1));
 						}
 					}
-					predicted++;
+					predicted_head++;
 				}
 				for (auto i : touched_heads) {
 					result_head[i] = 0.0;
@@ -277,10 +281,10 @@ double ApplicationEngine::noisy(std::vector<std::vector<int>> clusters) {
 	delete[] cluster_result_tail;
 	delete[] result_head;
 	delete[] result_tail;
-	return (double)mrr / (double)predicted;
+	return std::make_pair(((double)mrr_head / (double)predicted_head), ((double)mrr_tail / (double)predicted_tail));
 }
 
-double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
+std::pair<double, double> ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -303,6 +307,11 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 
 	int ind_ptr = adj_begin[3 + rel];
 	int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+
+	double mrr_head = 0.0;
+	int predicted_head = 0;
+	double mrr_tail = 0.0;
+	int predicted_tail = 0;
 
 	{
 		// adj list of testtriple x r ?
@@ -395,10 +404,10 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 							rank = i;
 						}
 						if (tail == tailresults_vec[i].first) {
-							mrr = mrr + (1.0 / (rank + 1));
+							mrr_tail = mrr_tail + (1.0 / (rank + 1));
 						}
 					}
-					predicted++;
+					predicted_tail++;
 
 					tailScoreTrees[tailIndex].Free();
 				}
@@ -495,10 +504,10 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 							rank = i;
 						}
 						if (head == headresults_vec[i].first) {
-							mrr = mrr + (1.0 / (rank + 1));
+							mrr_head = mrr_head + (1.0 / (rank + 1));
 						}
 					}
-					predicted++;
+					predicted_head++;
 					headScoreTrees[headIndex].Free();
 				}
 				delete[] headScoreTrees;
@@ -507,5 +516,5 @@ double ApplicationEngine::max(std::vector<std::vector<int>> clusters) {
 		}
 	}
 
-	return (double)mrr / (double)predicted;
+	return std::make_pair(((double)mrr_head / (double)predicted_head), ((double)mrr_tail / (double)predicted_tail));
 }

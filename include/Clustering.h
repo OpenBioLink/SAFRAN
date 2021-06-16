@@ -39,6 +39,8 @@ private:
 	TesttripleReader* ttr;
 	ValidationtripleReader* vtr;
 
+	FILE* chkFile;
+
 	std::string strat;
 
 	RuleReader* rr;
@@ -49,14 +51,23 @@ private:
 
 	int WORKER_THREADS;
 
-	double max_c_c = 0.0;
-	double max_ac1_ac1 = 0.0;
-	double max_ac2_ac2 = 0.0;
-	double max_c_ac2 = 0.0;
-	double max_c_ac1 = 0.0;
-	double max_ac1_ac2 = 0.0;
-	double max_mrr = 0.0;
-	std::vector<std::vector<int>> max_cluster;
+	double max_c_c_head = 0.0;
+	double max_ac1_ac1_head = 0.0;
+	double max_ac2_ac2_head = 0.0;
+	double max_c_ac2_head = 0.0;
+	double max_c_ac1_head = 0.0;
+	double max_ac1_ac2_head = 0.0;
+	double max_mrr_head = 0.0;
+	std::vector<std::vector<int>> max_cluster_head;
+
+	double max_c_c_tail = 0.0;
+	double max_ac1_ac1_tail = 0.0;
+	double max_ac2_ac2_tail = 0.0;
+	double max_c_ac2_tail = 0.0;
+	double max_c_ac1_tail = 0.0;
+	double max_ac1_ac2_tail = 0.0;
+	double max_mrr_tail = 0.0;
+	std::vector<std::vector<int>> max_cluster_tail;
 
 	std::vector<double>* random_sample;
 
@@ -67,6 +78,9 @@ private:
 
 	std::vector<std::pair<int, double>>* read_jaccard(std::string path);
 	void learn_parameters(Graph* g, RuleGraph* rulegraph);
+	void learn_vs(RuleGraph* rulegraph);
+
+	void writeThreshChk(std::string result);
 };
 
 #endif // CL_H

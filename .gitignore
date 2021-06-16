@@ -1,4 +1,5 @@
 build/
+boost_1_76_0/
 include/boost
 .vs/
 x64/

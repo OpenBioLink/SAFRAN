@@ -11,7 +11,7 @@ RuleApplication::RuleApplication(Index* index, TraintripleReader* graph, Testtri
 	this->k = Properties::get().TOP_K_OUTPUT;
 }
 
-void RuleApplication::apply_nr_noisy(std::unordered_map<int, std::pair<bool, std::vector<std::vector<int>>>> rel2clusters) {
+void RuleApplication::apply_nr_noisy(std::unordered_map<int, std::pair<std::pair<bool, std::vector<std::vector<int>>>, std::pair<bool, std::vector<std::vector<int>>>>> rel2clusters) {
 
 	int* adj_begin = rr->getCSR()->getAdjBegin();
 	Rule* rules_adj_list = rr->getCSR()->getAdjList();
@@ -25,16 +25,37 @@ void RuleApplication::apply_nr_noisy(std::unordered_map<int, std::pair<bool, std
 		else {
 			std::cout << "Relation " << rel << "/" << iterations << " " << *index->getStringOfRelId(rel) << "\n";
 		}
-		std::pair<double, std::vector<std::vector<int>>> cluster = rel2clusters[rel];
-		if (cluster.second.size() == 0) {
-			continue;
-		}
+		std::pair<std::pair<bool, std::vector<std::vector<int>>>, std::pair<bool, std::vector<std::vector<int>>>> cluster = rel2clusters[rel];
 
-		if (cluster.first == true) {
-			max(rel, cluster.second);
+
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> headTailResults;
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> tailHeadResults;
+
+		std::cout << cluster.first.first << " " << cluster.first.second.size() << " " << cluster.second.first << " " << cluster.second.second.size() << "\n";
+		if (cluster.first.first == true) {
+			tailHeadResults = max(rel, cluster.first.second, true);
 		}
 		else {
-			noisy(rel, cluster.second);
+			tailHeadResults = noisy(rel, cluster.first.second, true);
+		}
+
+		if (cluster.second.first == true) {
+			headTailResults = max(rel, cluster.second.second, false);
+		}
+		else {
+			headTailResults = noisy(rel, cluster.second.second, false);
+		}
+
+		auto it_head = headTailResults.begin();
+		while (it_head != headTailResults.end()) {
+			auto it_tail = it_head->second.begin();
+			while (it_tail != it_head->second.end()) {
+				{
+					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, k);
+				}
+				it_tail++;
+			}
+			it_head++;
 		}
 	}
 	fclose(pFile);
@@ -63,7 +84,22 @@ void RuleApplication::apply_only_noisy() {
 			cluster.push_back(i);
 			clusters.push_back(cluster);
 		}
-		noisy(rel, clusters);
+
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> headTailResults;
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> tailHeadResults;
+		tailHeadResults = noisy(rel, clusters, true);
+		headTailResults = noisy(rel, clusters, false);
+		auto it_head = headTailResults.begin();
+		while (it_head != headTailResults.end()) {
+			auto it_tail = it_head->second.begin();
+			while (it_tail != it_head->second.end()) {
+				{
+					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, k);
+				}
+				it_tail++;
+			}
+			it_head++;
+		}
 	}
 	fclose(pFile);
 }
@@ -91,7 +127,22 @@ void RuleApplication::apply_only_max() {
 			cluster.push_back(i);
 		}
 		clusters.push_back(cluster);
-		max(rel, clusters);
+
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> headTailResults;
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> tailHeadResults;
+		tailHeadResults = max(rel, clusters, true);
+		headTailResults = max(rel, clusters, false);
+		auto it_head = headTailResults.begin();
+		while (it_head != headTailResults.end()) {
+			auto it_tail = it_head->second.begin();
+			while (it_tail != it_head->second.end()) {
+				{
+					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, k);
+				}
+				it_tail++;
+			}
+			it_head++;
+		}
 	}
 	fclose(pFile);
 }
@@ -416,7 +467,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 }
 */
 
-void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
+std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters, bool predictHeadNotTail) {
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
 
@@ -436,10 +487,9 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 	int ind_ptr = adj_begin[3 + rel];
 	int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
 
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> entityEntityResults;
 
-	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> headTailResults;
-	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> tailHeadResults;
-
+	if(!predictHeadNotTail)
 	{
 		// adj list of testtriple x r ?
 		int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2]]);
@@ -539,7 +589,7 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 						std::reverse(tailresults_vec.begin(), tailresults_vec.end());
 #pragma omp critical
 						{
-							headTailResults[head][tail] = tailresults_vec;
+							entityEntityResults[head][tail] = tailresults_vec;
 						}
 
 					}
@@ -551,8 +601,7 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 			delete[] result_tail;
 			delete[] cluster_result_tail;
 		}
-	}
-	{
+	} else {
 		// adj list of testtriple x r ?
 		int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2 + 1]]);
 		int lenTails = t_adj_list[1]; // size + 1 of testtriple testtriple heads of a specific relation
@@ -652,7 +701,7 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 						std::reverse(headresults_vec.begin(), headresults_vec.end());
 #pragma omp critical
 						{
-							tailHeadResults[tail][head] = headresults_vec;
+							entityEntityResults[tail][head] = headresults_vec;
 						}
 					}
 					for (auto i : touched_heads) {
@@ -664,25 +713,12 @@ void RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters) {
 			delete[] cluster_result_head;
 		}
 	}
-#pragma omp critical
-	{
-		auto it_head = headTailResults.begin();
-		while (it_head != headTailResults.end()) {
-			auto it_tail = it_head->second.begin();
-			while (it_tail != it_head->second.end()) {
-				{
-					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, k);
-				}
-				it_tail++;
-			}
-			it_head++;
-		}
-	}
+	return entityEntityResults;
 }
 
 
 
-void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
+std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> RuleApplication::max(int rel, std::vector<std::vector<int>> clusters, bool predictHeadNotTail) {
 
 	int* adj_lists = graph->getCSR()->getAdjList();
 	int* adj_list_starts = graph->getCSR()->getAdjBegin();
@@ -705,8 +741,9 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 	int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
 
 
-	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> headTailResults;
-	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, double>>>> tailHeadResults;
+	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> entityEntityResults;
+
+	if (!predictHeadNotTail)
 	{
 		// adj list of testtriple x r ?
 		int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2]]);
@@ -790,9 +827,16 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 						std::vector<std::pair<int, double>> tailresults_vec;
 						tailScoreTrees[tailIndex].getResults(tailresults_vec);
 						std::sort(tailresults_vec.begin(), tailresults_vec.end(), finalResultComperator);
+
+						// convert to float50 hack
+						std::vector<std::pair<int, float50>> tailresults_vec_float50;
+						for (auto a : tailresults_vec) {
+							tailresults_vec_float50.push_back(std::make_pair(a.first, (float50)a.second));
+						}
+
 #pragma omp critical
 						{
-							headTailResults[head][tail] = tailresults_vec;
+							entityEntityResults[head][tail] = tailresults_vec_float50;
 						}
 
 						tailScoreTrees[tailIndex].Free();
@@ -801,7 +845,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 				}
 			}
 		}
-	}
+	} else
 	{
 		// adj list of testtriple x r ?
 		int* t_adj_list = &(tt_adj_list[tt_adj_begin[rel * 2 + 1]]);
@@ -884,9 +928,17 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 						std::vector<std::pair<int, double>> headresults_vec;
 						headScoreTrees[headIndex].getResults(headresults_vec);
 						std::sort(headresults_vec.begin(), headresults_vec.end(), finalResultComperator);
+
+
+						// convert to float50 hack
+						std::vector<std::pair<int, float50>> headresults_vec_float50;
+						for (auto a : headresults_vec) {
+							headresults_vec_float50.push_back(std::make_pair(a.first, (float50)a.second));
+						}
+
 #pragma omp critical
 						{
-							tailHeadResults[tail][head] = headresults_vec;
+							entityEntityResults[tail][head] = headresults_vec_float50;
 						}
 
 						headScoreTrees[headIndex].Free();
@@ -896,21 +948,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 			}
 		}
 	}
-
-#pragma omp critical
-	{
-		auto it_head = headTailResults.begin();
-		while (it_head != headTailResults.end()) {
-			auto it_tail = it_head->second.begin();
-			while (it_tail != it_head->second.end()) {
-				{
-					writeTopKCandidates(it_head->first, rel, it_tail->first, tailHeadResults[it_tail->first][it_head->first], it_tail->second, pFile, k);
-				}
-				it_tail++;
-			}
-			it_head++;
-		}
-	}
+	return entityEntityResults;
 }
 
 

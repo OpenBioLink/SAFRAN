@@ -59,27 +59,47 @@ namespace util{
 		return d_first;
 	}
 
-	inline bool in_sorted(std::vector<int>& vector, int ele) {
-		if (vector.size() == 0) return false;
+	inline bool in_sorted(int* vector, int n, int ele) {
+		if (n == 0) return false;
 		int a = 0;
-		int b = (vector.size() - 1) / 2;
-		int c = vector.size() - 1;
+		int b = (n - 1) / 2;
+		int c = n - 1;
 
 
 		if (vector[a] > ele) return false;
 		if (vector[c] == ele) return true;
 		if (vector[c] < ele) return false;
-		int asdf = 0;
 
 		while (true) {
-			asdf++;
-			if (asdf == 100) {
-				std::cout << "INF " << ele << "\n";
-				for (auto i : vector) {
-					std::cout << i << " ";
-				}
-				exit(-1);
+			if (vector[b] == ele) return true;
+			if (a == b or b == c) {
+				break;
 			}
+			if (vector[a] <= ele and ele < vector[b]) {
+				c = b;
+				b = (a + b) / 2;
+			}
+			else if (vector[b] < ele and ele <= vector[c]) {
+				a = b;
+				b = (b + c) / 2;
+			}
+		}
+		return false;
+	}
+
+	inline bool in_sorted(std::vector<int> vector, int ele) {
+		int n = vector.size();
+		if (n == 0) return false;
+		int a = 0;
+		int b = (n - 1) / 2;
+		int c = n - 1;
+
+
+		if (vector[a] > ele) return false;
+		if (vector[c] == ele) return true;
+		if (vector[c] < ele) return false;
+
+		while (true) {
 			if (vector[b] == ele) return true;
 			if (a == b or b == c) {
 				break;

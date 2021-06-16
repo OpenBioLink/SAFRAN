@@ -507,11 +507,8 @@ bool RuleGraph::existsAcyclic(int* valId, int* constant, int* relations, int N) 
 	int ind_ptr = adj_list[start_indptr + *valId];
 	int len = adj_list[start_indptr + *valId + 1] - ind_ptr;
 	if (N == 0 && constant != nullptr) {
-		for (int j = 0; j < len; j++) {
-			int to = adj_list[start_ind + ind_ptr + j];
-			if (to == *constant) {
-				return true;
-			}
+		if (util::in_sorted(&adj_list[start_ind + ind_ptr], len, *constant)) {
+			return true;
 		}
 		return false;
 	}
