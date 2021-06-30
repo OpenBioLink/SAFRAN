@@ -19,9 +19,9 @@ void RuleReader::read(std::string filepath) {
 		{
 			std::vector<std::string> rawrule = util::split(line, '\t');
 			Rule * r = parseRule(rawrule);
-			//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
-			//r->toString();
 			if (r != nullptr) {
+				//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
+				//r->toString();
 				int* relationId = r->getHeadrelation();
 				rules[*relationId].push_back(r);
 			}
@@ -48,7 +48,13 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	//Parse head
 	std::string token;
 	std::getline(ss, token, '(');
-	int * relid = index->getIdOfRelationstring(token);
+	int * relid = nullptr;
+	try {
+		relid = index->getIdOfRelationstring(token);
+	}
+	catch (std::runtime_error& e) {
+		return nullptr;
+	}
 	if (relid == nullptr) {
 		throw "Id not found in relid's";
 	}
@@ -66,7 +72,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 			nodeid = index->getIdOfNodestring(head);
 		}
 		catch (std::runtime_error& e) {
-			nodeid = new int(1);
+			return nullptr;
 		}
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
@@ -83,7 +89,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 			nodeid = index->getIdOfNodestring(tail);
 		}
 		catch (std::runtime_error& e) {
-			nodeid = new int(1);
+			return nullptr;
 		}
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
@@ -137,14 +143,19 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		if (atom[atom.size() - 1] == ',') {
 			atom.pop_back();
 		}
-		next = getRelation(atom, next, &forwardrelations[i]);
+		try {
+			next = getRelation(atom, next, &forwardrelations[i]);
+		}
+		catch (std::runtime_error& e) {
+			return nullptr;
+		}
 		if (!(next.length() == 1 && isupper(next[0])) && i == rulelength - 1 && (type == Ruletype::XRule || type == Ruletype::YRule)) {
 			int* id = nullptr;
 			try {
 				id = this->index->getIdOfNodestring(next);
 			}
 			catch (std::runtime_error& e) {
-				id = new int(1);
+				return nullptr;
 			}
 			if (id != nullptr) {
 				ruleObj->setBodyconstantId(id);
@@ -196,9 +207,15 @@ std::string RuleReader::getRelation(std::string atom, std::string previous, int 
 	std::stringstream ss(atom);
 	std::string token;
 	std::getline(ss, token, '(');
-	int * relationId = this->index->getIdOfRelationstring(token);
+	int* relationId = nullptr;
+	try {
+		relationId = this->index->getIdOfRelationstring(token);
+	}
+	catch (std::runtime_error& e) {
+		throw std::runtime_error("No relation found");
+	}
 	if (relationId == nullptr) {
-		throw "No relation found";
+		throw std::runtime_error("No relation found");
 	}
 
 	std::string head_tail;
