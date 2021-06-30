@@ -45,6 +45,9 @@ int main(int argc, char** argv)
 
 	index->addNode(Properties::get().REFLEXIV_TOKEN);
 
+	std::string unk("unknown");
+	index->addNode(unk);
+
 	std::cout << "Reading trainingset..." << std::endl;
 	//"C:\\Users\\Simon\\Desktop\\data\\train.txt"
 	TraintripleReader* graph = new TraintripleReader(Properties::get().PATH_TRAINING, index);

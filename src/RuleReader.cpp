@@ -66,7 +66,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 			nodeid = index->getIdOfNodestring(head);
 		}
 		catch (std::runtime_error& e) {
-			nodeid = new int(-99999);
+			nodeid = new int(1);
 		}
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
@@ -83,7 +83,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 			nodeid = index->getIdOfNodestring(tail);
 		}
 		catch (std::runtime_error& e) {
-			nodeid = new int(-99999);
+			nodeid = new int(1);
 		}
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
@@ -144,7 +144,7 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 				id = this->index->getIdOfNodestring(next);
 			}
 			catch (std::runtime_error& e) {
-				id = new int(-99999);
+				id = new int(1);
 			}
 			if (id != nullptr) {
 				ruleObj->setBodyconstantId(id);
