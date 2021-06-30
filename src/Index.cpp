@@ -52,7 +52,6 @@ int* Index::getIdOfRelationstring(std::string& relation) {
 	}
 	else {
 		std::cout << "Error: Relation " << relation << " not found in Trainingset";
-		exit(-1);
 	}
 }
 

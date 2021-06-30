@@ -91,9 +91,11 @@ std::pair<bool, std::vector<std::vector<int>>> ClusteringReader::parseCluster(st
 				if (id != rulestringToID.end()) {
 					id_cluster.push_back(id->second);
 				}
+				/*
 				else {
 					std::cout << "Rule in cluster not found in ruleset";
 				}
+				*/
 			}
 			id_clusters.push_back(id_cluster);
 		}
