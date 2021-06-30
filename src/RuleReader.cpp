@@ -21,8 +21,10 @@ void RuleReader::read(std::string filepath) {
 			Rule * r = parseRule(rawrule);
 			//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
 			//r->toString();
-			int * relationId = r->getHeadrelation();
-			rules[*relationId].push_back(r);
+			if (r != nullptr) {
+				int* relationId = r->getHeadrelation();
+				rules[*relationId].push_back(r);
+			}
 		}
 		myfile.close();
 	}
@@ -59,7 +61,13 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 	std::tie(head, tail) = getHeadTail(head_tail);
 
 	if (head != std::string("X")) {
-		int * nodeid = index->getIdOfNodestring(head);
+		int* nodeid = nullptr;
+		try {
+			nodeid = index->getIdOfNodestring(head);
+		}
+		catch (std::runtime_error& e) {
+			nodeid = new int(-99999);
+		}
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
 		}
@@ -70,8 +78,13 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		ruleObj->setRuletype(type);
 	}
 	if (tail != std::string("Y")) {
-		
-		int * nodeid = index->getIdOfNodestring(tail);
+		int* nodeid = nullptr;
+		try {
+			nodeid = index->getIdOfNodestring(tail);
+		}
+		catch (std::runtime_error& e) {
+			nodeid = new int(-99999);
+		}
 		if (nodeid == nullptr) {
 			throw "Id not found in nodeid's";
 		}
@@ -126,7 +139,13 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		}
 		next = getRelation(atom, next, &forwardrelations[i]);
 		if (!(next.length() == 1 && isupper(next[0])) && i == rulelength - 1 && (type == Ruletype::XRule || type == Ruletype::YRule)) {
-			int * id = this->index->getIdOfNodestring(next);
+			int* id = nullptr;
+			try {
+				id = this->index->getIdOfNodestring(next);
+			}
+			catch (std::runtime_error& e) {
+				id = new int(-99999);
+			}
 			if (id != nullptr) {
 				ruleObj->setBodyconstantId(id);
 			}

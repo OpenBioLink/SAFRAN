@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>learnnrnoisy C:\Users\ottsi\SAFRAN_mani\SAFRAN\x64\Release\apply.txt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>applynrnoisy C:\Users\ottsi\SAFRAN_mani\apply.txt</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
