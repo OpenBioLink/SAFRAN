@@ -331,6 +331,8 @@ void Clustering::learn_vs(RuleGraph* rulegraph) {
 
 
 
+
+
 void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 
 	int iterations;
@@ -349,7 +351,7 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 
 #pragma omp parallel for schedule(dynamic)
 	for(int i = 0; i < iterations; i++){
-		if ((i % ((iterations - 1) / 100)) == 0) {
+		if (iterations > 100 && (i % ((iterations - 1) / 100)) == 0) {
 			util::printProgress((double)i / (double)(iterations - 1));
 		}
 

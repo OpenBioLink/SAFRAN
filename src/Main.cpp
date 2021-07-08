@@ -15,16 +15,9 @@
 
 
 int main(int argc, char** argv)
-{/*
-	long double score = 0.7;
-	long double psUpdated = 0.7 * 1000000.0;
-	for (int i = 1; i < 100; i++)
-	{
-		psUpdated = 1000000.0 - (1000000.0 - psUpdated) * (1000000.0 - score * 1000000.0);
-		std::cout << i << " " << std::setprecision(308) << psUpdated << "\n";
-	}
-	exit(-1);
-	*/
+{
+
+	
 	if (argc != 3) {
 		std::cout << "Wrong number of startup arguments, please make sure that arguments are in form of {action} {path to properties}" << std::endl;
 		exit(-1);

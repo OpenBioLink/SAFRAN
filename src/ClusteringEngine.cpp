@@ -17,9 +17,10 @@ ClusteringEngine::ClusteringEngine(Index* index, TraintripleReader* graph, Testt
 
 void ClusteringEngine::learn() {
 	fopen_s(&pFile, Properties::get().PATH_CLUSTER.c_str(), "w");
-
-	int rellen = index->getRelSize();
-	for (int i = 0; i < rellen; i++) {
+	int rellen = vtr->getRelHeadToTails().size();
+	auto relvalid = vtr->getRelHeadToTails().begin();
+	while(relvalid != vtr->getRelHeadToTails().end()){
+		int i = relvalid->first;
 		int ind_ptr = adj_begin[3 + i];
 		int len = adj_begin[3 + i + 1] - ind_ptr;
 		std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << " " << len << "\n";
@@ -33,6 +34,7 @@ void ClusteringEngine::learn() {
 
 		delete cluster;
 		std::cout << "Cluster calculated for " << i << "/" << rellen << " rule relations" << std::endl;
+		relvalid++;
 	}
 
 	std::cout << "DONEZO" << std::endl;

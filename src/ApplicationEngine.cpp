@@ -47,7 +47,6 @@ std::pair<double,double> ApplicationEngine::noisy(std::vector<std::vector<int>> 
 	int predicted_head = 0;
 	double mrr_tail = 0.0;
 	int predicted_tail = 0;
-		
 
 	{
 		// adj list of testtriple x r ?
