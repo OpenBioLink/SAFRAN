@@ -33,6 +33,7 @@ public:
 	std::string REFLEXIV_TOKEN = "me_myself_i"; 
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
+	int ONLY_XY = 0;
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";
@@ -140,6 +141,9 @@ public:
 			}
 			else if (strKey.compare("SEED") == 0) {
 				SEED = std::stoi(strVal);
+			}
+			else if (strKey.compare("ONLY_XY") == 0) {
+				ONLY_XY = std::stoi(strVal);
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";
