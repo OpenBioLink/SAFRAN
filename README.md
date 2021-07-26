@@ -6,13 +6,6 @@ SAFRAN (Scalable and fast non-redundant rule application) is a framework for fas
 
 [Paper preprint on arXiv](http://arxiv.org/abs/2012.05750)
 
-
-## Download binaries
-
-[Windows x64](https://github.com/OpenBioLink/IRIFAB/raw/master/resources/binaries/SAFRAN.exe)
-
-[Linux](https://github.com/OpenBioLink/IRIFAB/raw/master/resources/binaries/SAFRAN)
-
 ## Build from source
 
 1. Download and extract boost 1.76.0 to project root directory
