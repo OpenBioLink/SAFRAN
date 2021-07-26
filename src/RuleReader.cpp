@@ -11,6 +11,7 @@ CSR<int, Rule> * RuleReader::getCSR() {
 }
 
 void RuleReader::read(std::string filepath) {
+	int currID = 0;
 	RelToRules rules;
 	std::string line;
 	std::ifstream myfile(filepath);
@@ -18,14 +19,13 @@ void RuleReader::read(std::string filepath) {
 		while (!util::safeGetline(myfile, line).eof())
 		{
 			std::vector<std::string> rawrule = util::split(line, '\t');
-			Rule * r = parseRule(rawrule);
+			Rule * r = parseRule(rawrule, currID);
+			currID++;
 			if (r != nullptr) {
-				if (Properties::get().ONLY_XY == 0 || (Properties::get().ONLY_XY == 1 && r->getRuletype() == Ruletype::XYRule)) {
-					//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
-					//r->toString();
-					int* relationId = r->getHeadrelation();
-					rules[*relationId].push_back(r);
-				}
+				//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
+				//r->toString();
+				int* relationId = r->getHeadrelation();
+				rules[*relationId].push_back(r);
 			}
 		}
 		myfile.close();
@@ -38,11 +38,12 @@ void RuleReader::read(std::string filepath) {
 	csr = new CSR<int, Rule>(index->getRelSize(), rules);
 }
 
-Rule* RuleReader::parseRule(std::vector<std::string> rule) {
+Rule* RuleReader::parseRule(std::vector<std::string> rule, int currID) {
 	Rule * ruleObj = new Rule(std::stoi(rule[0]), std::stoi(rule[1]), std::stod(rule[2]));
 
 	std::string rawrule = rule[3];
 	ruleObj->setRulestring(rawrule);
+	ruleObj->setID(currID);
 	std::stringstream ss(rawrule);
 
 	Ruletype type = Ruletype::None;

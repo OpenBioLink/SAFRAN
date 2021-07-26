@@ -9,11 +9,13 @@
 #include <algorithm>
 #include <sstream>  
 
+enum Action { learnnrnoisy, calcjacc, applynoisy, applymax, applynrnoisy };
+
 class Properties {
 
 public:
 	// ACTION
-	std::string ACTION = "applymax";
+	Action ACTION = applymax;
 
 	// PATHS
 	std::string PATH_TRAINING = "train.txt";
@@ -33,7 +35,9 @@ public:
 	std::string REFLEXIV_TOKEN = "me_myself_i"; 
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
-	int ONLY_XY = 0;
+
+	// APPLY
+	int EXPLAIN = 0;
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";
@@ -142,8 +146,8 @@ public:
 			else if (strKey.compare("SEED") == 0) {
 				SEED = std::stoi(strVal);
 			}
-			else if (strKey.compare("ONLY_XY") == 0) {
-				ONLY_XY = std::stoi(strVal);
+			else if (strKey.compare("EXPLAIN") == 0) {
+				EXPLAIN = std::stoi(strVal);
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";
@@ -157,21 +161,22 @@ public:
 	std::string toString() {
 		std::ostringstream string_rep;
 
-		string_rep << "ACTION = " << ACTION << std::endl;
+		string_rep << "ACTION = " << getAction(ACTION) << std::endl;
 
 		// PATHS
 		string_rep << "PATH_TRAINING = " << PATH_TRAINING << std::endl;
 		string_rep << "PATH_TEST = " << PATH_TEST << std::endl;
 		string_rep << "PATH_VALID = " << PATH_VALID << std::endl;
 		string_rep << "PATH_RULES = " << PATH_RULES << std::endl;
-		if (ACTION.compare("learnnrnoisy") == 0 || ACTION.compare("calcjacc") == 0) {
+		if (ACTION == learnnrnoisy || ACTION == calcjacc) {
 			string_rep << "PATH_JACCARD = " << PATH_JACCARD << std::endl;
 		}
-		if (ACTION.compare("learnnrnoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
+		if (ACTION == learnnrnoisy || ACTION == applynrnoisy) {
 			string_rep << "PATH_CLUSTER = " << PATH_CLUSTER << std::endl;
 		}
-		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
+		if (ACTION == applymax || ACTION == applynoisy || ACTION == applynrnoisy) {
 			string_rep << "PATH_OUTPUT = " << PATH_OUTPUT << std::endl;
+			string_rep << "EXPLAIN = " << EXPLAIN << std::endl;
 		}
 
 		// GENERAL PROPS
@@ -180,32 +185,28 @@ public:
 		string_rep << "UNSEEN_NEGATIVE_EXAMPLES = " << UNSEEN_NEGATIVE_EXAMPLES << std::endl;
 		string_rep << "TOP_K_OUTPUT = " << TOP_K_OUTPUT << std::endl;
 		string_rep << "REFLEXIV_TOKEN = " << REFLEXIV_TOKEN << std::endl;
+		string_rep << "ONLY_UNCONNECTED = " << ONLY_UNCONNECTED << std::endl;
 
-		// SPECIFIC PROPS
-		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0 || ACTION.compare("learnnrnoisy") == 0) {
-			string_rep << "ONLY_UNCONNECTED = " << ONLY_UNCONNECTED << std::endl;
-		}
-
-		if (ACTION.compare("learnnrnoisy") == 0) {
+		if (ACTION == learnnrnoisy) {
 			string_rep << "STRATEGY = " << STRATEGY << std::endl;
 			if (STRATEGY.compare("random") == 0) {
 				string_rep << "ITERATIONS = " << ITERATIONS << std::endl;
 			}
 		}
-		if (ACTION.compare("learnnrnoisy") == 0 || ACTION.compare("calcjacc") == 0) {
+		if (ACTION == learnnrnoisy || ACTION == calcjacc) {
 			string_rep << "RESOLUTION = " << RESOLUTION << std::endl;
 			string_rep << "SEED = " << SEED << std::endl;
 		}
 		
-		if (ACTION.compare("learnnrnoisy") == 0) {
+		if (ACTION == learnnrnoisy) {
 			string_rep << "BUFFER_SIZE = " << BUFFER_SIZE << std::endl;
 		}
 		
-		if (ACTION.compare("calcjacc") == 0) {
+		if (ACTION == calcjacc) {
 			string_rep << "CLUSTER_SET = " << CLUSTER_SET << std::endl;
 		}
 
-		if (ACTION.compare("applymax") == 0 || ACTION.compare("applynoisy") == 0 || ACTION.compare("applynrnoisy") == 0) {
+		if (ACTION == applymax || ACTION == applynoisy || ACTION == applynrnoisy) {
 			string_rep << "TRIAL = " << TRIAL << std::endl;
 			if (TRIAL == 1) {
 				string_rep << "TRIAL_SIZE = " << TRIAL_SIZE << std::endl;
@@ -220,6 +221,49 @@ public:
 		return string_rep.str().c_str();
 	}
 
+	void setAction(std::string action) {
+		if (action.compare("learnnrnoisy") == 0) {
+			this->ACTION = learnnrnoisy;
+		}
+		else if (action.compare("calcjacc") == 0) {
+			this->ACTION = calcjacc;
+		}
+		else if (action.compare("applynoisy") == 0) {
+			this->ACTION = applynoisy;
+		}
+		else if (action.compare("applymax") == 0) {
+			this->ACTION = applymax;
+		}
+		else if (action.compare("applynrnoisy") == 0) {
+			this->ACTION = applynrnoisy;
+		}
+		else {
+			std::cout << "ACTION" << action << " not found" << "\n";
+			exit(-1);
+		}
+	}
+
+	std::string getAction(int action) {
+		if (action == learnnrnoisy) {
+			return "learnnrnoisy";
+		}
+		else if (action == calcjacc) {
+			return "calcjacc";
+		}
+		else if (action == applynoisy) {
+			return "applynoisy";
+		}
+		else if (action == applymax) {
+			return "applymax";
+		}
+		else if (action == applynrnoisy) {
+			return "applynrnoisy";
+		}
+		else {
+			std::cout << "ACTION" << action << " not found" << "\n";
+			exit(-1);
+		}
+	}
 private:
 	Properties() {};
 	Properties(const Properties&);
@@ -242,6 +286,9 @@ private:
 	{
 		return rtrim(ltrim(s));
 	}
+
+
+	
 };
 
 #endif //PROPERTIES_H

@@ -15,6 +15,7 @@
 #include <random>
 #include <iostream>
 #include "Properties.hpp"
+#include <time.h>
 
 namespace util{
 	inline std::vector<std::string> split(const std::string& str, char delim = ' ') {
@@ -72,14 +73,14 @@ namespace util{
 
 		while (true) {
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}
@@ -101,14 +102,14 @@ namespace util{
 
 		while (true) {
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}
@@ -150,7 +151,7 @@ namespace util{
 		// That is faster than reading them one-by-one using the std::istream.
 		// Code that uses streambuf this way must be guarded by a sentry object.
 		// The sentry object performs various tasks,
-		// such as thread synchronization and updating the stream state.
+		// such as thread synchronization && updating the stream state.
 
 		std::istream::sentry se(is, true);
 		std::streambuf* sb = is.rdbuf();
@@ -192,6 +193,15 @@ namespace util{
 			// eq
 			return 0;
 		}
+	}
+
+	inline std::string getDbName() {
+		time_t     now = time(0);
+		struct tm  tstruct;
+		char       buf[80];
+		tstruct = *localtime(&now);
+		strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S.db", &tstruct);
+		return buf;
 	}
 }
 

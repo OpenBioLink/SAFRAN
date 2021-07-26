@@ -36,29 +36,29 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 	RuleGraph* rulegraph = new RuleGraph(index->getNodeSize(), graph, ttr, vtr);
 #pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < lenRules; i++) {
-		if (lenRules > 100 and (i % ((lenRules - 1) / 100)) == 0) {
+		if (lenRules > 100 && (i % ((lenRules - 1) / 100)) == 0) {
 			util::printProgress((double)i / (double)(lenRules - 1));
 		}
 		Rule& currRule = rules_adj_list[ind_ptr + i];
-		if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::XRule) {
+		if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
 			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}
 			currRule.setBuffer(results_vec);
 		}
-		else if (currRule.is_ac2() and currRule.getRuletype() == Ruletype::YRule) {
+		else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, results_vec, false, true);
 			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}
 			currRule.setBuffer(results_vec);
 		}
-		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::XRule) {
+		else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, results_vec, false, true);
 			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}			
 			currRule.setBuffer(results_vec);
 		}
-		else if (currRule.is_ac1() and currRule.getRuletype() == Ruletype::YRule) {
+		else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule) {
 			std::vector<int> results_vec;
 			rulegraph->searchDFSMultiStart_filt(true, *currRule.getHeadconstant(), currRule, true, results_vec, false, true);
 			if(results_vec.size() >= Properties::get().DISCRIMINATION_BOUND){results_vec.clear();}		

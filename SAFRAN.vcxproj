@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Explanation.h" />
     <ClInclude Include="include\ApplicationEngine.h" />
     <ClInclude Include="include\Clustering.h" />
     <ClInclude Include="include\ClusteringEngine.h" />
@@ -43,6 +44,7 @@
     <ClInclude Include="include\ValidationtripleReader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Explanation.cpp" />
     <ClCompile Include="src\ApplicationEngine.cpp" />
     <ClCompile Include="src\Clustering.cpp" />
     <ClCompile Include="src\ClusteringEngine.cpp" />
