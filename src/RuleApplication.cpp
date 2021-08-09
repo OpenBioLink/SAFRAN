@@ -276,7 +276,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 								hit = true;
 							}
 							exp->insertPrediction(task_id, p.first, hit, (double) p.second);
-							auto& it = entityToRules.find(p.first);
+							auto it = entityToRules.find(p.first);
 							if (it != entityToRules.end()) {
 								for (auto rule : it->second) {
 									exp->insertRule_Entity(rule, task_id, p.first);
@@ -428,7 +428,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 								hit = true;
 							}
 							exp->insertPrediction(task_id, p.first, hit, (double) p.second);
-							auto& it = entityToRules.find(p.first);
+							auto it = entityToRules.find(p.first);
 							if (it != entityToRules.end()) {
 								for (auto rule : it->second) {
 									exp->insertRule_Entity(rule, task_id, p.first);
@@ -609,7 +609,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 								hit = true;
 							}
 							exp->insertPrediction(task_id, p.first, hit, p.second);
-							auto& it = entityToRules.find(p.first);
+							auto it = entityToRules.find(p.first);
 							if (it != entityToRules.end()) {
 								for (auto rule : it->second) {
 									exp->insertRule_Entity(rule, task_id, p.first);
@@ -753,7 +753,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 								hit = true;
 							}
 							exp->insertPrediction(task_id, p.first, hit, p.second);
-							auto& it = entityToRules.find(p.first);
+							auto it = entityToRules.find(p.first);
 							if (it != entityToRules.end()) {
 								for (auto rule : it->second) {
 									exp->insertRule_Entity(rule, task_id, p.first);

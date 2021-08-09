@@ -15,7 +15,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-FetchContent_Declare(sqlite3 URL "https://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
+FetchContent_Declare(sqlite3 URL "http://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
 set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailable(sqlite3)
 
@@ -35,5 +35,5 @@ message(${sqlite3_SOURCE_DIR})
 add_executable(SAFRAN  ${all_src})
 target_include_directories(SAFRAN PUBLIC ${sqlite3_SOURCE_DIR})
 target_sources(SAFRAN PUBLIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
-target_link_libraries("${PROJECT_NAME}" PUBLIC OpenMP::OpenMP_CXX)
+target_link_libraries("${PROJECT_NAME}" PUBLIC OpenMP::OpenMP_CXX ${CMAKE_DL_LIBS})
 
