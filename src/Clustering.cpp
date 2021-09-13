@@ -342,7 +342,7 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 	else if (strat.compare("random") == 0) {
 		iterations = Properties::get().ITERATIONS;
 		random_sample = new std::vector<double>[iterations];
-		util::sample_random(random_sample, iterations, portions);
+		util::sample_random(random_sample, iterations, portions, Properties::get().SEED);
 	}
 	else {
 		throw std::runtime_error("Strategy not supported");

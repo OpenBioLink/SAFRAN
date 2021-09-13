@@ -8,6 +8,9 @@
 #include <string>
 #include <algorithm>
 #include <sstream>  
+#include <vector>
+
+#include "Util.hpp"
 
 class Properties {
 
@@ -46,6 +49,7 @@ public:
 	unsigned long long BUFFER_SIZE = std::numeric_limits<unsigned long long>().max();
 	std::string STRATEGY = "grid";
 	int ITERATIONS = 10000;
+	std::vector<int> REL_IDS;
 
 	//trial
 	int TRIAL = 0;
@@ -144,6 +148,11 @@ public:
 			}
 			else if (strKey.compare("ONLY_XY") == 0) {
 				ONLY_XY = std::stoi(strVal);
+			}else if (strKey.compare("REL_IDS") == 0){
+				std::vector<std::string> rel_ids_str = util::split(strVal, ',');
+				for(auto rel_id_str : rel_ids_str){
+					REL_IDS.push_back(std::stoi(trim(rel_id_str)));
+				}				
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";

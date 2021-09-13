@@ -14,7 +14,6 @@
 #include <memory>
 #include <random>
 #include <iostream>
-#include "Properties.hpp"
 
 namespace util{
 	inline std::vector<std::string> split(const std::string& str, char delim = ' ') {
@@ -122,8 +121,8 @@ namespace util{
 		return std::mt19937(seed);
 	}
 
-	inline void sample_random(std::vector<double> * random_sample, int iterations, int portions) {
-		std::mt19937 gen(Properties::get().SEED);
+	inline void sample_random(std::vector<double> * random_sample, int iterations, int portions, int seed) {
+		std::mt19937 gen(seed);
 		for (int i = 0; i < iterations; i++) {
 			for (int j = 0; j < 6; j++) {
 				double thresh = (double)(gen() % (portions + 1)) / portions;

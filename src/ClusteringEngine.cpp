@@ -17,10 +17,21 @@ ClusteringEngine::ClusteringEngine(Index* index, TraintripleReader* graph, Testt
 
 void ClusteringEngine::learn() {
 	fopen_s(&pFile, Properties::get().PATH_CLUSTER.c_str(), "w");
-	int rellen = vtr->getRelHeadToTails().size();
-	auto relvalid = vtr->getRelHeadToTails().begin();
-	while(relvalid != vtr->getRelHeadToTails().end()){
-		int i = relvalid->first;
+
+	std::vector<int> relations;
+	if(Properties::get().REL_IDS.size() == 0){
+		for(auto kv : vtr->getRelHeadToTails()) {
+    			relations.push_back(kv.first);
+		} 
+	} else {
+		relations = Properties::get().REL_IDS;
+	}
+	std::sort(relations.begin(), relations.end());
+
+	int rellen = relations.size();
+	auto relvalid = relations.begin();
+	while(relvalid != relations.end()){
+		int i = *relvalid;
 		int ind_ptr = adj_begin[3 + i];
 		int len = adj_begin[3 + i + 1] - ind_ptr;
 		std::cout << "Calculating cluster for " << *index->getStringOfRelId(i) << " " << len << "\n";
