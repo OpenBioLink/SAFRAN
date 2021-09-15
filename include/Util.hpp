@@ -4,6 +4,9 @@
 #ifdef __unix
 #define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
 #endif
+#ifdef __APPLE__
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+#endif
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
@@ -71,14 +74,14 @@ namespace util{
 
 		while (true) {
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}
@@ -100,14 +103,14 @@ namespace util{
 
 		while (true) {
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}

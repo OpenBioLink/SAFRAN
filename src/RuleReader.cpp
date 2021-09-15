@@ -133,8 +133,8 @@ Rule* RuleReader::parseRule(std::vector<std::string> rule) {
 		next = "Y";
 	}
 
-	// If XRule or XYRule and atoms have xToY (left to right) direction
-	// or it is a YRule and atoms have yToX direction
+	// If XRule or XYRule && atoms have xToY (left to right) direction
+	// or it is a YRule && atoms have yToX direction
 	for (int i = 0; i < rulelength; i++) {
 		int index = i;
 		//if (!((xToY && type != Ruletype::YRule) || (!xToY && type == Ruletype::YRule))) {

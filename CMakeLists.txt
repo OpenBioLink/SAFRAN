@@ -23,3 +23,5 @@ add_executable(SAFRAN  ${all_src})
 find_package(OpenMP REQUIRED)
 target_link_libraries("${PROJECT_NAME}" PUBLIC OpenMP::OpenMP_CXX)
 
+install(TARGETS SAFRAN)
+

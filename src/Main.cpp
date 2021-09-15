@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 		std::vector<int> headresults_vec;
 		Rule& r = rules_adj_list[ind_ptr + i];
 		if (r.getRulestring().compare("/award/award_winning_work/awards_won./award/award_honor/award_winner(/m/015ppk,Y) <= /award/award_winner/awards_won./award/award_honor/award_winner(Y,/m/05cqhl)") == 0) {
-			if (r.is_ac2() and r.getRuletype() == Ruletype::YRule and *r.getHeadconstant() != tail) {
+			if (r.is_ac2() && r.getRuletype() == Ruletype::YRule && *r.getHeadconstant() != tail) {
 				if (rulegraph->existsAcyclic(&tail, r, true)) {
 					headresults_vec.push_back(*r.getHeadconstant());
 				}
