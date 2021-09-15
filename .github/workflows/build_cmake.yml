@@ -71,7 +71,7 @@ jobs:
 
         set(boost_url "https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/${boost_suffix}")
         file(DOWNLOAD "${boost_url}" $ENV{GITHUB_WORKSPACE}/boost.zip SHOW_PROGRESS)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf $ENV{GITHUB_WORKSPACE}/cmake.zip)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf $ENV{GITHUB_WORKSPACE}/boost.zip)
 
         # Save the path for other steps
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
