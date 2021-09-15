@@ -21,9 +21,9 @@ Clustering::Clustering(int relation, int size, Index* index, TraintripleReader* 
 
 std::string Clustering::learn_cluster(std::string jacc_path) {
 
-	fopen_s(&chkFile, (Properties::get().PATH_CLUSTER + "_" + std::to_string(relation) + "_chk").c_str(), "w");
-
-	
+	if(Properties::get().VERBOSE == 1){
+		fopen_s(&chkFile, (Properties::get().PATH_CLUSTER + "_" + std::to_string(relation) + "_chk").c_str(), "w");
+	}
 
 	const unsigned long long MAX_BUF = Properties::get().BUFFER_SIZE;
 	long long CURR_BUF = 0;
@@ -160,8 +160,9 @@ std::string Clustering::learn_cluster(std::string jacc_path) {
 		}
 	}
 
-
-	fclose(chkFile);
+	if (Properties::get().VERBOSE == 1) {
+		fclose(chkFile);
+	}
 
 	std::cout << "Calculated parameters\n";
 
@@ -249,9 +250,13 @@ void Clustering::learn_vs(RuleGraph* rulegraph) {
 				max_c_ac1_head = 0.0;
 				max_ac1_ac2_head = 0.0;
 				max_cluster_head = clusters;
-				std::ostringstream os;
-				os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
-				writeThreshChk(os.str());
+				if (Properties::get().VERBOSE == 1) {
+					std::ostringstream os;
+					os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
+					writeThreshChk(os.str());
+				}
+
+
 			}
 		}
 		if (result_tail > max_mrr_tail) {
@@ -266,10 +271,12 @@ void Clustering::learn_vs(RuleGraph* rulegraph) {
 				max_c_ac1_tail = 0.0;
 				max_ac1_ac2_tail = 0.0;
 				max_cluster_tail = clusters;
+				if (Properties::get().VERBOSE == 1) {
+						std::ostringstream os;
+						os << *index->getStringOfRelId(relation) << " MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
+						writeThreshChk(os.str());
+				}
 
-				std::ostringstream os;
-				os << *index->getStringOfRelId(relation) << " MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
-				writeThreshChk(os.str());
 			}
 		}
 
@@ -301,10 +308,12 @@ void Clustering::learn_vs(RuleGraph* rulegraph) {
 				max_c_ac1_head = 1.0;
 				max_ac1_ac2_head = 1.0;
 				max_cluster_head = clusters;
+				if (Properties::get().VERBOSE == 1) {
+					std::ostringstream os;
+					os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
+					writeThreshChk(os.str());
+				}
 
-				std::ostringstream os;
-				os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
-				writeThreshChk(os.str());
 			}
 		}
 		if (result_tail > max_mrr_tail) {
@@ -319,9 +328,12 @@ void Clustering::learn_vs(RuleGraph* rulegraph) {
 				max_c_ac1_tail = 1.0;
 				max_ac1_ac2_tail = 1.0;
 				max_cluster_tail = clusters;
-				std::ostringstream os;
-				os << *index->getStringOfRelId(relation) << "MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
-				writeThreshChk(os.str());
+				if (Properties::get().VERBOSE == 1) {
+					std::ostringstream os;
+					os << *index->getStringOfRelId(relation) << "MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
+					writeThreshChk(os.str());
+				}
+
 			}
 		}
 
@@ -381,9 +393,12 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 					max_c_ac1_head = 0.0;
 					max_ac1_ac2_head = 0.0;
 					max_cluster_head = clusters;
-					std::ostringstream os;
-					os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
-					writeThreshChk(os.str());
+					if (Properties::get().VERBOSE == 1) {
+						std::ostringstream os;
+						os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
+						writeThreshChk(os.str());
+					}
+
 				}
 			}
 			if (result_tail > max_mrr_tail) {
@@ -398,10 +413,11 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 					max_c_ac1_tail = 0.0;
 					max_ac1_ac2_tail = 0.0;
 					max_cluster_tail = clusters;
-
-					std::ostringstream os;
-					os << *index->getStringOfRelId(relation) << " MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
-					writeThreshChk(os.str());
+					if (Properties::get().VERBOSE == 1) {
+						std::ostringstream os;
+						os << *index->getStringOfRelId(relation) << " MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
+						writeThreshChk(os.str());
+					}
 				}
 			}
 
@@ -463,10 +479,12 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 					max_c_ac1_head = c_ac1;
 					max_ac1_ac2_head = ac1_ac2;
 					max_cluster_head = clusters;
+					if (Properties::get().VERBOSE == 1) {
+						std::ostringstream os;
+						os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
+						writeThreshChk(os.str());
+					}
 
-					std::ostringstream os;
-					os << *index->getStringOfRelId(relation) << "MAX Head " << max_c_c_head << " " << max_ac1_ac1_head << " " << max_ac2_ac2_head << " " << max_c_ac2_head << " " << max_c_ac1_head << " " << max_ac1_ac2_head << " " << max_mrr_head << "\n";
-					writeThreshChk(os.str());
 				}
 			}
 			if (result_tail > max_mrr_tail) {
@@ -481,9 +499,12 @@ void Clustering::learn_parameters(Graph * g, RuleGraph * rulegraph) {
 					max_c_ac1_tail = c_ac1;
 					max_ac1_ac2_tail = ac1_ac2;
 					max_cluster_tail = clusters;
-					std::ostringstream os;
-					os << *index->getStringOfRelId(relation) << "MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
-					writeThreshChk(os.str());
+					if (Properties::get().VERBOSE == 1) {
+						std::ostringstream os;
+						os << *index->getStringOfRelId(relation) << "MAX Tail " << max_c_c_tail << " " << max_ac1_ac1_tail << " " << max_ac2_ac2_tail << " " << max_c_ac2_tail << " " << max_c_ac1_tail << " " << max_ac1_ac2_tail << " " << max_mrr_tail << "\n";
+						writeThreshChk(os.str());
+					}
+
 				}
 			}
 

@@ -37,6 +37,7 @@ public:
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
 	int ONLY_XY = 0;
+	int VERBOSE = 1;
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";
@@ -148,11 +149,15 @@ public:
 			}
 			else if (strKey.compare("ONLY_XY") == 0) {
 				ONLY_XY = std::stoi(strVal);
-			}else if (strKey.compare("REL_IDS") == 0){
+			}
+			else if (strKey.compare("REL_IDS") == 0){
 				std::vector<std::string> rel_ids_str = util::split(strVal, ',');
 				for(auto rel_id_str : rel_ids_str){
 					REL_IDS.push_back(std::stoi(trim(rel_id_str)));
 				}				
+			}
+			else if (strKey.compare("VERBOSE") == 0) {
+				VERBOSE = std::stoi(strVal);
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";
