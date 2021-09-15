@@ -209,7 +209,7 @@ void RuleApplication::max(int rel, std::vector<std::vector<int>> clusters) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if (currRule.getRuletype() == Ruletype::YRule && ead == *currRule.getHeadconstant()) {
+								else if (currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 									tailresults_vec = currRule.getBuffer();
 								}
 							}
@@ -522,12 +522,12 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 								rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true, false);
 							}
 							else {
-								if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule && rRule.getHeadconstant() != head) {
+								if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule && *currRule.getHeadconstant() != head) {
 									if (rulegraph->existsAcyclic(&head, currRule, true)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if (currRule.is_ac2() && urrRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
+								else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSSingleStart_filt(true, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, tailresults_vec, true, false);
 								}
 								else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule && *currRule.getHeadconstant() != head) {
@@ -645,7 +645,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 								else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 									rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, false);
 								}
-								else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule && rrRule.getHeadconstant() != tail) {
+								else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule && *currRule.getHeadconstant() != tail) {
 									if (rulegraph->existsAcyclic(&tail, currRule, true)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
@@ -769,7 +769,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 							rulegraph->searchDFSSingleStart_filt(true, head, head, currRule, false, tailresults_vec, true, false);
 						}
 						else {
-							if (currRule.is_ac2() && rrRule.getRuletype() == Ruletype::XRule && *currRule.getHeadconstant() != head) {
+							if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule && *currRule.getHeadconstant() != head) {
 								if (rulegraph->existsAcyclic(&head, currRule, true)) {
 									tailresults_vec.push_back(*currRule.getHeadconstant());
 								}
@@ -876,12 +876,12 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 							if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 								rulegraph->searchDFSSingleStart_filt(false, *currRule.getHeadconstant(), *currRule.getBodyconstantId(), currRule, true, headresults_vec, true, false);
 							}
-							else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule && currRule.getHeadconstant() != tail) {
+							else if (currRule.is_ac2() && currRule.getRuletype() == Ruletype::YRule && *currRule.getHeadconstant() != tail) {
 								if (rulegraph->existsAcyclic(&tail, currRule, true)) {
 									headresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
-							else if (currRule.is_ac1() && urrRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
+							else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 								rulegraph->searchDFSMultiStart_filt(false, *currRule.getHeadconstant(), currRule, true, headresults_vec, true, false);
 							}
 							else if (currRule.is_ac1() && currRule.getRuletype() == Ruletype::YRule && *currRule.getHeadconstant() != tail) {
