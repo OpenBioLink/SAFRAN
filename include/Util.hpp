@@ -71,7 +71,7 @@ namespace util{
 
 		while (true) {
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
 			if (vector[a] <= ele && ele < vector[b]) {
@@ -100,7 +100,7 @@ namespace util{
 
 		while (true) {
 			if (vector[b] == ele) return true;
-			if (a == b or b == c) {
+			if (a == b || b == c) {
 				break;
 			}
 			if (vector[a] <= ele && ele < vector[b]) {

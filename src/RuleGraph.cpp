@@ -385,7 +385,7 @@ void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, in
 			}
 		}
 			
-		if (filtExceptions && (r->is_c() or r->is_ac1())) {
+		if (filtExceptions && (r->is_c() || r->is_ac1())) {
 			if (!headNotTail && r->head_exceptions.find(ex_head) != r->head_exceptions.end()) {
 				return;
 			}

@@ -146,7 +146,7 @@ std::pair<double,double> ApplicationEngine::noisy(std::vector<std::vector<int>> 
 					int size_tails = tailresults_vec.size() > k ? k : tailresults_vec.size();
 					int rank;
 					for (int i = size_tails - 1; i >= 0; i--) {
-						if (i == size_tails - 1 or tailresults_vec[i].second != tailresults_vec[i + 1].second) {
+						if (i == size_tails - 1 || tailresults_vec[i].second != tailresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (tail == tailresults_vec[i].first) {
@@ -260,7 +260,7 @@ std::pair<double,double> ApplicationEngine::noisy(std::vector<std::vector<int>> 
 					int size_heads = headresults_vec.size() > k ? k : headresults_vec.size();
 					int rank;
 					for (int i = size_heads - 1; i >= 0; i--) {
-						if (i == size_heads - 1 or headresults_vec[i].second != headresults_vec[i + 1].second) {
+						if (i == size_heads - 1 || headresults_vec[i].second != headresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (head == headresults_vec[i].first) {
@@ -399,7 +399,7 @@ std::pair<double, double> ApplicationEngine::max(std::vector<std::vector<int>> c
 					int size_tails = tailresults_vec.size() > k ? k : tailresults_vec.size();
 					int rank;
 					for (int i = size_tails - 1; i >= 0; i--) {
-						if (i == size_tails - 1 or tailresults_vec[i].second != tailresults_vec[i + 1].second) {
+						if (i == size_tails - 1 || tailresults_vec[i].second != tailresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (tail == tailresults_vec[i].first) {
@@ -499,7 +499,7 @@ std::pair<double, double> ApplicationEngine::max(std::vector<std::vector<int>> c
 					int size_heads = headresults_vec.size() > k ? k : headresults_vec.size();
 					int rank;
 					for (int i = size_heads - 1; i >= 0; i--) {
-						if (i == size_heads - 1 or headresults_vec[i].second != headresults_vec[i + 1].second) {
+						if (i == size_heads - 1 || headresults_vec[i].second != headresults_vec[i + 1].second) {
 							rank = i;
 						}
 						if (head == headresults_vec[i].first) {

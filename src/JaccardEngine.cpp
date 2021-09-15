@@ -204,7 +204,7 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 						jacc[i].push_back(std::make_pair(j, jaccard));
 					}
 				}
-				else if ((rule_i.is_c() && rule_j.is_ac2()) or (rule_i.is_ac2() && rule_j.is_c())) {
+				else if ((rule_i.is_c() && rule_j.is_ac2()) || (rule_i.is_ac2() && rule_j.is_c())) {
 					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
 					if (jaccard > 0.0) {
 						jacc[i].push_back(std::make_pair(j, jaccard));
@@ -220,7 +220,7 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 				}
 				else {
 				*/
-				if ((rule_i.is_ac2() or rule_i.is_ac1()) && (rule_j.is_ac2() or rule_j.is_ac1()) && rule_i.getRuletype() == rule_j.getRuletype() && *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
+				if ((rule_i.is_ac2() || rule_i.is_ac1()) && (rule_j.is_ac2() || rule_j.is_ac1()) && rule_i.getRuletype() == rule_j.getRuletype() && *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
 					continue;
 				}
 					int c = 0;
