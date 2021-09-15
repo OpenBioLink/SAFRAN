@@ -10,7 +10,6 @@ env:
 
 jobs:
   build:
-    needs: openmp-macos
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
