@@ -81,12 +81,12 @@ std::pair<double,double> ApplicationEngine::noisy(std::vector<std::vector<int>> 
 						else {
 
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule and *currRule.getHeadconstant() != head && cluster_result_tail[*currRule.getHeadconstant()] < currRule.getAppliedConfidence()) {
+								if (currRule.getRuletype() == Ruletype::XRule && *currRule.getHeadconstant() != head && cluster_result_tail[*currRule.getHeadconstant()] < currRule.getAppliedConfidence()) {
 									if (rulegraph->existsAcyclic(&head, currRule, false)) {
 										tailresults_vec.push_back(*currRule.getHeadconstant());
 									}
 								}
-								else if(currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()){
+								else if(currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()){
 									tailresults_vec = currRule.getBuffer();
 								}
 							}
@@ -195,10 +195,10 @@ std::pair<double,double> ApplicationEngine::noisy(std::vector<std::vector<int>> 
 						}
 						else {
 							if (currRule.isBuffered()) {
-								if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+								if (currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 									headresults_vec = currRule.getBuffer();
 								}
-								else if(currRule.getRuletype() == Ruletype::YRule and tail != *currRule.getHeadconstant() && cluster_result_head[*currRule.getHeadconstant()] < currRule.getAppliedConfidence()){
+								else if(currRule.getRuletype() == Ruletype::YRule && tail != *currRule.getHeadconstant() && cluster_result_head[*currRule.getHeadconstant()] < currRule.getAppliedConfidence()){
 									if (rulegraph->existsAcyclic(&tail, currRule, false)) {
 										headresults_vec.push_back(*currRule.getHeadconstant());
 									}
@@ -341,12 +341,12 @@ std::pair<double, double> ApplicationEngine::max(std::vector<std::vector<int>> c
 					}
 					else {
 						if (currRule.isBuffered()) {
-							if (currRule.getRuletype() == Ruletype::XRule and head != *currRule.getHeadconstant()) {
+							if (currRule.getRuletype() == Ruletype::XRule && head != *currRule.getHeadconstant()) {
 								if (rulegraph->existsAcyclic(&head, currRule, false)) {
 									tailresults_vec.push_back(*currRule.getHeadconstant());
 								}
 							}
-							else if (currRule.getRuletype() == Ruletype::YRule and head == *currRule.getHeadconstant()) {
+							else if (currRule.getRuletype() == Ruletype::YRule && head == *currRule.getHeadconstant()) {
 								tailresults_vec = currRule.getBuffer();
 							}
 						}
@@ -445,10 +445,10 @@ std::pair<double, double> ApplicationEngine::max(std::vector<std::vector<int>> c
 					}
 					else {
 						if (currRule.isBuffered()) {
-							if (currRule.getRuletype() == Ruletype::XRule and tail == *currRule.getHeadconstant()) {
+							if (currRule.getRuletype() == Ruletype::XRule && tail == *currRule.getHeadconstant()) {
 								headresults_vec = currRule.getBuffer();
 							}
-							else if (currRule.getRuletype() == Ruletype::YRule and tail != *currRule.getHeadconstant()) {
+							else if (currRule.getRuletype() == Ruletype::YRule && tail != *currRule.getHeadconstant()) {
 								if (rulegraph->existsAcyclic(&tail, currRule, false)) {
 									headresults_vec.push_back(*currRule.getHeadconstant());
 								}

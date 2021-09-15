@@ -183,10 +183,10 @@ void RuleGraph::searchDFSMultiStart_filt(bool headNotTail, int filt_v, Rule& r, 
 	for (int val = 0; val < size_indptr - 1; val++) {
 		//OI
 		if (val == *r.getHeadconstant()) continue;
-		if (r.getRuletype() == Ruletype::YRule and r.head_exceptions.find(val) != r.head_exceptions.end()) {
+		if (r.getRuletype() == Ruletype::YRule && r.head_exceptions.find(val) != r.head_exceptions.end()) {
 			continue;
 		}
-		if (r.getRuletype() == Ruletype::XRule and r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
+		if (r.getRuletype() == Ruletype::XRule && r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
 			continue;
 		}
 		int ind_ptr = adj_list[start_indptr + val];
@@ -325,10 +325,10 @@ void RuleGraph::searchDFSMultiStart(Rule& r, bool bwd, std::vector<int>& solutio
 	for (int val = 0; val < size_indptr - 1; val++) {
 		//OI
 		if (val == *r.getHeadconstant()) continue;
-		if (r.getRuletype() == Ruletype::YRule and r.head_exceptions.find(val) != r.head_exceptions.end()) {
+		if (r.getRuletype() == Ruletype::YRule && r.head_exceptions.find(val) != r.head_exceptions.end()) {
 			continue;
 		}
-		if (r.getRuletype() == Ruletype::XRule and r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
+		if (r.getRuletype() == Ruletype::XRule && r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
 			continue;
 		}
 		int ind_ptr = adj_list[start_indptr + val];
@@ -348,7 +348,7 @@ void RuleGraph::searchDFSMultiStart(Rule& r, bool bwd, std::vector<int>& solutio
 
 void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, int filt_ex, int value, std::vector<int>& solution, int* relations, std::vector<std::vector<bool>>& visited, std::vector<int>& previous, int level, int rulelength, int limit, int* c, bool filtValidNotTest, bool filtExceptions, std::set<int>* trains, std::set<int>* second_filt_set) {
 	(*c)++;
-	if (*c >= limit and limit > 0) {
+	if (*c >= limit && limit > 0) {
 		solution.clear();
 		return;
 	}
@@ -385,11 +385,11 @@ void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, in
 			}
 		}
 			
-		if (filtExceptions and (r->is_c() or r->is_ac1())) {
-			if (!headNotTail and r->head_exceptions.find(ex_head) != r->head_exceptions.end()) {
+		if (filtExceptions && (r->is_c() or r->is_ac1())) {
+			if (!headNotTail && r->head_exceptions.find(ex_head) != r->head_exceptions.end()) {
 				return;
 			}
-			if (headNotTail and r->tail_exceptions.find(ex_tail) != r->tail_exceptions.end()) {
+			if (headNotTail && r->tail_exceptions.find(ex_tail) != r->tail_exceptions.end()) {
 				return;
 			}
 		}
@@ -436,19 +436,19 @@ void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, in
 				continue;
 			}
 			searchDFSUtil_filt(r, headNotTail, filt_value, filt_ex, nextval, solution, relations, visited, previous, level, rulelength, limit, c, filtValidNotTest, filtExceptions, trains, second_filt_set);
-			if (*c >= limit and limit > 0) {
+			if (*c >= limit && limit > 0) {
 				return;
 			}
 		}
 	}
-	if (node_fully_visited and this_level > 0) {
+	if (node_fully_visited && this_level > 0) {
 		visited[this_level - 1][value] = true;
 	}
 }
 
 void RuleGraph::searchDFSUtil(int value, std::vector<int>& solution, int* relations, bool** visited, int* previous, int level, int rulelength, int limit) {
 
-	if (solution.size() >= limit and limit > 0) {
+	if (solution.size() >= limit && limit > 0) {
 		return;
 	}
 	if (level >= rulelength) {
@@ -485,12 +485,12 @@ void RuleGraph::searchDFSUtil(int value, std::vector<int>& solution, int* relati
 				continue;
 			}
 			searchDFSUtil(nextval, solution, relations, visited, previous, level, rulelength, limit);
-			if (solution.size() >= limit and limit > 0) {
+			if (solution.size() >= limit && limit > 0) {
 				return;
 			}
 		}
 	}
-	if (node_fully_visited and this_level > 0) {
+	if (node_fully_visited && this_level > 0) {
 		visited[this_level - 1][value] = true;
 	}
 }

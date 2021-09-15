@@ -56,19 +56,19 @@ void Graph::searchDFSUtil(std::vector<int>& solution, bool* visited, int v, doub
 				if (rule_i.is_c() && rule_j.is_c() && conf > c_c) {
 					stack.push(u);
 				}
-				else if (rule_i.is_ac1() and rule_j.is_ac1() && conf > ac1_ac1) {
+				else if (rule_i.is_ac1() && rule_j.is_ac1() && conf > ac1_ac1) {
 					stack.push(u);
 				}
-				else if (rule_i.is_ac2() and rule_j.is_ac2() && conf > ac2_ac2) {
+				else if (rule_i.is_ac2() && rule_j.is_ac2() && conf > ac2_ac2) {
 					stack.push(u);
 				}
-				else if (((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) && conf > c_ac2) {
+				else if (((rule_i.is_c() && rule_j.is_ac2()) or (rule_i.is_ac2() && rule_j.is_c())) && conf > c_ac2) {
 					stack.push(u);
 				}
-				else if (((rule_i.is_c() and rule_j.is_ac1()) or (rule_i.is_ac1() and rule_j.is_c())) && conf > c_ac1) {
+				else if (((rule_i.is_c() && rule_j.is_ac1()) or (rule_i.is_ac1() && rule_j.is_c())) && conf > c_ac1) {
 					stack.push(u);
 				}
-				else if (((rule_i.is_ac1() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_ac1())) && conf > ac1_ac2) {
+				else if (((rule_i.is_ac1() && rule_j.is_ac2()) or (rule_i.is_ac2() && rule_j.is_ac1())) && conf > ac1_ac2) {
 					stack.push(u);
 				}
 			}

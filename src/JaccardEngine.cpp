@@ -63,7 +63,7 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 
 #pragma omp parallel for schedule(dynamic)
 	for (int j = 0; j < len; j++) {
-		if (len > 100 and (j % ((len - 1) / 100)) == 0) {
+		if (len > 100 && (j % ((len - 1) / 100)) == 0) {
 			util::printProgress((double)j / (double)(len - 1));
 		}
 
@@ -183,7 +183,7 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc) {
 #pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < len; i++) {
-		if (len > 100 and (i % ((len - 1) / 100)) == 0) {
+		if (len > 100 && (i % ((len - 1) / 100)) == 0) {
 			util::printProgress((double)i / (double)(len - 1));
 		}
 		for (int j = 0; j < len; j++) {
@@ -192,19 +192,19 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 				Rule rule_i = rules[i];
 				Rule rule_j = rules[j];
 
-				if (rule_i.is_c() and rule_j.is_c()) {
+				if (rule_i.is_c() && rule_j.is_c()) {
 					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
 					if (jaccard > 0.0) {
 						jacc[i].push_back(std::make_pair(j, jaccard));
 					}
 				}
-				else if (rule_i.is_ac2() and rule_j.is_ac2()) {
+				else if (rule_i.is_ac2() && rule_j.is_ac2()) {
 					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
 					if (jaccard > 0.0) {
 						jacc[i].push_back(std::make_pair(j, jaccard));
 					}
 				}
-				else if ((rule_i.is_c() and rule_j.is_ac2()) or (rule_i.is_ac2() and rule_j.is_c())) {
+				else if ((rule_i.is_c() && rule_j.is_ac2()) or (rule_i.is_ac2() && rule_j.is_c())) {
 					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
 					if (jaccard > 0.0) {
 						jacc[i].push_back(std::make_pair(j, jaccard));
@@ -220,7 +220,7 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 				}
 				else {
 				*/
-				if ((rule_i.is_ac2() or rule_i.is_ac1()) and (rule_j.is_ac2() or rule_j.is_ac1()) and rule_i.getRuletype() == rule_j.getRuletype() and *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
+				if ((rule_i.is_ac2() or rule_i.is_ac1()) && (rule_j.is_ac2() or rule_j.is_ac1()) && rule_i.getRuletype() == rule_j.getRuletype() && *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
 					continue;
 				}
 					int c = 0;

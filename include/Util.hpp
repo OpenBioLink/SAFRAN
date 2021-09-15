@@ -74,11 +74,11 @@ namespace util{
 			if (a == b or b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}
@@ -103,11 +103,11 @@ namespace util{
 			if (a == b or b == c) {
 				break;
 			}
-			if (vector[a] <= ele and ele < vector[b]) {
+			if (vector[a] <= ele && ele < vector[b]) {
 				c = b;
 				b = (a + b) / 2;
 			}
-			else if (vector[b] < ele and ele <= vector[c]) {
+			else if (vector[b] < ele && ele <= vector[c]) {
 				a = b;
 				b = (b + c) / 2;
 			}
