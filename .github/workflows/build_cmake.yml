@@ -103,7 +103,6 @@ jobs:
         key: openmp-macos-release-11.0.0
     - name: Download openmp (MacOS)
       if: matrix.os == 'macOS-latest' && steps.cache-openmp.outputs.cache-hit != 'true'
-      uses: actions/checkout@v2
       run: |
         wget https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/openmp-11.0.0.src.tar.xz
         tar -xf openmp-11.0.0.src.tar.xz
