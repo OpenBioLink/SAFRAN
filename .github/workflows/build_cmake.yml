@@ -32,11 +32,11 @@ jobs:
             os: ubuntu-latest,
             cc: "gcc", cxx: "g++"
           }
-#        - {
-#            name: "macOS Latest Clang", artifact: "macOS.7z",
-#            os: macos-latest,
-#            cc: "clang", cxx: "clang++"
-#          }
+        - {
+            name: "macOS Latest Clang", artifact: "macOS.7z",
+            os: macos-latest,
+            cc: "clang", cxx: "clang++"
+          }
 
     steps:
     - uses: actions/checkout@v1
@@ -93,10 +93,10 @@ jobs:
           )
         endif()
 
-#    - name: Download and install openmp (MacOS)
-#      if: runner.os == 'macOS'
-#      run: |
-#        brew install libomp
+    - name: Download and install openmp (MacOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install libomp
 
     - name: Download ccache
       id: ccache
