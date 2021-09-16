@@ -8,8 +8,8 @@
     <img src="https://github.com/OpenBioLink/SAFRAN/actions/workflows/build_cmake.yml/badge.svg?branch=master"
          alt="CMake Build Matrix">
   </a>
-  <a href="https://openbiolink.readthedocs.io/en/latest/?badge=latest">
-    <img src="https://readthedocs.org/projects/openbiolink/badge/?version=latest"
+  <a href="https://safran.readthedocs.io/en/latest/?badge=latest">
+    <img src="https://readthedocs.org/projects/safran/badge/?version=latest"
          alt="docs">
   </a>
 </p>
@@ -21,7 +21,7 @@ SAFRAN (Scalable and fast non-redundant rule application) is a framework for fas
 
 # Documentation
 
-can be found [here](https://openbiolink.readthedocs.io/en/latest/?badge=latest).
+can be found [here](https://safran.readthedocs.io/en/latest/?badge=latest).
 
 # Citation
 
