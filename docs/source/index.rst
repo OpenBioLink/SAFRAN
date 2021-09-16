@@ -33,8 +33,11 @@ of link prediction.
    :maxdepth: 2
 
    manual/command_lines
-   manual/actions
-   manual/trial
+   manual/applymax
+   manual/applynoisy
+   manual/applynrnoisy
+   manual/learnnrnoisy
+   manual/calcjacc
    manual/input_fmt
 
 .. toctree::

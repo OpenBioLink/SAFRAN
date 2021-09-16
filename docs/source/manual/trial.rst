@@ -1,7 +1,0 @@
-Trial
-=====
-
-Trial properties
-----------------
-
-TBD
