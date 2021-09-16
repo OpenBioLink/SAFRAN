@@ -21,7 +21,7 @@ SAFRAN (Scalable and fast non-redundant rule application) is a framework for fas
 
 # Documentation
 
-can be found [here](https://safran.readthedocs.io/en/latest/?badge=latest).
+Can be found [here](https://safran.readthedocs.io/en/latest/?badge=latest).
 
 # Citation
 

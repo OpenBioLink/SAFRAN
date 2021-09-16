@@ -9,7 +9,9 @@ Safran currently only supports rules in the format of AnyBURL:
 
     {predicted: int}\t{correctlyPredicted: int}\t{confidence: double}\t{rule}
 
-where ``predicted`` is the absolute number of all predictions made by the rule and ``correctlyPredicted`` is the absolute number of all predictions that are correct. ``confidence`` is redundant and never is used within SAFRAN as it gets calculated through :math:`\frac{correctlyPredicted}{predicted + \text{Properties.UNSEEN_NEGATIVE_EXAMPLES}`.
+where ``predicted`` is the absolute number of all predictions made by the rule and ``correctlyPredicted`` is the absolute number of all predictions that are correct. ``confidence`` is redundant and never is used within SAFRAN as it gets calculated as 
+
+.. math:: confidence = \frac{correctlyPredicted}{predicted + Properties.UNSEEN\_NEGATIVE\_EXAMPLES}
 
 AnyBURL rule format
 -------------------

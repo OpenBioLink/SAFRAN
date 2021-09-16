@@ -3,12 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. image:: /img/logo.png
+   :class: with-shadow
+   :align: center
+
+------------
+
 Welcome to SAFRAN's documentation!
 ==================================
-
-.. image:: https://github.com/OpenBioLink/SAFRAN/blob/master/resources/img/logo.png
-   :class: with-shadow
-
 
 SAFRAN (Scalable and fast non-redundant rule application) is a framework
 for fast inference of groundings and aggregation of logical rules on
@@ -32,7 +34,6 @@ of link prediction.
 
    manual/command_lines
    manual/actions
-   manual/properties
    manual/trial
    manual/input_fmt
 
