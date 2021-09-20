@@ -1,12 +1,12 @@
 Action *applymax*
 -----------------
 
-Application of rules using the Maximum aggregation approach. 
+Application of rules using the Maximum aggregation approach:
 
 .. math::
     score(e) = \max \{conf(r_1), \dots, \text{conf}(r_k)\}
 
-where score(e) is the maximum confidence of all rules :math:`r_1, \dots, r_k` that predict entity :math:`e`. If the maximum confidences of two or more entities are the same, these entities are further ranked by their second best confidence and so on, until all top-k candidates can be distinguished or  all rules are processed.
+where score(e) is the maximum confidence of all rules :math:`r_1, \dots, r_k` that predict entity :math:`e`. If the maximum confidences of two or more entities are the same, these entities are further ranked by their second best confidence and so on, until all top-k candidates can be distinguished or all rules are processed.
 
 Configuration file
 ^^^^^^^^^^^^^^^^^^

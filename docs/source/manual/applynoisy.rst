@@ -1,7 +1,7 @@
 Action *applynoisy*
 -------------------
 
-Application of rules using noisy-or aggregation approach.
+Application of rules using noisy-or aggregation approach:
 
 .. math::
     score(e) = 1 - \prod_{i=1}^{k} (1 - conf(r_i))
