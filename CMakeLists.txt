@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9.0)
-project(SAFRAN CXX)
+project(safran CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,10 +20,14 @@ file(GLOB all_src
 )
 
 
-add_executable(SAFRAN  ${all_src})
+add_library(lsafran  ${all_src})
 find_package(OpenMP REQUIRED)
-target_link_libraries("${PROJECT_NAME}" PUBLIC OpenMP::OpenMP_CXX)
-install(TARGETS SAFRAN)
+target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX)
+
+add_executable(safran ${PROJECT_SOURCE_DIR}/Main.cpp)
+target_link_libraries(safran lsafran)
+
+install(TARGETS safran)
 
 Include(FetchContent)
 
@@ -36,7 +40,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(tests tests/test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain lsafran)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(CTest)

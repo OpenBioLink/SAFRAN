@@ -1,6 +1,10 @@
 build/
 boost_1_76_0/
 include/boost
+tests/WN18RR
+Testing/
+instdir/
+
 .vs/
 x64/
 # Prerequisites
