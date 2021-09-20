@@ -16,8 +16,11 @@
 
 SAFRAN (Scalable and fast non-redundant rule application) is a framework for fast inference of groundings and aggregation of logical rules on large heterogeneous knowledge graphs. It is based on the work of [AnyBURL](http://web.informatik.uni-mannheim.de/AnyBURL/) (Anytime Bottom Up Rule Learning), which is an algorithm for learning, applying and evaluating logical rules from large knowledge graphs in the context of link prediction.
 
-[Paper preprint on arXiv]()
-[AKBC 2021 conference paper]()
+
+<p align="center">
+  <a href="https://arxiv.org/pdf/2109.08002.pdf">Paper preprint on arXiv</a> •
+  <a href="https://openreview.net/forum?id=jCt9S_3w_S9">AKBC 2021 conference paper (for citations)</a>
+</p>
 
 # Documentation
 
