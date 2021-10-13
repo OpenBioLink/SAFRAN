@@ -38,6 +38,7 @@ public:
 
 	// APPLY
 	int EXPLAIN = 0;
+	std::string PATH_EXPLAIN = "explanation.db";
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";
@@ -148,6 +149,9 @@ public:
 			}
 			else if (strKey.compare("EXPLAIN") == 0) {
 				EXPLAIN = std::stoi(strVal);
+			}
+			else if (strKey.compare("PATH_EXPLAIN") == 0) {
+				PATH_EXPLAIN = strVal;
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";

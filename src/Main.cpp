@@ -83,11 +83,9 @@ int main(int argc, char** argv)
 
 	// PREPARE Explanation DB if wanted
 	Explanation* explanation = nullptr;
-	std::string db;
 	if (Properties::get().EXPLAIN == 1) {
 		std::cout << "Writing entities, relations and rules to db file..." << std::endl;
-		db = util::getDbName();
-		explanation = new Explanation(db, true);
+		explanation = new Explanation(Properties::get().PATH_EXPLAIN, true);
 		explanation->begin_tr();
 		explanation->insertEntities(index);
 		explanation->insertRelations(index);
