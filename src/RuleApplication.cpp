@@ -170,8 +170,6 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 
 	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> entityEntityResults;
 
-	std::unordered_map<int, std::vector<int>> entityToRules;
-
 	if(!predictHeadNotTail)
 	{
 		// adj list of testtriple x r ?
@@ -184,6 +182,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 			double* cluster_result_tail = new double[nodesize];
 			std::fill(result_tail, result_tail + nodesize, 0.0);
 			std::fill(cluster_result_tail, cluster_result_tail + nodesize, 0.0);
+			std::unordered_map<int, std::vector<int>> entityToRules;
 			for (auto heads = rHT.begin(b); heads != rHT.end(b); heads++) {
 				int head = heads->first;
 				int* head_ind_ptr = &t_adj_list[3 + head];
@@ -336,7 +335,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 			double* cluster_result_head = new double[nodesize];
 			std::fill(result_head, result_head + nodesize, 0.0);
 			std::fill(cluster_result_head, cluster_result_head + nodesize, 0.0);
-
+			std::unordered_map<int, std::vector<int>> entityToRules;
 			for (auto tails = rTH.begin(b); tails != rTH.end(b); tails++) {
 				int tail = tails->first;
 				int* tail_ind_ptr = &t_adj_list[3 + tail];
@@ -504,8 +503,6 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 	int ind_ptr = adj_begin[3 + rel];
 	int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
 
-	std::unordered_map<int, std::vector<int>> entityToRules;
-
 	std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> entityEntityResults;
 
 	if (!predictHeadNotTail)
@@ -516,6 +513,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 		auto rHT = ttr->getRelHeadToTails()[rel];
 #pragma omp parallel for schedule(dynamic)
 		for (int b = 0; b < rHT.bucket_count(); b++) {
+			std::unordered_map<int, std::vector<int>> entityToRules;
 			for (auto heads = rHT.begin(b); heads != rHT.end(b); heads++) {
 				int head = heads->first;
 				int* head_ind_ptr = &t_adj_list[3 + head];
@@ -661,6 +659,7 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 		auto rTH = ttr->getRelTailToHeads()[rel];
 #pragma omp parallel for schedule(dynamic)
 		for (int b = 0; b < rTH.bucket_count(); b++) {
+			std::unordered_map<int, std::vector<int>> entityToRules;
 			for (auto tails = rTH.begin(b); tails != rTH.end(b); tails++) {
 				int tail = tails->first;
 
