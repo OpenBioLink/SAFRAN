@@ -25,7 +25,7 @@ void JaccardEngine::calculate_jaccard() {
 		int len = adj_begin[3 + i + 1] - ind_ptr;
 		std::cout << "Jaccard calculation for " << *(index->getStringOfRelId(i)) << " " << len << std::endl;
 		Rule** rules = new Rule * [len];
-		std::vector<long long>* solutions = new std::vector<long long>[len];
+		std::set<unsigned long long>* solutions = new std::set<unsigned long long>[len];
 		std::cout << "Calulating all solutions of all rules ... \n";
 		calc_sols(solutions, rules, ind_ptr, len);
 		std::cout << "Calculating jaccards...\n";
@@ -58,7 +58,7 @@ void JaccardEngine::calculate_jaccard() {
 	std::cout << "DONEZO" << std::endl;
 }
 
-void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, int ind_ptr, int len) {
+void JaccardEngine::calc_sols(std::set<unsigned long long>* solutions, Rule** rules, int ind_ptr, int len) {
 	int size = index->getNodeSize();
 
 #pragma omp parallel for schedule(dynamic)
@@ -180,7 +180,7 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 	}
 }
 
-void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc) {
+void JaccardEngine::calc_jaccs(std::set<unsigned long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc) {
 #pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < len; i++) {
 		if (len > 100 && (i % ((len - 1) / 100)) == 0) {
@@ -188,52 +188,15 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 		}
 		for (int j = 0; j < len; j++) {
 			if (i != j) {
-				/*
-				Rule rule_i = rules[i];
-				Rule rule_j = rules[j];
-
-				if (rule_i.is_c() && rule_j.is_c()) {
-					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				}
-				else if (rule_i.is_ac2() && rule_j.is_ac2()) {
-					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				}
-				else if ((rule_i.is_c() && rule_j.is_ac2()) || (rule_i.is_ac2() && rule_j.is_c())) {
-					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				}
-				*/
-
 				Rule& rule_i = *rules[i];
 				Rule& rule_j = *rules[j];
-				/*
-				if (rule_i.get_body_hash() == rule_j.get_body_hash()) {
-					jacc[i].push_back(std::make_pair(j, 1.0));
-				}
-				else {
-				*/
 				if ((rule_i.is_ac2() || rule_i.is_ac1()) && (rule_j.is_ac2() || rule_j.is_ac1()) && rule_i.getRuletype() == rule_j.getRuletype() && *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
 					continue;
 				}
-					int c = 0;
-					for (int m = 0; m < k; m++) {
-						if (solutions[i][m] == solutions[j][m]) {
-							c++;
-						}
-					}
-					double jaccard = (double)c / k;
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				//}
+				double jaccard = min->getJacc(solutions[i], solutions[j]);
+				if (jaccard > 0.0) {
+					jacc[i].push_back(std::make_pair(j, jaccard));
+				}
 			}
 		}
 	}

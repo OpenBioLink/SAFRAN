@@ -19,10 +19,16 @@ file(GLOB all_src
  "${PROJECT_SOURCE_DIR}/src/*.cpp"
 )
 
+# set this to the path to OpenSSL if cmake cant find your OpenSSL installation
+# set(OPENSSL_ROOT_DIR, "C:/Program Files/OpenSSL-Win64")
 
 add_library(lsafran  ${all_src})
 find_package(OpenMP REQUIRED)
 target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX)
+
+find_package(OpenSSL REQUIRED)
+target_link_libraries(lsafran PRIVATE OpenSSL::applink)
+target_link_libraries(lsafran PUBLIC OpenSSL::SSL)
 
 add_executable(safran ${PROJECT_SOURCE_DIR}/Main.cpp)
 target_link_libraries(safran lsafran)

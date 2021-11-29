@@ -43,8 +43,8 @@ private:
 
 	RuleGraph* rulegraph;
 
-	void calc_sols(std::vector<long long>* solutions, Rule** rules, int ind_ptr, int len);
-	void calc_jaccs(std::vector<long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc);
+	void calc_sols(std::set<unsigned long long>* solutions, Rule** rules, int ind_ptr, int len);
+	void calc_jaccs(std::set<unsigned long long>* solutions, Rule** rules, int len, std::vector<std::pair<int, double>>* jacc);
 
 
 };

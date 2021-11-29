@@ -1,62 +1,66 @@
 #include "MinHash.h"
 
-MinHash::MinHash(int k) {
-	this->k = k;
-	std::mt19937 generator(Properties::get().SEED);
-	std::uniform_int_distribution<long long> distribution_0(0, _mersenne_prime - 1);
-	std::uniform_int_distribution<long long> distribution_1(1, _mersenne_prime - 1);
-	permfuncs = new long long* [k];
-	for (int i = 0; i < k; i++) {
-		permfuncs[i] = new long long[2];
-
-		long long next_a = distribution_1(generator);
-
-		long long next_b = distribution_0(generator);
-
-		permfuncs[i][0] = next_a;
-		permfuncs[i][1] = next_b;
-	}
+MinHash::MinHash(int k)
+{
+    this->k = k;
 }
 
-MinHash::~MinHash() {
-	for (int i = 0; i < k; i++) {
-		delete[] permfuncs[i];
-	}
-	delete[] permfuncs;
+std::set<unsigned long long> MinHash::getMinimum(std::vector<std::vector<int>>& heads, std::vector<std::vector<int>>& tails){
+    std::set<unsigned long long> min_hash;  // The k minimum hashes for each file.
+    unsigned char hash[16];  
+    unsigned long long ll;
+    std::set<unsigned long long>::iterator liti, litj;      
+    for (int j = 0; j < heads.size(); j++) {
+        for (auto head : heads[j]) {
+            for (auto tail : tails[j]) {
+                std::string s = std::to_string(head) + "+" + std::to_string(tail) + ";";
+                MD5((unsigned char *) s.c_str(), s.size(), hash);
+                memcpy((unsigned char *) &ll, hash, sizeof(long long));
+                
+                /* Error check code 1: Print out the hashes. */
+                // printf("%-20s 0x%016llx\n", s.c_str(), ll);
+
+                if (min_hash.size() < this->k) {
+                    min_hash.insert(ll);
+                } else {
+                    liti = min_hash.begin();
+                    if (ll > *liti) {
+                        min_hash.insert(ll);
+                        if (min_hash.size() > this->k) min_hash.erase(liti);
+                    }
+                }
+            }
+        }
+    }
+    return min_hash;
 }
 
-std::vector<long long> MinHash::getMinimum(std::vector<std::vector<int>>& heads, std::vector<std::vector<int>>& tails){
-	std::vector<long long> solutions(k);
-	for (int i = 0; i < k; i++) {
-		solutions[i] = std::numeric_limits<long long>::max();
-	}
 
-
-	for (int j = 0; j < heads.size(); j++) {
-		for (auto head : heads[j]) {
-			for (auto tail : tails[j]) {
-				unsigned long long a = head;
-				unsigned long long b = tail;
-				unsigned long long cantor_pairing = (a + b) * (a + b + 1) / 2 + a;
-				unsigned long long h_v = hash(cantor_pairing);
-				for (int i = 0; i < k; i++) {
-					unsigned long long hash = fast_mod((permfuncs[i][0] * h_v) + permfuncs[i][1], _mersenne_prime) & _max_hash;
-					if (hash < solutions[i]) {
-						solutions[i] = hash;
-					}
-				}
-			}
-		}
-	}
-	return solutions;
+double MinHash::getJacc(std::set<unsigned long long>& a, std::set<unsigned long long>& b){
+    std::set<unsigned long long>::iterator liti, litj;
+    double Intersection;                  
+    double Union;                  
+    double Total;   
+    liti = a.begin();
+    litj = a.begin();
+    Intersection = 0;
+    while (liti != b.end() && litj != b.end()) {
+    if (*liti == *litj) {
+        Intersection++;
+        liti++;
+        litj++;
+    } else if (*liti < *litj) {
+        liti++;
+    } else {
+        litj++;
+    }
+    }
+    Total = a.size() + b.size();
+    Union = Total - Intersection;
+    return Intersection / Union;
 }
 
-unsigned long long MinHash::fast_mod(const long long input, const long long ceil) {
-	unsigned long long val = input;
-	val = (val & _mersenne_prime) + (val >> 61);
-	val = (val & _mersenne_prime) + (val >> 61); //necessary if previous add led to a val > M61
-	val = (val == _mersenne_prime) ? 0 : val;
-	return val;
+MinHash::~MinHash()
+{
 }
-
 
