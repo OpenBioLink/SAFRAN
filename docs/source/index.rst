@@ -39,6 +39,7 @@ of link prediction.
    manual/learnnrnoisy
    manual/calcjacc
    manual/input_fmt
+   manual/expl
 
 .. toctree::
    :caption: Benchmark results

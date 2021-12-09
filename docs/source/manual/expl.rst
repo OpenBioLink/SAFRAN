@@ -1,5 +1,5 @@
-Creating explanations
-=====================
+Creating explanation file
+=========================
 
 Safran currently supports the creation of explanations for predictions, as needed f.e. for `https://github.com/OpenBioLink/Explorer/ LinkExplorer`_.
 
