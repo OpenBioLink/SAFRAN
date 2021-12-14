@@ -19,7 +19,7 @@ rules learned by `AnyBURL <http://web.informatik.uni-mannheim.de/AnyBURL/>`__ (A
 Bottom Up Rule Learning), a highly-efficient approach for learning logical rules from knowledge graphs.
 
 .. warning::
-   Currently only rules learned with the :code:`AnyBURL-RE` version are supported. Further information can be found at the *Previous and Special Versions* section at the  `AnyBURL Homepage <http://web.informatik.uni-mannheim.de/AnyBURL/>`__.
+   Currently only rules learned with the :code:`AnyBURL-RE` version are supported. Further information can be found at the *Previous and Special Versions* section at the  `AnyBURL Homepage <http://web.informatik.uni-mannheim.de/AnyBURL/>`__. You can use the version :code:`AnyBURL-JUNO`, however you have to set `ZERO_RULES_ACTIVE = false` in the properties file for learning the rules.
 
 .. toctree::
    :caption: Getting Started
