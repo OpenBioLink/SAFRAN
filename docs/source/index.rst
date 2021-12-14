@@ -18,8 +18,8 @@ rules in the context of knowledge graph completion/link prediction. It uses
 rules learned by `AnyBURL <http://web.informatik.uni-mannheim.de/AnyBURL/>`__ (Anytime
 Bottom Up Rule Learning), a highly-efficient approach for learning logical rules from knowledge graphs.
 
-.. note::
-   Currently only rules learned with the `AnyBURL-RE` version are supported. Further information can be found at the *Previous and Special Versions* section at the [AnyBURL homepage](https://web.informatik.uni-mannheim.de/AnyBURL).
+.. warning::
+   Currently only rules learned with the :code:`AnyBURL-RE` version are supported. Further information can be found at the *Previous and Special Versions* section at the  `AnyBURL Homepage <http://web.informatik.uni-mannheim.de/AnyBURL/>`__.
 
 .. toctree::
    :caption: Getting Started
