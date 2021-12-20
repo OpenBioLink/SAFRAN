@@ -39,6 +39,7 @@ Bottom Up Rule Learning), a highly-efficient approach for learning logical rules
    manual/applynrnoisy
    manual/learnnrnoisy
    manual/calcjacc
+   manual/evaluation
    manual/input_fmt
    manual/expl
 
