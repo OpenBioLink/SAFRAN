@@ -1,4 +1,4 @@
-# Scripts for evaluating SAFRAN prediction files (multiprecision)
+
 ## eval.py
 
 Script used to evaluate a single prediction file. 
