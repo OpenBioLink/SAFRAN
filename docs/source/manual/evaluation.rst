@@ -1,10 +1,12 @@
 Evaluate predictions
 ====================
 
-Safran currently supports the creation of explanations for predictions, as needed f.e. for `https://github.com/OpenBioLink/Explorer/ LinkExplorer`_.
+Following scripts can be found in the `python` folder.
 
 Evaluate a single prediction file
 ---------------------------------
+
+Use this script to evaluate a single prediction file. 
 
 Script name: eval.py
 
@@ -29,8 +31,10 @@ Script name: eval.py
    Hits@3: 0.371
    Hits@10: 0.537
 
-Evaluate an experiment (Multiple datasets -> Multiple prediction files)
------------------------------------------------------------------------
+Evaluate an experiment
+----------------------
+
+Use this script if you want to evaluate multiple datasets containing multiple prediction files at once (Multiple datasets -> Multiple prediction files).
 
 Script name: eval_experiment.py
 
@@ -50,8 +54,14 @@ Script name: eval_experiment.py
 
 **File structure:**
 
-Path to prediction file: f”./{dataset}/predictions/{prediction}” Path to
-testset file: f”./{dataset}/data/test.txt”
+Each dataset should have its own folder. Evaluations are run 
+
+::
+
+   for each {dataset} in {list of datasets}: 
+      for each {prediction file name} in {list of prediction file name}:
+         Path to prediction file: f”./{dataset}/predictions/{prediction file name}”
+         Path to testset file: f”./{dataset}/data/test.txt”
 
 Example:
 
@@ -84,3 +94,14 @@ Example:
            |
            ---- test.txt
 
+Output:
+
+::
+
+   OBL
+   predfile1.txt MRR: 0.389 Hits@1: 0.298 Hits@3: 0.371 Hits@10: 0.537
+   predfile2.txt MRR: 0.389 Hits@1: 0.298 Hits@3: 0.371 Hits@10: 0.537
+   
+   WN18RR
+   predfile1.txt MRR: 0.389 Hits@1: 0.298 Hits@3: 0.371 Hits@10: 0.537
+   predfile2.txt MRR: 0.389 Hits@1: 0.298 Hits@3: 0.371 Hits@10: 0.537

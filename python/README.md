@@ -30,7 +30,7 @@ Script used to evaluate a experiment (Multiple datasets -> Multiple prediction f
 
 ##### Requires:
 
-```pip install scipy tqdm
+```
 pip install scipy tqdm
 ```
 
@@ -42,8 +42,14 @@ python eval_experiment.py --datasets {list of datasets} --predictions {list of p
 
 **File structure:**
 
-Path to prediction file: f"./{dataset}/predictions/{prediction}"
-Path to testset file: f"./{dataset}/data/test.txt"
+Each dataset should have its own folder. Evaluations are run 
+
+```text
+for each {dataset} in {list of datasets}: 
+   for each {prediction file name} in {list of prediction file name}:
+      Path to prediction file: f”./{dataset}/predictions/{prediction file name}”
+      Path to testset file: f”./{dataset}/data/test.txt”
+```
 
 Example:
 
