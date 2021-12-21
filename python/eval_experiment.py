@@ -18,7 +18,7 @@ class ArgParser(argparse.ArgumentParser):
         return args
 
 def read_predictions(path):
-    with open(path, encoding="ansi") as infile:
+    with open(path, encoding="utf8") as infile:
         while True:
             triple = infile.readline().strip().split(" ")
             if not triple or triple[0] == "":
@@ -36,7 +36,7 @@ def read_predictions(path):
 
 def get_n_test(path):
     content = None
-    with open(path, encoding="ansi") as infile:
+    with open(path, encoding="utf8") as infile:
         content = infile.readlines()
     content = [x.strip() for x in content]
     return len(content)       
@@ -77,12 +77,12 @@ if __name__ == "__main__":
     args = ArgParser().parse_args()
     
     for dataset in args.datasets:
-    print(dataset)
-    for eval in args.predictions:
+        print(dataset)
+        for eval in args.predictions:
         
-        res = evaluate(f"./{dataset}/predictions/{eval}", f"./{dataset}/data/test.txt")
+            res = evaluate(f"./{dataset}/predictions/{eval}", f"./{dataset}/data/test.txt")
         
-        print(eval.ljust(25) + res)
+            print(eval.ljust(25) + res)
         
-    print()
+        print()
     
