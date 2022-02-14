@@ -13,12 +13,13 @@ Welcome to SAFRAN's documentation!
 ==================================
 
 SAFRAN (Scalable and fast non-redundant rule application) is a framework
-for fast inference of groundings and aggregation of logical rules on
-large heterogeneous knowledge graphs. It is based on the work of
-`AnyBURL <http://web.informatik.uni-mannheim.de/AnyBURL/>`__ (Anytime
-Bottom Up Rule Learning), which is an algorithm for learning, applying
-and evaluating logical rules from large knowledge graphs in the context
-of link prediction.
+for fast inference of groundings and aggregation of predictions of logical
+rules in the context of knowledge graph completion/link prediction. It uses
+rules learned by `AnyBURL <http://web.informatik.uni-mannheim.de/AnyBURL/>`__ (Anytime
+Bottom Up Rule Learning), a highly-efficient approach for learning logical rules from knowledge graphs.
+
+.. warning::
+   Currently only rules learned with the :code:`AnyBURL-RE` version are supported. Further information can be found at the *Previous and Special Versions* section at the  `AnyBURL Homepage <http://web.informatik.uni-mannheim.de/AnyBURL/>`__. You can use the version :code:`AnyBURL-JUNO`, however you have to set `ZERO_RULES_ACTIVE = false` in the properties file for learning the rules.
 
 .. toctree::
    :caption: Getting Started
@@ -38,6 +39,7 @@ of link prediction.
    manual/applynrnoisy
    manual/learnnrnoisy
    manual/calcjacc
+   manual/evaluation
    manual/input_fmt
    manual/expl
 
