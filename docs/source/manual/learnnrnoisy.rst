@@ -41,6 +41,11 @@ Properties :
         Amount of iterations used in random search strategy, **default: 10000**
    * SEED : int
         Seed for the sampling of thresholds used in random search strategy, **default: 0**
+   * VERBOSE : int
+        If set to 1, writes the MRR and settings (thresholds) of each iteration of the hyperparameter search to seperate files named {relation}_chk.txt, **default: 0**
+   * ONLY_XY : int
+        If set to 1, only cyclic (XY) rules are read from the rules file, **default: 0**
+       
 
 Output : 
     * PATH_CLUSTER : Valid path (file)

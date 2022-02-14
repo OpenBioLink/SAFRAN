@@ -37,6 +37,7 @@ int main(int argc, char** argv)
 	Index* index = new Index();
 
 	index->addNode(Properties::get().REFLEXIV_TOKEN);
+	index->addNode(Properties::get().UNK_TOKEN);
 
 	std::cout << "Reading trainingset..." << std::endl;
 	//"C:\\Users\\Simon\\Desktop\\data\\train.txt"

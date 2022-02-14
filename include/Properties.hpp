@@ -34,10 +34,12 @@ public:
 	int TRIAL_SIZE = 100000;
 	int DISCRIMINATION_BOUND = 1000;
 	std::string REFLEXIV_TOKEN = "me_myself_i"; 
+	std::string UNK_TOKEN = "UNKNOWN"; 
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
 	int ONLY_XY = 0;
 	int VERBOSE = 1;
+	int PREDICT_UNKNOWN = 0;
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";
@@ -149,6 +151,9 @@ public:
 			}
 			else if (strKey.compare("ONLY_XY") == 0) {
 				ONLY_XY = std::stoi(strVal);
+			}
+			else if (strKey.compare("PREDICT_UNKNOWN") == 0) {
+				PREDICT_UNKNOWN = std::stoi(strVal);
 			}
 			else if (strKey.compare("REL_IDS") == 0){
 				std::vector<std::string> rel_ids_str = util::split(strVal, ',');

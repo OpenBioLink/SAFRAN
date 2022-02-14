@@ -32,7 +32,11 @@ Properties :
         Token used for substitution of reflexive rules. (Used if AnyBURL ruleset was trained with REWRITE_REFLEXIV = TRUE), **default: me_myself_i**
    * TOP_K_OUTPUT : int
         The top-k results that are after filtering kept in the results, **default: 10**
-
+   * PREDICT_UNKNOWN : int
+        If set to 1, does not skip triples containing unkwown entities in the training set. F.e. generates predictions for *john speaks UNKOWN* if *UNKNOWN* is not in the training set. **default 0**
+   * ONLY_XY : int
+        If set to 1, only cyclic (XY) rules are read from the rules file, **default: 0**
+        
 Output : 
     * PATH_OUTPUT : Valid path (file)
         Path to file used for storing predictions, **default: predictions.txt**

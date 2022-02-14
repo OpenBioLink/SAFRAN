@@ -28,9 +28,9 @@ Properties :
         Seed for generating hash functions used in MinHash, **default: 0**
    * RESOLUTION : int
         Sets the accuracy of the Jaccard estimation. The number of hash functions used in MinHash (f.e. RESOLUTION = 200 --> 200 hash functions --> Max resolution of Jaccard 1/200), **default: 200**
-
-
-
+   * ONLY_XY : int
+        If set to 1, only cyclic (XY) rules are read from the rules file, **default: 0**
+        
 Output :
     * PATH_JACCARD : Valid path (directory)
         Path to directory for storing binary files containing similarity matrices for each relation. *0_jacc.bin* f.e. is the similarity matrix of relation with ID 0., **default: jaccard/**
