@@ -8,6 +8,9 @@
 #include <string>
 #include <algorithm>
 #include <sstream>  
+#include <vector>
+
+#include "Util.hpp"
 
 enum Action { learnnrnoisy, calcjacc, applynoisy, applymax, applynrnoisy };
 
@@ -33,12 +36,17 @@ public:
 	int TRIAL_SIZE = 100000;
 	int DISCRIMINATION_BOUND = 1000;
 	std::string REFLEXIV_TOKEN = "me_myself_i"; 
+	std::string UNK_TOKEN = "UNKNOWN"; 
 	int UNSEEN_NEGATIVE_EXAMPLES = 5;
 	int ONLY_UNCONNECTED = 0;
 
 	// APPLY
 	int EXPLAIN = 0;
 	std::string PATH_EXPLAIN = "explanation.db";
+	
+	int ONLY_XY = 0;
+	int VERBOSE = 1;
+	int PREDICT_UNKNOWN = 0;
 
 	// JACCARD
 	std::string CLUSTER_SET = "train";
@@ -51,6 +59,7 @@ public:
 	unsigned long long BUFFER_SIZE = std::numeric_limits<unsigned long long>().max();
 	std::string STRATEGY = "grid";
 	int ITERATIONS = 10000;
+	std::vector<int> REL_IDS;
 
 	//trial
 	int TRIAL = 0;
@@ -152,6 +161,18 @@ public:
 			}
 			else if (strKey.compare("PATH_EXPLAIN") == 0) {
 				PATH_EXPLAIN = strVal;
+			}
+			else if (strKey.compare("PREDICT_UNKNOWN") == 0) {
+				PREDICT_UNKNOWN = std::stoi(strVal);
+			}
+			else if (strKey.compare("REL_IDS") == 0){
+				std::vector<std::string> rel_ids_str = util::split(strVal, ',');
+				for(auto rel_id_str : rel_ids_str){
+					REL_IDS.push_back(std::stoi(trim(rel_id_str)));
+				}				
+			}
+			else if (strKey.compare("VERBOSE") == 0) {
+				VERBOSE = std::stoi(strVal);
 			}
 			else {
 				std::cout << "Properties key " << strKey << " not recognized";

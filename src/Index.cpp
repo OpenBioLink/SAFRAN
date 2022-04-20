@@ -30,7 +30,11 @@ int* Index::getIdOfNodestring(std::string& node) {
 		return &(it->second);
 	}
 	else {
-		throw std::runtime_error(("Error: Node " + node + " not found in Trainingset").c_str());
+		if(Properties::get().PREDICT_UNKNOWN){
+			return getIdOfNodestring(Properties::get().UNK_TOKEN);
+		} else {
+			throw std::runtime_error(("Error: Node " + node + " not found in Trainingset").c_str());
+		}
 	}
 }
 

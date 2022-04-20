@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9.0)
 
 include(FetchContent)
 
-project(SAFRAN CXX C)
+project(safran CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,10 +13,6 @@ find_package(OpenMP REQUIRED)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
-
-FetchContent_Declare(sqlite3 URL "http://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
-set(FETCHCONTENT_QUIET OFF)
-FetchContent_MakeAvailable(sqlite3)
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/boost_1_76_0
@@ -30,9 +26,35 @@ file(GLOB all_src
  "${PROJECT_SOURCE_DIR}/src/*.cpp"
 )
 
-message(${sqlite3_SOURCE_DIR})
-add_executable(SAFRAN  ${all_src})
+add_library(lsafran  ${all_src})
+find_package(OpenMP REQUIRED)
+target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX)
+
+add_executable(safran ${PROJECT_SOURCE_DIR}/Main.cpp)
+target_link_libraries(safran lsafran)
+
+FetchContent_Declare(sqlite3 URL "http://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
+set(FETCHCONTENT_QUIET OFF)
+FetchContent_MakeAvailable(sqlite3)
 target_include_directories(SAFRAN PUBLIC ${sqlite3_SOURCE_DIR})
 target_sources(SAFRAN PUBLIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
 target_link_libraries("${PROJECT_NAME}" PUBLIC OpenMP::OpenMP_CXX ${CMAKE_DL_LIBS})
+
+install(TARGETS safran)
+
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.0.0-preview3
+)
+FetchContent_MakeAvailable(Catch2)
+
+add_executable(tests tests/test.cpp)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain lsafran)
+
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(CTest)
+include(Catch)
+catch_discover_tests(tests)
 

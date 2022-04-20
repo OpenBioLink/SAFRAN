@@ -163,6 +163,7 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 
 				Rule& rule_i = *rules[i];
 				Rule& rule_j = *rules[j];
+				
 				if ((rule_i.is_ac2() || rule_i.is_ac1()) && (rule_j.is_ac2() || rule_j.is_ac1()) && rule_i.getRuletype() == rule_j.getRuletype() && *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
 					continue;
 				}

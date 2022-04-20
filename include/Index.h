@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <iostream>
+#include "Properties.hpp"
 
 class Index {
 
