@@ -28,7 +28,7 @@ private:
 	CSR<int, Rule>* csr;
 
 	void read(std::string filepath);
-	Rule* parseRule(std::vector<std::string> rule);
+	Rule* parseRule(std::vector<std::string> rule, int currID);
 	bool parseXtoY(Ruletype type, std::string& head, std::string& tail);
 	std::string getRelation(std::string atom, std::string previous, int* relation);
 	std::pair<std::string, std::string> getHeadTail(std::string& atom);

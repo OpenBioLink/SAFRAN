@@ -7,7 +7,7 @@
 #include <iostream>
 #include <unordered_set>
 #include <unordered_map>
-
+#include <optional>
 #include "Properties.hpp"
 
 enum Ruletype { XYRule, XRule, YRule, None };
@@ -18,6 +18,7 @@ public:
 	Rule() {}
 	Rule(int no1, int no2, double confidence);
 
+	void setID(int ID);
 	void print();
 
 	//Setter
@@ -29,8 +30,11 @@ public:
 	void setHeadconstant(int* constant);
 	void setBodyconstantId(int* id);
 	void setRulestring(std::string rule);
+
 	void setBuffer(std::vector<int> buffer);
 	bool isBuffered();
+	std::vector<int>& getBuffer();
+	void removeBuffer();
 
 	void setHeadBuffer(int head, std::vector<int> buffer);
 	bool isHeadBuffered(int head);
@@ -46,10 +50,8 @@ public:
 	bool is_ac1();
 	bool is_ac2();
 
-	void add_head_exception(int val);
-	void add_tail_exception(int val);
-
 	//Getter
+	int& getID();
 	Ruletype getRuletype();
 	int& getRulelength();
 	int* getHeadrelation();
@@ -61,19 +63,17 @@ public:
 	long long getPredicted();
 	double getAppliedConfidence();
 	std::string getRulestring();
-	std::vector<int>& getBuffer();
 	long long get_body_hash();
 
-	void removeBuffer();
 	void compute_body_hash();
 	bool is_body_equal(Rule other);
 	Rule& operator=(Rule* other);
 
-	std::unordered_set<int> head_exceptions;
-	std::unordered_set<int> tail_exceptions;
 protected:
 
 private:
+	//ID (Needed for explaination)
+	int ID;
 	//Type of rule XYRule, XRule, YRule
 	Ruletype type;
 	//Length of body
@@ -96,11 +96,11 @@ private:
 
 	std::string rulestring;
 
-	std::vector<int> buffer;
+	std::optional<std::vector<int>> buffer{};
 	bool buffered = false;
 
-	std::unordered_map<int, std::vector<int>> tailBuffer;
-	std::unordered_map<int, std::vector<int>> headBuffer;
+	std::optional<std::unordered_map<int, std::vector<int>>> tailBuffer{};
+	std::optional<std::unordered_map<int, std::vector<int>>> headBuffer{};
 
 };
 

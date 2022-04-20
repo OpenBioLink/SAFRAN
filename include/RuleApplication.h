@@ -15,6 +15,7 @@
 #include "Util.hpp"
 #include "ScoreTree.h"
 #include "boost/multiprecision/cpp_bin_float.hpp"
+#include "Explanation.h"
 
 #include <iostream>
 #include<iomanip>
@@ -25,7 +26,7 @@ typedef boost::multiprecision::cpp_bin_float_50 float50;
 class RuleApplication
 {
 public:
-	RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr);
+	RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr, Explanation* exp);
 	void apply_nr_noisy(std::unordered_map<int, std::pair<std::pair<bool, std::vector<std::vector<int>>>, std::pair<bool, std::vector<std::vector<int>>>>> rel2clusters);
 	void apply_only_noisy();
 	void apply_only_max();
@@ -36,6 +37,8 @@ private:
 	TesttripleReader* ttr;
 	ValidationtripleReader* vtr;
 	RuleReader* rr;
+
+	Explanation* exp;
 
 	FILE* pFile;
 	RuleGraph* rulegraph;

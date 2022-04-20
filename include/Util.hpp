@@ -17,6 +17,7 @@
 #include <memory>
 #include <random>
 #include <iostream>
+#include <time.h>
 
 namespace util{
 	inline std::vector<std::string> split(const std::string& str, char delim = ' ') {
@@ -152,7 +153,7 @@ namespace util{
 		// That is faster than reading them one-by-one using the std::istream.
 		// Code that uses streambuf this way must be guarded by a sentry object.
 		// The sentry object performs various tasks,
-		// such as thread synchronization and updating the stream state.
+		// such as thread synchronization && updating the stream state.
 
 		std::istream::sentry se(is, true);
 		std::streambuf* sb = is.rdbuf();
@@ -194,6 +195,15 @@ namespace util{
 			// eq
 			return 0;
 		}
+	}
+
+	inline std::string getDbName() {
+		time_t     now = time(0);
+		struct tm  tstruct;
+		char       buf[80];
+		tstruct = *localtime(&now);
+		strftime(buf, sizeof(buf), "%Y-%m-%d-%H-%M-%S.db", &tstruct);
+		return buf;
 	}
 }
 
