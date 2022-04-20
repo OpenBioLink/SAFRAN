@@ -35,7 +35,7 @@ file(GLOB all_src
 
 add_library(lsafran  ${all_src})
 find_package(OpenMP REQUIRED)
-target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX)
+target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX ${CMAKE_DL_LIBS})
 
 add_executable(safran ${PROJECT_SOURCE_DIR}/Main.cpp)
 target_link_libraries(safran PUBLIC lsafran)
