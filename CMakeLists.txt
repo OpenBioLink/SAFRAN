@@ -8,22 +8,29 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(OpenMP REQUIRED)
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
+
+FetchContent_Declare(sqlite3 URL "http://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
+set(FETCHCONTENT_QUIET OFF)
+FetchContent_MakeAvailable(sqlite3)
+
+message(STATUS "${sqlite3_SOURCE_DIR}")
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/boost_1_76_0
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/src
+  ${sqlite3_SOURCE_DIR}
 )
 
 file(GLOB all_src
  "${PROJECT_SOURCE_DIR}/include/*.h"
  "${PROJECT_SOURCE_DIR}/include/*.hpp"
  "${PROJECT_SOURCE_DIR}/src/*.cpp"
+ "${sqlite3_SOURCE_DIR}/*.c"
+ "${sqlite3_SOURCE_DIR}/*.h"
 )
 
 add_library(lsafran  ${all_src})
@@ -31,17 +38,9 @@ find_package(OpenMP REQUIRED)
 target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX)
 
 add_executable(safran ${PROJECT_SOURCE_DIR}/Main.cpp)
-target_link_libraries(safran lsafran)
-
-FetchContent_Declare(sqlite3 URL "http://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
-set(FETCHCONTENT_QUIET OFF)
-FetchContent_MakeAvailable(sqlite3)
-target_include_directories(safran PUBLIC ${sqlite3_SOURCE_DIR})
-target_sources(safran PUBLIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
-target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX ${CMAKE_DL_LIBS})
+target_link_libraries(safran PUBLIC lsafran)
 
 install(TARGETS safran)
-
 
 FetchContent_Declare(
   Catch2
