@@ -670,7 +670,10 @@ std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float
 					ScoreTree* headScoreTrees = new ScoreTree[lenHeads];
 					std::vector<bool> fineScoreTrees(lenHeads);
 
-					ScoreTree* expScoreTree = new ScoreTree();
+					ScoreTree* expScoreTree = nullptr;
+					if (this->exp != nullptr) {
+						expScoreTree = new ScoreTree();
+					}
 
 					bool stop = false;
 					for (auto ruleIndex : clusters[0]) {

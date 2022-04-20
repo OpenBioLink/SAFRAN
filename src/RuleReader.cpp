@@ -22,10 +22,12 @@ void RuleReader::read(std::string filepath) {
 			Rule * r = parseRule(rawrule, currID);
 			currID++;
 			if (r != nullptr) {
-				//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
-				//r->toString();
-				int* relationId = r->getHeadrelation();
-				rules[*relationId].push_back(r);
+				if (Properties::get().ONLY_XY == 0 || (Properties::get().ONLY_XY == 1 && r->getRuletype() == Ruletype::XYRule)) {
+					//TODO no insert if rule bad, is probably never the cas (Rules are sampled from trainset)
+					//r->toString();
+					int* relationId = r->getHeadrelation();
+					rules[*relationId].push_back(r);
+				}
 			}
 		}
 		myfile.close();

@@ -162,6 +162,10 @@ public:
 			else if (strKey.compare("PATH_EXPLAIN") == 0) {
 				PATH_EXPLAIN = strVal;
 			}
+			else if (strKey.compare("ONLY_XY") == 0) {
+				ONLY_XY = std::stoi(strVal);
+			}
+
 			else if (strKey.compare("PREDICT_UNKNOWN") == 0) {
 				PREDICT_UNKNOWN = std::stoi(strVal);
 			}
