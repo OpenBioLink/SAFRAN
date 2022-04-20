@@ -36,9 +36,9 @@ target_link_libraries(safran lsafran)
 FetchContent_Declare(sqlite3 URL "http://sqlite.org/2021/sqlite-amalgamation-3340100.zip")
 set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailable(sqlite3)
-target_include_directories(SAFRAN PUBLIC ${sqlite3_SOURCE_DIR})
-target_sources(SAFRAN PUBLIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
-target_link_libraries("${PROJECT_NAME}" PUBLIC OpenMP::OpenMP_CXX ${CMAKE_DL_LIBS})
+target_include_directories(safran PUBLIC ${sqlite3_SOURCE_DIR})
+target_sources(safran PUBLIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
+target_link_libraries(lsafran PUBLIC OpenMP::OpenMP_CXX ${CMAKE_DL_LIBS})
 
 install(TARGETS safran)
 
