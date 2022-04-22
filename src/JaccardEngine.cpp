@@ -92,15 +92,7 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 				std::vector<int> results;
 				rulegraph->searchDFSMultiStart(currRule, true, results);
 
-				std::vector<int> filt_results;
-				for (auto res : results) {
-					if (currRule.head_exceptions.find(res) != currRule.head_exceptions.end()) {
-						continue;
-					}
-					filt_results.push_back(res);
-				}
-
-				heads.push_back(filt_results);
+				heads.push_back(results);
 				tails.push_back(std::vector<int> {*currRule.getHeadconstant()});
 			}
 		}
@@ -116,16 +108,7 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 				std::vector<int> results;
 				rulegraph->searchDFSMultiStart(currRule, true, results);
 				heads.push_back(std::vector<int> {*currRule.getHeadconstant()});
-
-				std::vector<int> filt_results;
-				for (auto res : results) {
-					if (currRule.tail_exceptions.find(res) != currRule.tail_exceptions.end()) {
-						continue;
-					}
-					filt_results.push_back(res);
-				}
-
-				tails.push_back(filt_results);
+				tails.push_back(results);
 			}
 		}
 		else {
@@ -144,22 +127,11 @@ void JaccardEngine::calc_sols(std::vector<long long>* solutions, Rule** rules, i
 				int ind_ptr = adj_list[start_indptr + val];
 				int len = adj_list[start_indptr + val + 1] - ind_ptr;
 				if (len > 0) {
-					if (currRule.head_exceptions.find(val) != currRule.head_exceptions.end()) {
-						continue;
-					}
 					std::vector<int> results;
 					rulegraph->searchDFSSingleStart(val, currRule, false, results, previous, visited);
 					if (results.size() > 0) {
-						std::vector<int> filt_results;
-						for (auto res : results) {
-							if (currRule.tail_exceptions.find(res) != currRule.tail_exceptions.end()) {
-								continue;
-							}
-							filt_results.push_back(res);
-						}
-
 						heads.push_back(std::vector<int> {val});
-						tails.push_back(filt_results);
+						tails.push_back(results);
 					}
 					for (int i = 0; i < rulelength; i++) {
 						std::fill(visited[i], visited[i] + size, false);
@@ -188,38 +160,10 @@ void JaccardEngine::calc_jaccs(std::vector<long long>* solutions, Rule** rules, 
 		}
 		for (int j = 0; j < len; j++) {
 			if (i != j) {
-				/*
-				Rule rule_i = rules[i];
-				Rule rule_j = rules[j];
-
-				if (rule_i.is_c() && rule_j.is_c()) {
-					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				}
-				else if (rule_i.is_ac2() && rule_j.is_ac2()) {
-					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				}
-				else if ((rule_i.is_c() && rule_j.is_ac2()) || (rule_i.is_ac2() && rule_j.is_c())) {
-					double jaccard = calc_jacc_samp(solutions[i], solutions[j], true);
-					if (jaccard > 0.0) {
-						jacc[i].push_back(std::make_pair(j, jaccard));
-					}
-				}
-				*/
 
 				Rule& rule_i = *rules[i];
 				Rule& rule_j = *rules[j];
-				/*
-				if (rule_i.get_body_hash() == rule_j.get_body_hash()) {
-					jacc[i].push_back(std::make_pair(j, 1.0));
-				}
-				else {
-				*/
+				
 				if ((rule_i.is_ac2() || rule_i.is_ac1()) && (rule_j.is_ac2() || rule_j.is_ac1()) && rule_i.getRuletype() == rule_j.getRuletype() && *rule_i.getHeadconstant() != *rule_j.getHeadconstant()) {
 					continue;
 				}

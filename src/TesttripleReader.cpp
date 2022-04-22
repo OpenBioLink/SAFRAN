@@ -1,10 +1,9 @@
 #include "TesttripleReader.h"
 
-TesttripleReader::TesttripleReader(std::string filepath, Index * index, TraintripleReader* graph, int is_trial) {
+TesttripleReader::TesttripleReader(Index * index, TraintripleReader* graph, int is_trial) {
 	this->index = index;
 	this->graph = graph;
 	this->is_trial = is_trial;
-	read(filepath);
 }
 
 int ** TesttripleReader::getTesttriples() {
@@ -76,7 +75,8 @@ void TesttripleReader::read(std::string filepath) {
 			fclose(test_sample_file);
 			std::cout << "Written test sample to " << Properties::get().PATH_TEST_SAMPLE << std::endl;
 
-			TesttripleReader* sample_reader = new TesttripleReader(Properties::get().PATH_TEST_SAMPLE.c_str(), index, graph, 0);
+			TesttripleReader* sample_reader = new TesttripleReader(index, graph, 0);
+            sample_reader->read(Properties::get().PATH_TEST_SAMPLE);
 			csr = sample_reader->getCSR();
 			delete sample_reader;
 		}
@@ -102,4 +102,51 @@ void TesttripleReader::read(std::string filepath) {
 		std::cout << "Unable to open test file " << filepath << std::endl;
 		exit(-1);
 	}
+}
+
+void TesttripleReader::read(std::vector<std::tuple<std::string, std::string, std::string>> & triples) {
+    std::vector<std::vector<int*>> testtriplesVector;
+    size_t numTriplesRead = 0;
+    for (auto & [head, rel, tail] : triples)
+    {
+        try {
+            int* headId = index->getIdOfNodestring(head);
+            int* relId = index->getIdOfRelationstring(rel);
+            int* tailId = index->getIdOfNodestring(tail);
+            std::vector<int*> testtriple;
+            testtriple.push_back(headId);
+            testtriple.push_back(relId);
+            testtriple.push_back(tailId);
+            testtriplesVector.push_back(testtriple);
+
+            relHeadToTails[*relId][*headId].insert(*tailId);
+            relTailToHeads[*relId][*tailId].insert(*headId);
+
+            numTriplesRead++;
+        }
+        catch (std::runtime_error& e) {}
+    }
+    if (Properties::get().VERBOSE == 1) {
+        std::cout << "read " << numTriplesRead << " triples" << std::endl;
+        std::cout << "csr start" << std::endl;
+        std::cout << "relsize=" << index->getRelSize() << " nodesize=" << index->getNodeSize() << std::endl;
+    }
+    csr = new CSR<int, int>(index->getRelSize(), index->getNodeSize(), relHeadToTails, relTailToHeads);
+    if (Properties::get().VERBOSE == 1) {
+        std::cout << "csr end" << std::endl;
+    }
+
+    testtripleSize = new int;
+    *testtripleSize = testtriplesVector.size();
+    // Convert to pointers of pointers
+    int * testtriplesstore;
+    testtriples = new int*[*testtripleSize];
+    testtriplesstore = new int[(*testtripleSize) * 3];
+
+    for (int i = 0; i < (*testtripleSize); i++) {
+        testtriplesstore[i * 3] = *(testtriplesVector[i][0]);
+        testtriplesstore[i * 3 + 1] = *(testtriplesVector[i][1]);
+        testtriplesstore[i * 3 + 2] = *(testtriplesVector[i][2]);
+        testtriples[i] = &testtriplesstore[i * 3];
+    }
 }

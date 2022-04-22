@@ -21,6 +21,23 @@ RuleGraph::RuleGraph(int nodesize, TraintripleReader* graph, TesttripleReader* t
 	this->relCounter = graph->getRelCounter();
 }
 
+RuleGraph::RuleGraph(int nodesize, TraintripleReader* graph, ValidationtripleReader* vtr) {
+    this->size = nodesize;
+    this->graph = graph;
+    adj_lists = graph->getCSR()->getAdjList();
+    adj_list_starts = graph->getCSR()->getAdjBegin();
+    this->train_relHeadToTails = graph->getRelHeadToTails();
+    this->train_relTailToHeads = graph->getRelTailToHeads();
+    this->valid_relHeadToTails = vtr->getRelHeadToTails();
+    this->valid_relTailToHeads = vtr->getRelTailToHeads();
+    this->relCounter = graph->getRelCounter();
+}
+
+void RuleGraph::updateTTR(TesttripleReader* ttr) {
+    this->test_relHeadToTails = ttr->getRelHeadToTails();
+    this->test_relTailToHeads = ttr->getRelTailToHeads();
+}
+
 void RuleGraph::searchDFSSingleStart_filt(bool headNotTail, int filt_v, int v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest, bool filtExceptions) {
 	
 	int rulelength = r.getRulelength();
@@ -183,12 +200,6 @@ void RuleGraph::searchDFSMultiStart_filt(bool headNotTail, int filt_v, Rule& r, 
 	for (int val = 0; val < size_indptr - 1; val++) {
 		//OI
 		if (val == *r.getHeadconstant()) continue;
-		if (r.getRuletype() == Ruletype::YRule && r.head_exceptions.find(val) != r.head_exceptions.end()) {
-			continue;
-		}
-		if (r.getRuletype() == Ruletype::XRule && r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
-			continue;
-		}
 		int ind_ptr = adj_list[start_indptr + val];
 		int len = adj_list[start_indptr + val + 1] - ind_ptr;
 		if (len > 0) {
@@ -325,12 +336,6 @@ void RuleGraph::searchDFSMultiStart(Rule& r, bool bwd, std::vector<int>& solutio
 	for (int val = 0; val < size_indptr - 1; val++) {
 		//OI
 		if (val == *r.getHeadconstant()) continue;
-		if (r.getRuletype() == Ruletype::YRule && r.head_exceptions.find(val) != r.head_exceptions.end()) {
-			continue;
-		}
-		if (r.getRuletype() == Ruletype::XRule && r.tail_exceptions.find(val) != r.tail_exceptions.end()) {
-			continue;
-		}
 		int ind_ptr = adj_list[start_indptr + val];
 		int len = adj_list[start_indptr + val + 1] - ind_ptr;
 		if (len > 0) {
@@ -381,15 +386,6 @@ void RuleGraph::searchDFSUtil_filt(Rule* r, bool headNotTail, int filt_value, in
 		if (second_filt_set != nullptr) {
 			auto sfit = second_filt_set->find(value);
 			if (sfit != second_filt_set->end()) {
-				return;
-			}
-		}
-			
-		if (filtExceptions && (r->is_c() || r->is_ac1())) {
-			if (!headNotTail && r->head_exceptions.find(ex_head) != r->head_exceptions.end()) {
-				return;
-			}
-			if (headNotTail && r->tail_exceptions.find(ex_tail) != r->tail_exceptions.end()) {
 				return;
 			}
 		}
