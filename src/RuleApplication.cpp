@@ -176,7 +176,7 @@ std::vector<std::tuple<int, int, int, float50>> RuleApplication::apply_only_max_
         std::cout << "aomim init end" << std::endl;
     }
     for (int rel = 0; rel < iterations; rel++) {
-        // TODO (Anton): precompute clusters outside of this call!
+        // TODO: precompute clusters outside of this call
         int ind_ptr = adj_begin[3 + rel];
         int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
         if (Properties::get().VERBOSE == 1) {

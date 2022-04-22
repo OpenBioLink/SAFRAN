@@ -1,7 +1,7 @@
 #include "safran_wrapper.h"
 
 pysafran::pysafran(std::string train_path, std::string rule_path, int num_threads) {
-    // TODO (Anton): Perhaps instead initialize these globally, or make those a part of pysafran instance.
+    // TODO: initialize these globally, or make those a part of pysafran instance.
     Properties::get().VERBOSE = 0;
     Properties::get().PREDICT_UNKNOWN = 1;
     if (num_threads != -1) {
@@ -81,7 +81,6 @@ std::vector<std::pair<std::string, std::pair<std::string, std::pair<std::string,
         std::string headStr = *this->index->getStringOfNodeId(head_id);
         std::string predStr = *this->index->getStringOfRelId(relation_id);
         std::string tailStr = *this->index->getStringOfNodeId(tail_id);
-        // TODO: check that exists?
         int rule_id = exp->tripleBestRules[head_id][relation_id][tail_id];
         std::pair<float, int> p1 = {val, rule_id};
         std::pair<std::string, std::pair<float, int>> p2 = {tailStr, p1};
