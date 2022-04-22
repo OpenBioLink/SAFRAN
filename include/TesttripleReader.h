@@ -21,7 +21,7 @@ class TesttripleReader
 {
 
 public:
-    TesttripleReader(Index* index, TraintripleReader* graph, int is_trial);
+	TesttripleReader(Index* index, TraintripleReader* graph, int is_trial);
 
 	int** getTesttriples();
 	int* getTesttriplesSize();
@@ -30,7 +30,7 @@ public:
 	RelNodeToNodes& getRelTailToHeads();
 
 	void read(std::string filepath);
-    void read(std::vector<std::tuple<std::string, std::string, std::string>> & triples);
+	void read(std::vector<std::tuple<std::string, std::string, std::string>> & triples);
 
 protected:
 

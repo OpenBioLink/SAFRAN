@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 
 	std::cout << "Reading testset..." << std::endl;
 	TesttripleReader* ttr = new TesttripleReader(index, graph, Properties::get().TRIAL);
-    ttr->read(Properties::get().PATH_TEST);
+	ttr->read(Properties::get().PATH_TEST);
 	finish = std::chrono::high_resolution_clock::now();
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 	std::cout << "Testset read in " << milliseconds.count() << " ms\n";
