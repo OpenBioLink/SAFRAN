@@ -1,5 +1,5 @@
 Action *calcjacc*
------------------
+=================
 
 Calculates the similarity matrices (Jaccard index) used by Non-redundant Noisy-OR for each relation. 
 

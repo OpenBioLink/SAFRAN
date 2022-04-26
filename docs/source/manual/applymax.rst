@@ -1,5 +1,5 @@
 Action *applymax*
------------------
+=================
 
 Application of rules using the Maximum aggregation approach:
 

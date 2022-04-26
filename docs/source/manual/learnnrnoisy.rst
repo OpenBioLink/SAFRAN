@@ -1,5 +1,5 @@
 Action *learnnrnoisy*
----------------------
+=====================
 
 .. caution:: Needs similarity matrices from action *calcjacc*
 

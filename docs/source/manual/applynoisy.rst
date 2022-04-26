@@ -1,5 +1,5 @@
 Action *applynoisy*
--------------------
+===================
 
 Application of rules using noisy-or aggregation approach:
 

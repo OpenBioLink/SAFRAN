@@ -1,5 +1,5 @@
 Action *applynrnoisy*
----------------------
+=====================
 
 .. caution:: Needs clusters from action *learnnrnoisy*
 
