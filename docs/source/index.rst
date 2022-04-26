@@ -21,15 +21,19 @@ Bottom Up Rule Learning), a highly-efficient approach for learning logical rules
 .. warning::
    Currently only rules learned with the :code:`AnyBURL-RE` version are supported. Further information can be found at the *Previous and Special Versions* section at the  `AnyBURL Homepage <http://web.informatik.uni-mannheim.de/AnyBURL/>`__. You can use the version :code:`AnyBURL-JUNO`, however you have to set `ZERO_RULES_ACTIVE = false` in the properties file for learning the rules.
 
+Getting Started
+---------------
+
 .. toctree::
-   :caption: Getting Started
    :name: quickstart
    :maxdepth: 2
 
    installation
    
+Manual
+------
+   
 .. toctree::
-   :caption: Manual
    :name: manual
    :maxdepth: 2
 
@@ -42,9 +46,11 @@ Bottom Up Rule Learning), a highly-efficient approach for learning logical rules
    manual/evaluation
    manual/input_fmt
    manual/expl
+   
+Benchmark results
+-----------------
 
 .. toctree::
-   :caption: Benchmark results
    :name: benchmark
    :maxdepth: 2
 
@@ -53,7 +59,7 @@ Bottom Up Rule Learning), a highly-efficient approach for learning logical rules
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
