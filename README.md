@@ -39,3 +39,5 @@ Can be found [here](https://safran.readthedocs.io/en/latest/?badge=latest).
   doi={}
 }
 ```
+
+This project received funding from [netidee](https://www.netidee.at/).
