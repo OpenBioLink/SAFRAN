@@ -1,7 +1,6 @@
 #ifndef EXPL_H
 #define EXPL_H
 
-#include <sqlite3.h>
 #include "Index.h"
 #include "Rule.h"
 #include "RuleReader.h"
@@ -9,34 +8,22 @@
 
 class Explanation {
 public:
-	Explanation(std::string dbName, bool init = false);
-	~Explanation();
+	Explanation() {}
+	virtual ~Explanation() {}
 
-	void begin();
-	void commit();
-	void begin_tr();
-	void commit_tr();
-	void insertEntities(Index* index);
-	void insertRelations(Index* index);
-	void insertRules(RuleReader* rr, int relsize, ClusteringReader* cr);
+	virtual void begin() = 0;
+	virtual void commit() = 0;
+	virtual void begin_tr() = 0;
+	virtual void commit_tr() = 0;
+	virtual void insertEntities(Index* index) = 0;
+	virtual void insertRelations(Index* index) = 0;
+	virtual void insertRules(RuleReader* rr, int relsize, ClusteringReader* cr) = 0;
 
-	void insertTask(int prediction_id, bool is_head, int relation_id, int entity_id);
-	void insertPrediction(int task_id, int entity_id, bool hit, double confidence);
-	void insertRule_Entity(int rule_id, int task_id, int entity_id);
+	virtual void insertTask(int prediction_id, bool is_head, int relation_id, int entity_id) = 0;
+	virtual void insertPrediction(int task_id, int entity_id, bool hit, double confidence) = 0;
+	virtual void insertRule_Entity(int rule_id, int task_id, int entity_id) = 0;
 
-	// OLD
-	void insertCluster(int prediction_id, int entity_id, int cluster_id, double confidence);
-	void insertRule_Cluster(int prediction_id, int entity_id, int cluster_id, int rule_id);
-
-	int getNextTaskID();
-private:
-	sqlite3* db;
-	int task_id = 0;
-	void initDb();
-	void checkErrorCode(int code);
-	void checkErrorCode(int code, char* sql);
-	sqlite3_stmt* prepare(char* sql);
-	void finalize(sqlite3_stmt* stmt);
+	virtual int getNextTaskID() = 0;
 };
 
 #endif //EXPL_H

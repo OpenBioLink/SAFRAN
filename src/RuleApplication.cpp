@@ -1,5 +1,16 @@
 #include "RuleApplication.h"
 
+RuleApplication::RuleApplication(Index* index, TraintripleReader* graph, ValidationtripleReader* vtr, RuleReader* rr, Explanation* exp) {
+	this->index = index;
+	this->graph = graph;
+	this->vtr = vtr;
+	this->rr = rr;
+	this->rulegraph = new RuleGraph(index->getNodeSize(), graph, vtr);
+	reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
+	this->k = Properties::get().TOP_K_OUTPUT;
+	this->exp = exp;
+}
+
 RuleApplication::RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr, Explanation* exp) {
 	this->index = index;
 	this->graph = graph;
@@ -10,6 +21,11 @@ RuleApplication::RuleApplication(Index* index, TraintripleReader* graph, Testtri
 	reflexiv_token = *index->getIdOfNodestring(Properties::get().REFLEXIV_TOKEN);
 	this->k = Properties::get().TOP_K_OUTPUT;
 	this->exp = exp;
+}
+
+void RuleApplication::updateTTR(TesttripleReader* testReader) {
+	this->ttr = testReader;
+	this->rulegraph->updateTTR(testReader);
 }
 
 void RuleApplication::apply_nr_noisy(std::unordered_map<int, std::pair<std::pair<bool, std::vector<std::vector<int>>>, std::pair<bool, std::vector<std::vector<int>>>>> rel2clusters) {
@@ -146,6 +162,43 @@ void RuleApplication::apply_only_max() {
 		}
 	}
 	fclose(pFile);
+}
+
+std::vector<std::tuple<int, int, int, float50>> RuleApplication::apply_only_max_in_memory(size_t K) {
+	int* adj_begin = rr->getCSR()->getAdjBegin();
+	std::vector<std::tuple<int, int, int, float50>> out;
+
+	int iterations = index->getRelSize();
+	for (int rel = 0; rel < iterations; rel++) {
+		// TODO: precompute clusters outside of this call
+		int ind_ptr = adj_begin[3 + rel];
+		int lenRules = adj_begin[3 + rel + 1] - ind_ptr;
+		std::vector<std::vector<int>> clusters;
+		std::vector<int> cluster;
+		for (int i = 0; i < lenRules; i++) {
+			cluster.push_back(i);
+		}
+		clusters.push_back(cluster);
+
+		std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> headTailResults;
+		headTailResults = max(rel, clusters, false);
+
+		for (auto & [head, tailResults] : headTailResults) {
+			for (auto & [_, tails] : tailResults) {
+				size_t maxSize = std::min(tails.size(), K);
+				size_t i = 0;
+				for (auto [tail, val] : tails) {
+					if (i >= maxSize) {
+						break;
+					}
+					out.emplace_back(head, rel, tail, val);
+					i++;
+				}
+			}
+		}
+	}
+
+	return out;
 }
 
 std::unordered_map<int, std::unordered_map<int, std::vector<std::pair<int, float50>>>> RuleApplication::noisy(int rel, std::vector<std::vector<int>> clusters, bool predictHeadNotTail) {

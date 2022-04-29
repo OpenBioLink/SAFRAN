@@ -4,6 +4,7 @@
 #include <map>
 #include <functional>
 #include <math.h>
+#include <tuple>
 #include "Index.h"
 #include "TraintripleReader.h"
 #include "TesttripleReader.h"
@@ -27,9 +28,12 @@ class RuleApplication
 {
 public:
 	RuleApplication(Index* index, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr, RuleReader* rr, Explanation* exp);
+	RuleApplication(Index* index, TraintripleReader* graph, ValidationtripleReader* vtr, RuleReader* rr, Explanation* exp);
 	void apply_nr_noisy(std::unordered_map<int, std::pair<std::pair<bool, std::vector<std::vector<int>>>, std::pair<bool, std::vector<std::vector<int>>>>> rel2clusters);
 	void apply_only_noisy();
 	void apply_only_max();
+	void updateTTR(TesttripleReader* ttr);
+	std::vector<std::tuple<int, int, int, float50>> apply_only_max_in_memory(size_t K);
 
 private:
 	Index* index;

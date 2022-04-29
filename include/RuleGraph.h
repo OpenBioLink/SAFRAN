@@ -16,7 +16,9 @@
 class RuleGraph {
 public:
 	RuleGraph(int nodesize, TraintripleReader* graph);
+	RuleGraph(int nodesize, TraintripleReader* graph, ValidationtripleReader* vtr);
 	RuleGraph(int nodesize, TraintripleReader* graph, TesttripleReader* ttr, ValidationtripleReader* vtr);
+	void updateTTR(TesttripleReader *ttr);
 	void searchDFSSingleStart_filt(bool headNotTail, int filt_v, int v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest, bool filtExceptions);
 	void searchDFSMultiStart_filt(bool headNotTail, int filt_v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest, bool filtExceptions);
 	bool existsAcyclic(int* valId, Rule& rule, bool filtValidNotTest);

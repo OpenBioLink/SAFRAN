@@ -9,7 +9,7 @@
 #include "ClusteringReader.h"
 #include "RuleApplication.h"
 #include "JaccardEngine.h"
-#include "Explanation.h"
+#include "SQLiteExplanation.h"
 #include "Util.hpp"
 #include <chrono>
 #include <stdio.h>
@@ -54,7 +54,8 @@ int main(int argc, char** argv)
 	Properties::get().REL_SIZE = index->getRelSize();
 
 	std::cout << "Reading testset..." << std::endl;
-	TesttripleReader* ttr = new TesttripleReader(Properties::get().PATH_TEST, index, graph, Properties::get().TRIAL);
+	TesttripleReader* ttr = new TesttripleReader(index, graph, Properties::get().TRIAL);
+	ttr->read(Properties::get().PATH_TEST);
 	finish = std::chrono::high_resolution_clock::now();
 	milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 	std::cout << "Testset read in " << milliseconds.count() << " ms\n";
@@ -86,7 +87,7 @@ int main(int argc, char** argv)
 	Explanation* explanation = nullptr;
 	if (Properties::get().EXPLAIN == 1) {
 		std::cout << "Writing entities, relations and rules to db file..." << std::endl;
-		explanation = new Explanation(Properties::get().PATH_EXPLAIN, true);
+		explanation = new SQLiteExplanation(Properties::get().PATH_EXPLAIN, true);
 		explanation->begin_tr();
 		explanation->insertEntities(index);
 		explanation->insertRelations(index);

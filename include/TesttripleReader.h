@@ -21,13 +21,16 @@ class TesttripleReader
 {
 
 public:
-	TesttripleReader(std::string filepath, Index* index, TraintripleReader* graph, int is_trial);
+	TesttripleReader(Index* index, TraintripleReader* graph, int is_trial);
 
 	int** getTesttriples();
 	int* getTesttriplesSize();
 	CSR<int, int>* getCSR();
 	RelNodeToNodes& getRelHeadToTails();
 	RelNodeToNodes& getRelTailToHeads();
+
+	void read(std::string filepath);
+	void read(std::vector<std::tuple<std::string, std::string, std::string>> & triples);
 
 protected:
 
@@ -41,8 +44,6 @@ private:
 
 	RelNodeToNodes relHeadToTails;
 	RelNodeToNodes relTailToHeads;
-
-	void read(std::string filepath);
 };
 
 #endif // TESTTRIPLEREADER_H

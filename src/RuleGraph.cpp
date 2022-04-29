@@ -21,6 +21,23 @@ RuleGraph::RuleGraph(int nodesize, TraintripleReader* graph, TesttripleReader* t
 	this->relCounter = graph->getRelCounter();
 }
 
+RuleGraph::RuleGraph(int nodesize, TraintripleReader* graph, ValidationtripleReader* vtr) {
+	this->size = nodesize;
+	this->graph = graph;
+	adj_lists = graph->getCSR()->getAdjList();
+	adj_list_starts = graph->getCSR()->getAdjBegin();
+	this->train_relHeadToTails = graph->getRelHeadToTails();
+	this->train_relTailToHeads = graph->getRelTailToHeads();
+	this->valid_relHeadToTails = vtr->getRelHeadToTails();
+	this->valid_relTailToHeads = vtr->getRelTailToHeads();
+	this->relCounter = graph->getRelCounter();
+}
+
+void RuleGraph::updateTTR(TesttripleReader* ttr) {
+	this->test_relHeadToTails = ttr->getRelHeadToTails();
+	this->test_relTailToHeads = ttr->getRelTailToHeads();
+}
+
 void RuleGraph::searchDFSSingleStart_filt(bool headNotTail, int filt_v, int v, Rule& r, bool bwd, std::vector<int>& solution, bool filtValidNotTest, bool filtExceptions) {
 	
 	int rulelength = r.getRulelength();
