@@ -1,4 +1,5 @@
 #include "Explanation.h"
+#include <cstring>
 
 Explanation::Explanation(std::string dbName, bool init) {
     checkErrorCode(sqlite3_open_v2(dbName.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nullptr));
