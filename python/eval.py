@@ -14,8 +14,8 @@ def read_predictions(path):
             pred_heads = infile.readline().strip()[7:].split("\t")
             pred_tails = infile.readline().strip()[7:].split("\t")
             
-            confidences_head = [int(x.replace("0.", "").replace("1.","1").ljust(100, "0")) if (not x.startswith("1.") and not x.startswith("1")) else int("1".ljust(101, "0")) for x in pred_heads[1::2]]
-            confidences_tail = [int(x.replace("0.", "").replace("1.","1").ljust(100, "0")) if (not x.startswith("1.") and not x.startswith("1")) else int("1".ljust(101, "0")) for x in pred_tails[1::2]]
+            confidences_head = [float(x) for x in pred_heads[1::2]]
+            confidences_tail = [float(x) for x in pred_tails[1::2]]
             
             yield (head, pred_heads[0::2], confidences_head)
             yield (tail, pred_tails[0::2], confidences_tail)
