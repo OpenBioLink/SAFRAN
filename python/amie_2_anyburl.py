@@ -53,7 +53,7 @@ def amieToAnyBURL(in_path, out_path, pca):
     AnyBURL = []
     for rule in content:
         #Std. Lower Bound	PCA Lower Bound	PCA Conf estimation
-        Rule, Head_Coverage, Std_Confidence, PCA_Confidence, Positive_Examples, Body_size, PCA_Body_size, Functional_variable,_,_,_ = rule.split("\t")
+        Rule, Head_Coverage, Std_Confidence, PCA_Confidence, Positive_Examples, Body_size, PCA_Body_size, Functional_variable,*_ = rule.split("\t")
         
         if pca:
             AnyBURL.append(PCA_Body_size.replace(",",".") + "\t" + Positive_Examples.replace(",",".") + "\t" + PCA_Confidence.replace(",",".") + "\t" + rewriteRule(Rule))
